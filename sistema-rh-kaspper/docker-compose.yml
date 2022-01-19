@@ -1,0 +1,25 @@
+version: '1'
+
+services:
+  db:
+    image: 'mysql:8.0.27'
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    expose:
+      - 3306
+    ports:
+        - "3306"
+    container_name: app
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/sistemaRH
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    restart: unless-stopped
+      - postgres-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+volumes:
+  mysql-data:
