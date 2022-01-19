@@ -1,0 +1,73 @@
+<form [formGroup]="form" autocomplete="off" novalidate
+      (ngSubmit)="create(form.value)">
+  <mat-card>
+    <div class="form-container"
+         fxLayout="column"
+         fxLayoutAlign="space-evenly center">
+      <div fxFlex="10"
+           fxLayout="row"
+           fxLayoutAlign="flex start center" class="container-title-form">
+        <p class="title-form">Cadastro de Candidato</p>
+      </div>
+      <div fxFlex="80" class="form-container"
+           fxLayout="column"
+           fxLayoutAlign="space-evenly center">
+        <div fxLayout="row" class="form-container"
+             fxLayoutAlign="space-evenly center" fxLayoutGap="20px">
+
+          <mat-form-field appearance="outline">
+            <mat-label for="nome">Nome</mat-label>
+            <input matInput formControlName="nome" type="text" placeholder="Nome Completo">
+            <mat-hint>Campo obrigatório</mat-hint>
+            <mat-error *ngIf="hasErros('nome', 'required')">Campo obrigatório.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Perfil</mat-label>
+            <mat-select formControlName="perfil" required>
+              <mat-option *ngFor="let perfil of listaPerfis" [value]="perfil.id">
+                {{ perfil.descricao }}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Campo obrigatório.</mat-hint>
+            <mat-error *ngIf="hasErros('perfil', 'required')">Campo obrigatório.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div fxLayout="row" class="form-container"
+             fxLayoutAlign="space-evenly center" fxLayoutGap="20px">
+
+          <mat-form-field appearance="outline">
+            <mat-label for="pretensao">Pretensão Salarial</mat-label>
+            <input matInput formControlName="pretensao" placeholder="Pretensão Salarial">
+            <mat-hint>Campo obrigatório</mat-hint>
+            <mat-error *ngIf="hasErros('pretensao', 'required')">Campo obrigatório.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label for="pretensao">Currículo</mat-label>
+            <ngx-mat-file-input formControlName="curriculo">
+            </ngx-mat-file-input>
+            <mat-hint>Campo obrigatório</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div fxFlex="10"
+             fxLayout="row"
+             fxLayoutAlign="end center" fxLayoutGap="30px">
+          <div fxLayoutAlign="space-evenly center">
+            <button mat-raised-button (click)="goToHome()">
+              <em class="material-icons icon-card">keyboard_arrow_left</em>Voltar
+            </button>
+          </div>
+          <div fxLayoutAlign="space-evenly center">
+            <button mat-raised-button color="primary" [disabled]="!form.valid">
+              <em class="material-icons icon-card">save</em>Salvar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </mat-card>
+</form>
