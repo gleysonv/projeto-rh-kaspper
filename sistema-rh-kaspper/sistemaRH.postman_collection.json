@@ -1,0 +1,144 @@
+{
+	"info": {
+		"_postman_id": "9eb04923-36fd-4fba-ba7d-0aa9492c628d",
+		"name": "sistemaRH",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Consulta Candidatos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/candidatos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"candidatos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Consulta perfil",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/perfis",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"perfis"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Consulta vagas",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/vagas",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"vagas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "salva Candidato",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/candidatos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"candidatos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "salva Perfil",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/candidatos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"candidatos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "salva vaga",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"descricao\": \"desenvolvedor Jr.\",\r\n    \"tipo\": 2,\r\n    \"salario\": 8900,\r\n    \"perfil\": {\r\n        \"id\": 1\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/vagas",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"vagas"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
