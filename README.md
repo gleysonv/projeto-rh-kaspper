@@ -48,8 +48,11 @@ Caso haja problemas com a criação das tabelas pela imagem Docker (Mysql):
 Há um arquivo chamado init.sql na raiz do projeto, com um script de DDL e INSERT para auxiliar na subida do projeto.
 
 springBoot pra agilizar as configurações iniciais do projeto e facilitar o desenvolvimento
+
 lombok para ter classes menores sem o get e set;
+
 angular 10.2.1
+
 angular.material 13.1.2 conjunto de componentes visuais pra facilitar o desenvolvimento do frontend.
 
 
