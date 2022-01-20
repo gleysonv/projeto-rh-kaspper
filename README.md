@@ -47,6 +47,8 @@ Caso haja problemas com a criação das tabelas pela imagem Docker (Mysql):
 
 Há um arquivo chamado init.sql na raiz do projeto, com um script de DDL e INSERT para auxiliar na subida do projeto.
 
+*o que utilizei no desenvolvimento*
+
 springBoot pra agilizar as configurações iniciais do projeto e facilitar o desenvolvimento
 
 lombok para ter classes menores sem o get e set;
