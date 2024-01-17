@@ -28,5 +28,6 @@ public class CandidatoDTO implements BaseDTO {
     
     public String getNome() {
     	return this.nome;
+    	
     } 
 }
