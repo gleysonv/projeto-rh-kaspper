@@ -24,4 +24,9 @@ public class CandidatoDTO implements BaseDTO {
     private File curriculum;
 
     private PerfilDTO perfil;
+    
+    
+    public String getNome() {
+    	return this.nome;
+    } 
 }
