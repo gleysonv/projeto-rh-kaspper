@@ -16,4 +16,6 @@ public class PerfilDTO implements BaseDTO  {
     private String descricao;
 
     private String observacao;
+    
+    private String nivel;
 }
