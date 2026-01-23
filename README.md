@@ -1,303 +1,333 @@
-window.Fiador = Backbone.Model.extend({
-	urlRoot: '../fes-web/servicos/administracao/cadastrofiadorcontrato/visao/Fiador.html',
+window.FiadorControle = Backbone.View.extend({
+    modelUF: null,
+	modelExpedidor: null,
+	estadosCivis : [2, 3, 4, 5, 6, 7, 9],
+	events: {
+		'blur input': 'updateModel',
+		'change select': 'updateModel',
+		"changeDate .data": "changeDate2"
+	},
 
-
-	defaults: {
-		codigo: 0,
-		mensagem: "",
-		codigoFies: 0.0,
-		conjuge: new Conjuge().toJSON(),
-		cpf: "",
-		nome: "",
-		dependenteCPF: 0,
-		dataNascimento: "",
-		ric: '',
-		nacionalidade: new Nacionalidade().toJSON(),
-		identidade: new Identidade().toJSON(),
-		estadoCivil: new EstadoCivil().toJSON(),
-		regimeBens: new RegimeBens().toJSON(),
-		endereco: {
-			endereco: "",
-			numero: "",
-			bairro: "",
-			cep: "",
-			uf: new UF(),
-			cidade: {
-				codigoCidade: 0,
-				codigoIBGE: 0,
-				nome: "",
-				uf: new UF().toJSON()
-			}
-		},
-		contato: new Contato().toJSON(),
-		emancipado: new Emancipado().toJSON(),
-		vinculacao: '',
-		valorRendaMensal: 0,
-		codigoProfissao: ''
+	serialize: function() {
+		return {
+			title: this.$(".title").text(),
+			start: this.$(".start-page").text(),
+			end: this.$(".end-page").text()
+		};
 	},
 
 	initialize: function() {
-		console.log("call -> Fiador - > initialize ");
+		var that = this;
+		console.log("initialize FiadorControle");
+		$.get('../fes-web/servicos/administracao/cadastrofiadorcontrato/visao/Fiador.html').done(function(data) {
+			that.template = _.template(data);
+			that.render();
+		});
 	},
 
-	validate: function(attributes, options) {
-		console.log("call -> FiadorModel -> validate");
+	changeDate2: function (e) {
+		console.log("call -> ConsultaGenericaControle -> changeDate2");
+		console.log($('input', e.target).attr('name'));
 
-		if (attributes == undefined)
-			return true;
+		this.model.set($('input', e.target).attr('name'), $('input', e.target).val());
+		console.log(this.model);
+	},
+
+	render: function() {
+		var _this2;
+
+		try {
+			_this2 = this.model.toJSON();
+		} catch (e) {
+			_this2 = this.model;
+		}
+
+		$(this.el).html(this.template(_this2));
+
+		this.modelUF = new UFColecao();
+		this.modelUF.buscar().done(function(collection) {
+			var wSelecionado = _this2.identidade.uf.sigla;
+			gMontaSelect("#ufIdentidadeFiador", "sigla", "sigla", collection, wSelecionado);
+		});
 		
-		if(this.url == "../fes-web/emprest/fiador/excluir"){
-			return false;
-		}
-
-		var datas = true;
-		var isMenor18 = true;
-		var errors = [];
-
-		if (!attributes.nome) {
-			errors.push({
-				name: 'nome',
-				message: 'Não foi informado o nome.'
-			});
-		}
-
-		if (!attributes.cpf || validarCPF(attributes.cpf) != '') {
-			errors.push({
-				name: 'cpf',
-				message: 'Não foi informado o cpf.'
-			});
-		}
-
-		if (!attributes.dataNascimento) {
-			errors.push({
-				name: 'dataNascimento',
-				message: 'A data de nascimento não informada.'
-			});
-			datas = false;
-		} else {
-			var dataMenos16 = new Date(obterAnoAtual() - 16, obterMesAtual(), obterDiaAtual());
-			var dataMenos18 = new Date(obterAnoAtual() - 18, obterMesAtual(), obterDiaAtual());
-			var dataNascimento = $caixa.data.converteStrToData(attributes.dataNascimento);
-			isMenor18 = dataNascimento > dataMenos18;
-			if (dataNascimento > dataMenos16) {
-				errors.push({
-					name: 'dataNascimento',
-					message: 'A data de nascimento não pode ser maior ' + formatDate(dataMenos16, "dd/MM/yyyy")
-				});
-			}
-		}
-
-		if (attributes.nacionalidade == null || !attributes.nacionalidade.nome || !attributes.nacionalidade.codigo) {
-			errors.push({
-				name: 'nacionalidade',
-				message: 'Não foi informado a nacionalidade'
-			});
-		}
-
-		if (!attributes.identidade.identidade) {
-			errors.push({
-				name: 'identidade.identidade',
-				message: 'Não foi informado a identidade.'
-			});
-		}
-
-		if (!attributes.identidade.dataExpedicaoIdentidade || attributes.identidade.dataExpedicaoIdentidade == "__/__/____") {
-			errors.push({
-				name: 'identidade.identidade',
-				message: 'Não foi informado a data de expedição identidade.'
-			});
-			datas = false;
-		} else if(moment().isBefore(moment($("#dataExpedicaoIdentidadeFiador").val(), 'DD/MM/YYYY'))) {
-			errors.push({name: 'identidade.identidade', message: 'Data Expedição não pode ser superior à data atual.'});
-			datas = false;
+		if(_this2.cpf){
+			$('#cpfFiador').attr('readonly', true);
+			$('#cpfFiador').prop('readonly', true);
 		}
 		
-		if(datas){
-			if(moment(attributes.identidade.dataExpedicaoIdentidade, "DD/MM/YYYY").isBefore(moment(attributes.dataNascimento, "DD/MM/YYYY"))){
-				errors.push({name: 'identidade.dataExpedicaoIdentidade', message: 'Data Expedição não pode ser inferior à Data Nascimento.'});
+		$(".cpfmodal").mask("999.999.999-99").off('blur.mask').blur(function (e) {
+			var src = e.currentTarget;
+			if (src.value != '') {
+				var wRet = validarCPF(src.value); 
+				if (wRet != ''){
+					src.value = '';
+					mostrarErrors([ {
+						message : wRet
+					} ], '#msgModal');					
+				} else {
+					removerMensagens();
+				}
 			}
-		}
+		});
 
-		if (attributes.identidade.orgaoExpedidor == null || !attributes.identidade.orgaoExpedidor.codigo) {
-			errors.push({
-				name: 'identidade.identidade',
-				message: 'Não foi informado o orgão expedidor.'
-			});
-		}
+		this.modelExpedidor = new OrgaoExpedidorColecao();
+		this.modelExpedidor.buscar().done(function(collection) {
+			var wSelecionado = _this2.identidade.orgaoExpedidor.codigo;
+			gMontaSelect("#orgaoExpedidorFiador", "codigo", "nome", collection, wSelecionado);
+		});
 
-		if (attributes.identidade.uf == null || !attributes.identidade.uf.sigla) {
-			errors.push({
-				name: 'identidade.identidade',
-				message: 'Não foi informado a uf do orgão expedidor.'
-			});
-		}
-		
-		if (attributes.emancipado != null && attributes.emancipado.descricao == "S" && (!attributes.emancipado.codigo)) {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o Motivo Emancipação!'
-			});
-		}
+		this.modelRegimeBens = new RegimeBensColecao();
 
-		if (attributes.estadoCivil == null || !attributes.estadoCivil.codigo) {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o Estado Civil!'
-			});
-		} 
-		else if (attributes.estadoCivil.codigo == 1 && isMenor18 && 
-				(!(attributes.emancipado == null || !attributes.emancipado.descricao) && attributes.emancipado.descricao == "N")) {
-			errors.push({
-				message: 'Menor não emancipado!'
-			});
-		}
-		else if (attributes.estadoCivil.codigo == 2 || attributes.estadoCivil.codigo == 9) {
-			if (attributes.regimeBens.codigo == "") {
-				errors.push({
-					message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o Regime Bens!'
-				});
-			}
+		this.modelRegimeBens.buscar().done(function(collection) {
+			var wSelecionado = _this2.regimeBens.codigo;
+			gMontaSelect("#regimeBensFiador", "codigo", "nome", collection, wSelecionado);
+		});
 
-			if (!attributes.conjuge.nome || attributes.conjuge.nome == "") {
-				errors.push({
-					message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o nome do conjuge!'
-				});
-			}
+		this.modelEstadoCivil = new EstadoCivilColecao();
+		this.modelEstadoCivil.buscar().done(function(collection) {
+			var wSelecionado = _this2.estadoCivil.codigo;
+			gMontaSelect("#estadoCivilFiador", "codigo", "nome", collection, wSelecionado);
 
-			if (!attributes.conjuge.cpf || validarCPF(attributes.conjuge.cpf) != '') {
-				errors.push({
-					message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o CPF do conjuge!'
-				});
-			}
-
-			if (!attributes.conjuge.dataNascimento || attributes.conjuge.dataNascimento == "") {
-				errors.push({
-					message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar a data Nascimento do conjuge!'
-				});
+			if (wSelecionado == 2 || wSelecionado == 9) {
+				$('#litab2').show();
+				$('#regimeBensFiador').removeAttr('disabled');
 			} else {
-				var dataMenos16Conjuge = new Date(obterAnoAtual() - 16, obterMesAtual(), obterDiaAtual());
-				var dataNascimentoConjuge = $caixa.data.converteStrToData(attributes.conjuge.dataNascimento);
-				if (dataNascimentoConjuge > dataMenos16Conjuge) {
-					errors.push({
-						name: 'dataNascimento',
-						message: 'A data de nascimento do conjuge não pode ser maior ' + formatDate(dataMenos16Conjuge, "dd/MM/yyyy")
-					});
+				$('#litab2').hide();
+				$("#regimeBensFiador").prop("selectedIndex", 0);
+				$('#regimeBensFiador').attr('disabled', 'disabled');
+			}
+		});
+
+		gCarregarPaises("#nacionalidadeFiador", _this2.nacionalidade.codigo);
+
+		if (_this2.dataNascimento == null || _this2.dataNascimento == "") {
+			_this2.dataNascimento = "01/01/1901";
+		}
+
+		var wdataNascimento = $caixa.data.converteStrToData(_this2.dataNascimento);
+		var wIdade = moment().diff(wdataNascimento, 'years');
+
+		this.modelEmancipado = new EmancipadoColecao();
+
+		this.modelEmancipado.buscar().done(function(collection) {
+			console.log("call -> ConsultaGenericaControle -> modelEmancipado");
+
+			var wSelecionado = _this2.emancipado.codigo;
+
+			gMontaSelect("#emancipadoMotivoFiador", "codigo", "nome", collection, wSelecionado);
+
+			if (wSelecionado != "") {
+				_this2.emancipado.descricao = "S";
+				$("#emancipadoFiador").prop("selectedIndex", 1);
+			} else {
+				_this2.emancipado.descricao = "N";
+				$('#emancipadoMotivoFiador').attr('disabled', 'disabled');
+			}
+
+			if ($.inArray(parseInt(_this2.estadoCivil.codigo), _this2.estadosCivis) > -1) {
+				_this2.emancipado.codigo = "CAS";
+				try {
+					desabilitarCampo("#emancipadoFiador", 'disabled');
+					desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
+				} catch (exception) {}
+			} else {
+				if (wIdade >= 18) {
+					$("#emancipadoFiador").val("S");
+
+					_this2.emancipado.codigo = "MAI";
+
+					desabilitarCampo("#emancipadoFiador", 'disabled');
+					desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
 				}
 			}
 
-			if (!attributes.conjuge.identidade.identidade) {
-				errors.push({
-					name: 'identidade.identidade',
-					message: 'Não foi informado a identidade do conjuge.'
-				});
-			}
+			$('#emancipadoMotivoFiador').val(_this2.emancipado.codigo);
 
-			if (!attributes.conjuge.identidade.dataExpedicaoIdentidade || attributes.conjuge.identidade.dataExpedicaoIdentidade == "__/__/____") {
-				errors.push({
-					name: 'identidade.identidade',
-					message: 'Não foi informado a data de expedição identidade do conjuge.'
-				});
-			} else if(moment().isBefore(moment(attributes.conjuge.identidade.dataExpedicaoIdentidade, 'DD/MM/YYYY'))) {
-				errors.push({name: 'identidade.identidade', message: 'Data Expedição não pode ser superior à data atual.'});
-			}
+		});
 
-			if (attributes.conjuge.identidade.orgaoExpedidor == null || !attributes.conjuge.identidade.orgaoExpedidor.codigo) {
-				errors.push({
-					name: 'identidade.identidade',
-					message: 'Não foi informado o orgão expedidor do conjuge.'
-				});
-			}
+		this.combo = new Combo();
+		this.combo.set('dominioCombo', 56);
+		this.combo.set('filtroNumerico', _this2.codigoProfissao);
 
-			if (attributes.conjuge.identidade.uf == null || !attributes.conjuge.identidade.uf.sigla) {
-				errors.push({
-					name: 'identidade.identidade',
-					message: 'Não foi informado a uf do orgão expedidor do conjuge.'
-				});
+		$fes.post('../fes-web/emprest/consultas/carregarCombo', this.combo, function sucesso(data) {
+			if (data.listaRetorno.length > 0) {
+				$("#profissao").val(data.listaRetorno[0].descricao);
 			}
+		});
+
+		var _self = this;
+		$("#profissao").autocomplete({
+			matchContains: true,
+			max: 50,
+			minLength: 3,
+			appendTo: $("#exportOrder"),
+			source: function(request, response) {
+				this.combo = new Combo();
+				this.combo.set('dominioCombo', 56);
+				this.combo.set('filtroTextual', request.term);
+
+				$fes.post('../fes-web/emprest/consultas/carregarCombo', this.combo, function sucesso(data) {
+
+					response($.map(data.listaRetorno, function(item) {
+						return {
+							value: item.identificadorNumerico,
+							label: item.descricao
+						}
+					}));
+				});
+			},
+			messages: {
+				noResults: '',
+				results: function() {}
+			},
+
+			select: function(event, ui) {
+				console.log("call -> ConsultaGenericaControle -> select");
+				event.preventDefault();
+				_self.model.set("codigoProfissao", ui.item.value);
+				$(event.target).val(ui.item.label);
+			},
+			focus: function(event, ui) {
+				console.log("call -> ConsultaGenericaControle -> focus");
+				event.preventDefault();
+				$(event.target).val(ui.item.label);
+			},
+
+			open: function() {
+				$(this).removeClass("ui-corner-all").addClass("ui-corner-top");
+			},
+			close: function() {
+				$(this).removeClass("ui-corner-top").addClass("ui-corner-all");
+			},
+			change: function(event, ui) {
+				console.log("call -> ConsultaGenericaControle -> change");
+				if (!ui.item) {
+					$(event.target).val("");
+					_self.model.set("codigoProfissao", "");
+				}
+			}
+		});
+
+		window.setTimeout(function() {
+			loadMask();
+		}, 500);
+
+		return this;
+	},
+
+	updateModel: function(el) {
+		// funcao de chamada dos inputs
+		console.log("call -> updateModel");
+
+		var $el = $(el.target);
+		var name = $el.attr('name');
+
+		if (name != undefined) {
+			console.log("call -> updateModel -> undefined");
+			this.model.set(name, $el.val());
 		}
-		attributes.valorRendaMensal = mascaraMoeda(Number(attributes.valorRendaMensal.toString()));
 
-		if (parseFloat(attributes.valorRendaMensal) <= 0) {
-			errors.push({
-				name: 'valorRendaMensal',
-				message: 'Não foi informado o valor da renda mensal'
-			});
+		this.model.set("cpf", purificaAtributo($("#cpfFiador").val()));
 
-		}
+		// ----------------------------------------------------------------------------
+		var wEc = this.model.get("estadoCivil");
+		wEc.codigo = $("#estadoCivilFiador").val();
+		wEc.nome = $("#estadoCivilFiador option:selected").text();
 
-		if (!attributes.emancipado.descricao) {
-			if (attributes.emancipado.codigo == "")
-				attributes.emancipado.descricao = "N";
+		if (wEc.codigo == 2 || wEc.codigo == 9) {
+			$('#litab2').show();
+			$('#regimeBensFiador').removeAttr('disabled');
 		} else {
-			if (attributes.emancipado.descricao == "S" && attributes.emancipado.codigo == "") {
-				errors.push({
-					message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o tipo da emancipação!'
-				});
+			$('#litab2').hide();
+			$("#regimeBensFiador").prop("selectedIndex", 0);
+			$('#regimeBensFiador').attr('disabled', 'disabled');
+		}
+
+		var wRb = this.model.get("regimeBens");
+		wRb.codigo = $("#regimeBensFiador").val();
+		wRb.nome = $("#regimeBensFiador option:selected").text();
+
+		var wId = {
+			identidade: $("#identidadeFiador").val(),
+			orgaoExpedidor: {
+				codigo: $("#orgaoExpedidorFiador").val(),
+				nome: $("#orgaoExpedidorFiador option:selected").text()
+			},
+			dataExpedicaoIdentidade: $("#dataExpedicaoIdentidadeFiador").val(),
+
+			uf: {
+				sigla: $("#ufIdentidadeFiador").val(),
+				descricao: $("#ufIdentidadeFiador").val()
+			}
+		};
+
+		this.model.set("identidade", wId);
+		var wEm = this.model.get("emancipado");
+
+		if ($("#emancipadoFiador").val() == "N") {
+			wEm.codigo = "";
+			wEm.descricao = "N";
+			$('#emancipadoMotivoFiador').attr('disabled', 'disabled');
+			$("#emancipadoMotivoFiador").prop("selectedIndex", 0);
+		} else {
+			wEm.codigo = $('#emancipadoMotivoFiador').val();
+			wEm.descricao = "S";
+			$('#emancipadoMotivoFiador').removeAttr('disabled');
+		}
+
+		var wNas = this.model.get("nacionalidade");
+
+		wNas.codigo = $("#nacionalidadeFiador").val();
+		wNas.nome = $("#nacionalidadeFiador option:selected").text();
+
+		var wRenda = $("#rendaMensalFiador").val();
+		this.model.set("valorRendaMensal", purificaMoeda(wRenda));
+
+		if(el.currentTarget.id != "emancipadoFiador" && el.currentTarget.id != "emancipadoMotivoFiador"){
+			var wIdade = 1;
+			if (!(this.model.get("dataNascimento") == null || this.model.get("dataNascimento") == "")) {
+				var wdataNascimento = $caixa.data.converteStrToData(this.model.get("dataNascimento"));
+				wIdade = (new Date()).differenceInYears(wdataNascimento);
+			}
+	
+			if (($.inArray(parseInt(wEc.codigo), this.estadosCivis) > -1) && wEc.codigo != 9) {
+				console.log("call -> updateModel -> casado2");
+				wEm.codigo = "CAS";
+				$("#emancipadoFiador").val("S");
+				$('#emancipadoMotivoFiador').val(wEm.codigo);
+			} else if(wEc.codigo == 9){
+				console.log("call -> updateModel ->  uniao estavel");
+				wEm.codigo = "MAI";
+				$("#emancipadoFiador").val("S");
+				$('#emancipadoMotivoFiador').val("MAI");
+			} else {
+				if (wIdade >= 18) {
+					console.log("call -> updateModel ->  18");
+					wEm.codigo = "MAI";
+					$("#emancipadoFiador").val("S");
+					$('#emancipadoMotivoFiador').val("MAI");
+				}
+			}
+
+			if ($.inArray(parseInt(wEc.codigo), [1, 9]) > -1 && wIdade < 18) {
+				$('#emancipadoFiador').removeAttr('disabled');
+				$('#emancipadoFiador').val("N");
+				$('#emancipadoMotivoFiador').removeAttr('disabled');
+				wEm.codigo = "";
+				wEm.descricao = "N";
+				$('#emancipadoMotivoFiador').attr('disabled', 'disabled');
+				$('#emancipadoMotivoFiador').val("");
+				if ($("#emancipadoFiador").val() != "N")
+					$('#emancipadoMotivoFiador').removeAttr('disabled');
+			} else {
+				desabilitarCampo("#emancipadoFiador", 'disabled');
+				desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
 			}
 		}
 
-		if (!attributes.codigoProfissao || $("#profissao").val() == "") {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar a profissão!'
-			});
-		}
-
-		if (!attributes.endereco.endereco) {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o endereço!'
-			});
-		}
-
-		if (!attributes.endereco.bairro) {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o bairro!'
-			});
-		}
-
-		if (!attributes.endereco.cep || attributes.endereco.cep == "" || attributes.endereco.cep == "00000000") {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o CEP!'
-			});
-		}
-
-		if (!attributes.endereco.cidade.codigoCidade || attributes.endereco.cidade.codigoCidade == "") {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar a cidade!'
-			});
-		}
-
-		if (!attributes.endereco.cidade.uf.sigla) {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar a UF!'
-			});
-		}
-
-		if (!attributes.contato.telefoneResidencial.ddd || attributes.contato.telefoneResidencial.ddd == ""
-			 || attributes.contato.telefoneResidencial.ddd == "0" || attributes.contato.telefoneResidencial.ddd == "00") {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar a ddd do telefone residencial!'
-			});
-		}
-
-		if (!attributes.contato.telefoneResidencial.numero || attributes.contato.telefoneResidencial.numero == ""
-			 || attributes.contato.telefoneResidencial.numero == "00000000") {
-			errors.push({
-				message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar a número do telefone residencial!'
-			});
-		}
-
-		return errors.length > 0 ? errors : false;
 	},
 
-	salvar: function() {
-		this.url = "../fes-web/emprest/fiador/salva";
-		console.log("call -> Fiador -> salvar");
-		return this.save(null);
-	},
-
-	excluir: function() {
-		this.url = "../fes-web/emprest/fiador/excluir";
-		console.log("call -> Fiador -> excluir");
-		return this.save(null);
+	hideErrors: function() {
+		$('#msgModal').html("");
 	}
-
 });
-//# sourceURL=Fiador.js	
