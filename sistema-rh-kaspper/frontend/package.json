@@ -3,407 +3,191 @@
     "@angular/material": "^10.2.7"
   }
 }
-1) Corrigir o Model que o menu/controle esperam
-✅ modelo/ConsultaFiador.js
-
-O seu arquivo estava como window.CadastroAlteraSemestre e com validação de semestre/ano (isso quebrava o new ConsultaFiador() e não corresponde ao fluxo novo). Substitua pelo conteúdo abaixo:
-
-// Model da tela: Consulta de dados do fiador por estudante (CPF / Código FIES / Agência)
-// Mantém a URL do serviço já existente.
-window.ConsultaFiador = Backbone.Model.extend({
-
-  // endpoint existente no sistema
-  urlRoot: '../fes-web/emprest/contrato/consultaDadosFiadorPorEstudante',
-
-  defaults: {
-    cpf: '',
-    codigoFiesConsulta: '',
-    agenciaConsulta: ''
-  },
-
-  initialize: function () {
-    // garante reset quando o controle chamar model.initialize()
-    this.set('cpf', '');
-    this.set('codigoFiesConsulta', '');
-    this.set('agenciaConsulta', '');
-  },
-
-  validate: function (attributes) {
-    if (attributes === undefined) return true;
-
-    var errors = [];
-
-    // Pelo fluxo novo: pelo menos CPF OU Código FIES
-    if (attributes.cpf === '' && (attributes.codigoFiesConsulta === '' || attributes.codigoFiesConsulta === '0.000')) {
-      errors.push({ message: 'Informe o código FIES ou o CPF do estudante.' });
-    } else if (purificaAtributo(attributes.cpf) !== '') {
-      var msg = validarCPF(attributes.cpf);
-      if (msg !== '') errors.push({ message: msg });
-    }
-
-    return errors.length > 0 ? errors : false;
-  },
-
-  buscar: function () {
-    return this.fetch({
-      type: 'GET',
-      contentType: 'application/json',
-      data: $.param({
-        cpf: this.attributes.cpf,
-        codigoFiesConsulta: purificaAtributo(this.attributes.codigoFiesConsulta),
-        agenciaConsulta: purificaAtributo(this.attributes.agenciaConsulta)
-      })
-    });
-  }
-});
-
-//# sourceURL=ConsultaFiador.js
-
-2) Corrigir o Model auxiliar que estava com nome trocado
-✅ modelo/FiadorConsulta.js
-
-Estava como window.Semestre. Troque para:
-
-// Model auxiliar (linha do resultado)
-window.FiadorConsulta = Backbone.Model.extend({
-  defaults: {
-    numeroContrato: '',
-    cpfFiador: '',
-    nomeFiador: '',
-    dataNascimento: ''
-  }
-});
-
-//# sourceURL=FiadorConsulta.js
-
-3) Corrigir/Completar o Controle da consulta + abrir “Novo Fiador” (modal)
-✅ controle/ConsultaFiadorControle.js
-
-O seu estava como CadastroAlteraSemestreControle. Precisa virar window.ConsultaFiadorControle e ganhar os eventos:
-
-Consultar → renderiza dados
-
-Renderiza tabela (com mock quando não vier do backend)
-
-Botão Novo Fiador → abre modal e renderiza as abas via FiadorModalControle
-
-Use este conteúdo (ele mantém seu padrão, só fecha o fluxo):
-
-// Controle da tela de consulta (CPF do estudante / Código FIES / Agência)
-// Fluxo: Consultar -> exibir resultado -> botão "Novo Fiador" abre as abas (modal)
-window.ConsultaFiadorControle = Backbone.View.extend({
-
-  urlTemplate: '../fes-web/servicos/contratofies/manutencaofiador/visao/ConsultaBaseFiador.html',
-
-  events: {
-    "click a#btnLimpar": "limpar",
-    "click a#btnConsultar": "consultar",
-    "click a#btnVoltar": "voltar",
-    "click a#btnLocalizarCodFies": "localizarCodFies",
-    "click a#btnNovoFiador": "novoFiador",
-    "click a#btnSair": "sair",
-    "blur #formFiltroConsulta input": "change",
-    "change #formFiltroConsulta select": "change",
-    "blur #cpf": "validarCpf"
-  },
-
-  initialize: function () {
-    var that = this;
-    removerMensagens();
-
-    // Dependências do fluxo de "Novo Fiador" (modal de abas)
-    $.get('../fes-web/servicos/contratofies/manutencaofiador/modelo/Fiador.js');
-    $.get('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorModalControle.js');
-
-    $.get(this.urlTemplate).done(function (data) {
-      that.template = _.template(data);
-      that.render();
-      loadMask();
-      removeAutoComplete('cpf', 'cpf');
-    });
-  },
-
-  validarCpf: function (e) {
-    removerMensagens();
-    var cpf = purificaAtributo(e.target.value);
-
-    if (cpf !== '') {
-      var msg = validarCPF(cpf);
-      if (msg !== '') {
-        return mostrarErrors([{ message: msg }]);
-      }
-    }
-    return true;
-  },
-
-  change: function (e) {
-    var change = {};
-    change[e.target.name] = e.target.value;
-    this.model.set(change);
-  },
-
-  limpar: function () {
-    removerMensagens();
-    limparFormulario('#formFiltroConsulta');
-    if (this.model && this.model.initialize) this.model.initialize();
-
-    $('#divResultado').hide('slow');
-    $('#tbResultadoFiadores tbody').empty();
-  },
-
-  localizarCodFies: function () {
-    $('#divResultado').hide();
-    this.detalhe = new ConsultaGenericaEstudanteModalControle({
-      el: $('#divModalIncluir'),
-      model: new Estudante(),
-      modelAnterior: this.model
-    });
-  },
-
-  consultar: function () {
-    $('#divResultado').hide('slow');
-    removerMensagens();
-    this.model.set('cpf', purificaAtributo(this.model.get('cpf')));
-
-    var that = this;
-
-    if (!this.validar()) {
-      $('#ajaxStatus').modal('hide');
-      return;
-    }
-
-    $('#ajaxStatus').modal('show');
-
-    this.model.buscar()
-      .done(function (data) {
-        if (data && data.mensagem) {
-          $('#ajaxStatus').modal('hide');
-          return mostrarErrors([{ message: data.mensagem }]);
-        }
-
-        // MOCK para permitir testar o visual mesmo sem backend
-        if (!data) data = {};
-        if (!data.fiadores && !data.listaFiadores) {
-          data.fiadores = [
-            { numeroContrato: '24.0340.185.0000061/47', cpfFiador: '', nomeFiador: 'CARLOS GAR', dataNascimento: '04/11/1999' },
-            { numeroContrato: '19.0970.185.0003669/05', cpfFiador: '', nomeFiador: 'SIMONE FERREIRA', dataNascimento: '19/04/2011' }
-          ];
-        }
-
-        that.renderResult(data);
-        that.renderTabelaFiadores(data.fiadores || data.listaFiadores || []);
-        $('#divResultado').show('slow');
-      })
-      .error(function (e) {
-        console.log(e);
-
-        // Mesmo com erro, deixa o front testável
-        var mock = {
-          fiadores: [
-            { numeroContrato: '24.0340.185.0000061/47', cpfFiador: '', nomeFiador: 'CARLOS GAR', dataNascimento: '04/11/1999' }
-          ]
-        };
-        that.renderResult(mock);
-        that.renderTabelaFiadores(mock.fiadores);
-        $('#divResultado').show('slow');
-        $('#ajaxStatus').modal('hide');
-      });
-  },
-
-  renderResult: function (data) {
-    if (data && data.dadosCandidato) {
-      $("#codigoFies").text(mascararCodigoFies(data.dadosCandidato.nuCandidato));
-    } else if (this.model && this.model.get('codigoFiesConsulta')) {
-      $("#codigoFies").text(this.model.get('codigoFiesConsulta'));
-    }
-
-    if (data && data.consultaPreAdit) {
-      $("#cpfEstudade").text(mascararCpf(data.consultaPreAdit.coCpf || this.model.get('cpf')));
-      $("#nomeEstudade").text(data.consultaPreAdit.noCandidato || '');
-      $("#codigoIESUF").text(((data.cursoHabilitacao && data.cursoHabilitacao.noIes) ? data.cursoHabilitacao.noIes : '') + '/' + (data.consultaPreAdit.ufIEs || ''));
-      $('#ultimoSemestre').val(data.consultaPreAdit.nuMinSemestre || '');
-    } else {
-      $("#cpfEstudade").text(this.model.get('cpf'));
-    }
-
-    if (data && data.cursoHabilitacao) {
-      $("#unidadeAdmCampus").text(data.cursoHabilitacao.noCampus || '');
-      $("#areaEspecifica").text(data.cursoHabilitacao.noAreaEspecifica || '');
-      $("#contratoSIAPI").text(data.nuContratoFormatado || '');
-      $("#cursoTurno").text((data.cursoHabilitacao.noCurso || '') + ' ' + (data.cursoHabilitacao.deTurno || ''));
-      $("#areGeral").text(data.cursoHabilitacao.noAreaGeral || '');
-    }
-
-    $('#ajaxStatus').modal('hide');
-  },
-
-  renderTabelaFiadores: function (fiadores) {
-    var $tbody = $('#tbResultadoFiadores tbody');
-    if ($tbody.length === 0) return;
-
-    $tbody.empty();
-
-    if (!fiadores || fiadores.length === 0) {
-      $tbody.append('<tr><td colspan="5">Nenhum fiador encontrado.</td></tr>');
-      return;
-    }
-
-    _.each(fiadores, function (f) {
-      var tr = '<tr>' +
-        '<td>' + (f.numeroContrato || f.nuContratoFormatado || '') + '</td>' +
-        '<td>' + (f.cpfFiador ? mascararCpf(f.cpfFiador) : '') + '</td>' +
-        '<td>' + (f.nomeFiador || f.noFiador || '') + '</td>' +
-        '<td>' + (f.dataNascimento || f.dtNascimento || '') + '</td>' +
-        '<td><a href="#" class="btn btn-mini btn-primary btnNovoFiadorRow">Novo Fiador</a></td>' +
-      '</tr>';
-
-      var $tr = $(tr);
-      $tr.find('.btnNovoFiadorRow').click(function (e) {
-        e.preventDefault();
-        $(document).trigger('novoFiador');
-      });
-
-      $tbody.append($tr);
-    });
-
-    var that = this;
-    $(document).off('novoFiador.consultaFiador').on('novoFiador.consultaFiador', function () {
-      that.novoFiador();
-    });
-  },
-
-  novoFiador: function () {
-    // Modal básico pra renderizar as abas (sem depender do template global)
-    if ($('#frmModal').length === 0) {
-      var modalHtml = ''
-        + '<div id="frmModal" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">'
-        + '  <div class="modal-header">'
-        + '    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>'
-        + '    <h3 id="modalLabel"></h3>'
-        + '  </div>'
-        + '  <div class="modal-body" id="modalBody"></div>'
-        + '  <div class="modal-footer">'
-        + '    <a href="#" class="btn" data-dismiss="modal">Fechar</a>'
-        + '    <a href="#" class="btn btn-primary" id="btnSalvar">Salvar</a>'
-        + '  </div>'
-        + '</div>';
-      $('#divModalIncluir').html(modalHtml);
-    }
-
-    var modelFiador = new Fiador();
-    var ctrl = new FiadorModalControle({
-      el: $('#modalBody'),
-      model: modelFiador
-    });
-
-    ctrl.callback = function () {};
-    $('#frmModal').modal('show');
-  },
-
-  sair: function () {
-    abrirPagina('../fes-web/fes-index.html');
-  },
-
-  validar: function () {
-    if (!this.model.isValid()) {
-      mostrarErrors(this.model.validationError);
-      return false;
-    }
-    return true;
-  },
-
-  voltar: function () {
-    abrirPagina('../fes-web/fes-index.html');
-  },
-
-  render: function () {
-    $(this.el).html(this.template(this.model.toJSON()));
-    $('#divResultado').hide();
-    if ($('#tbResultadoFiadores tbody').length) {
-      $('#tbResultadoFiadores tbody').empty();
-    }
-    return this;
-  }
-
-});
-
-//# sourceURL=ConsultaFiadorControle.js
-
-4) Ajustar o modal para carregar os controles e view do seu módulo de manutenção
-✅ controle/FiadorModalControle.js
-
-O seu estava apontando pra ../servicos/cadastro/fiador/.... Como você me enviou o FiadorModal.html dentro de manutencaofiador/visao, ajuste os caminhos para usar seus próprios arquivos:
-
-Troque o bloco $.when(...).done(...) para:
-
-// Usa os controles da manutenção (mesmo padrão das abas já existentes)
-$.when(
-  $.get('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorControle.js'),
-  $.get('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorConjugeControle.js'),
-  $.get('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorEnderecoControle.js'),
-  $.get('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorContatoControle.js')
-).done(function () {
-  $.get('../fes-web/servicos/contratofies/manutencaofiador/visao/FiadorModal.html').done(function (data) {
-    that.template = _.template(data);
-    that.render();
-  });
-});
-
-5) Completar a tela (HTML) para ter tabela + botões Novo Fiador/Sair
-✅ visao/ConsultaBaseFiador.html
-
-Eu mantive o trecho antigo de semestre oculto (pra não quebrar nada que ainda referencia #ultimoSemestre), e acrescentei:
-
-Tabela com id="tbResultadoFiadores"
-
-Botões #btnNovoFiador e #btnSair
-
-Adicione esse bloco (se já não estiver) dentro do #divResultado:
-
-<!-- Resultado da pesquisa de fiadores -->
-<div class="span12" style="margin-top:10px;">
-  <table class="table table-bordered table-striped" id="tbResultadoFiadores">
-    <thead>
-      <tr>
-        <th>N&ordm; Contrato</th>
-        <th>CPF Fiador</th>
-        <th>Nome Fiador</th>
-        <th>Data Nasc.</th>
-        <th>A&ccedil;&otilde;es</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<div class="form-actions">
-  <a href="#" class="btn btn-primary" title="Novo Fiador" id="btnNovoFiador">Novo Fiador</a>
-  <a href="#" class="btn" title="Sair" id="btnSair">Sair</a>
-</div>
-
-Resultado: fluxo do front rodando (testável)
-
-Com esses ajustes, você já consegue:
-
-✅ abrir a tela
-✅ preencher CPF/código/Agência
-✅ clicar Consultar → aparece resultado (com mock se backend não responder)
-✅ clicar Novo Fiador → abre modal com abas usando seu FiadorModal.html 
+Sim — dá pra fazer em cima desses mesmos arquivos e deixar o clique em “Novo Fiador” abrindo um modal com abas bem organizadas (Dados do Fiador / Cônjuge / Endereço / Contato), usando exatamente o FiadorModal.html que você mandou (ele já tem os tabFiador1..4). 
 
 FiadorModal
 
+A parte que está te travando hoje é só alinhamento de caminhos (paths): vários controles ainda apontam para ../servicos/cadastro/fiador/... e ../administracao/..., mas você agora está rodando tudo dentro de contratofies/manutencaofiador.
 
-✅ Voltar/Sair funcionando
+Abaixo está o “pacote” de acertos + o que codificar para as abas subirem redondinhas.
 
-Se você me mandar o arquivo do menu/roteador
+1) Padronize um BASE (pra não ficar caçando path em 10 arquivos)
 
-A última peça que eu consigo “bater o martelo” pra ficar perfeito é o arquivo onde está o mantemFiador (o trecho do print com $.when($.get(...))...).
+No topo de cada controle de fiador (FiadorControle/Conjuge/Endereco/Contato/Modal), coloque:
 
-Com ele eu ajusto os $.get(...) exatos (paths) para carregar:
+var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
 
-modelo/ConsultaFiador.js
 
-controle/ConsultaFiadorControle.js
-e garantir que o #container renderiza certinho sem depender de cache/ordem.
+E passe a usar:
 
-Se quiser, cola aqui esse trecho do menu que eu te devolvo já “redondo” também.
+Views: BASE_FIADOR + '/visao/Arquivo.html'
+
+Controles: BASE_FIADOR + '/controle/Arquivo.js'
+
+2) FiadorModalControle.js — fazer o modal abrir as abas “organizadas”
+
+O seu FiadorModalControle.js hoje carrega arquivos de cadastro/fiador/.... Ajuste para carregar os seus controles e sua view do modal:
+
+✅ Substitua o initialize por este (mantendo o resto do arquivo):
+window.FiadorModalControle = Backbone.View.extend({
+  callback: null,
+  modelFiador: null,
+  events: {},
+
+  initialize: function () {
+    var that = this;
+    var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
+
+    var cloneFiador = JSON.stringify(this.model.clone());
+    this.modelFiador = new Fiador(JSON.parse(cloneFiador));
+
+    $.when(
+      $.get(BASE_FIADOR + '/controle/FiadorControle.js'),
+      $.get(BASE_FIADOR + '/controle/FiadorConjugeControle.js'),
+      $.get(BASE_FIADOR + '/controle/FiadorEnderecoControle.js'),
+      $.get(BASE_FIADOR + '/controle/FiadorContatoControle.js')
+    ).done(function () {
+      $.get(BASE_FIADOR + '/visao/FiadorModal.html').done(function (data) {
+        that.template = _.template(data);
+        that.render();
+      });
+    });
+  },
+
+  render: function () {
+    $(this.el).html(this.template(this.modelFiador)); // seu modal não depende de variáveis
+    var _this = this;
+
+    $('#modalLabel').html("Dados do Fiador");
+    $('#btnSalvar').html("Salvar mudan&ccedil;as");
+
+    // (importante) renderiza cada aba uma única vez
+    $('#tabFiador1').html(new FiadorControle({ model: _this.modelFiador }).render().el);
+    $('#tabFiador2').html(new FiadorConjugeControle({ model: _this.modelFiador }).render().el);
+    $('#tabFiador3').html(new FiadorEnderecoControle({ model: _this.modelFiador }).render().el);
+    $('#tabFiador4').html(new FiadorContatoControle({ model: _this.modelFiador }).render().el);
+
+    // Ajuste visual (igual você já fazia)
+    $('#modalBody legend').hide();
+    $('#tabFiador2,#tabFiador3,#tabFiador4').removeClass('active');
+    $('#tabFiador1').addClass('active');
+    $('#litab2').removeClass('active');
+    $('#litab1').addClass('active');
+
+    // evita “duplicar evento” quando abrir novamente
+    $("#btnSalvar").unbind("click");
+    $('#btnSalvar').click(function () {
+      if (!_this.modelFiador.isValid()) {
+        _this.mostrarErros(_this.modelFiador.validationError);
+        $('#modalBody').animate({ scrollTop: 0 }, 500);
+        return;
+      }
+      $("#btnSalvar").attr("disabled", "disabled");
+      $('#ajaxStatus').modal('show');
+      _this.salvar();
+    });
+
+    return this;
+  },
+
+  // manter seu salvar() e mostrarErros() como já estão
+});
+
+
+✅ Resultado: ao abrir o modal, as 4 abas sobem imediatamente e cada uma renderiza seu respectivo template do módulo (sem dependência do “cadastro/fiador”).
+
+3) Corrigir os paths das views das abas (Conjuge/Endereco/Contato/Fiador)
+
+Hoje seus controles estão assim (exemplo do Conjuge):
+
+$.get('../fes-web/servicos/cadastro/fiador/visao/FiadorConjuge.html')
+
+
+Troque em cada controle:
+
+FiadorConjugeControle.js
+$.get('../fes-web/servicos/contratofies/manutencaofiador/visao/FiadorConjuge.html')
+
+FiadorEnderecoControle.js
+$.get('../fes-web/servicos/contratofies/manutencaofiador/visao/FiadorEndereco.html')
+
+FiadorContatoControle.js
+$.get('../fes-web/servicos/contratofies/manutencaofiador/visao/FiadorContato.html')
+
+FiadorControle.js (principal)
+
+Trocar:
+
+$.get('../fes-web/servicos/administracao/cadastrofiadorcontrato/visao/Fiador.html')
+
+
+por:
+
+$.get('../fes-web/servicos/contratofies/manutencaofiador/visao/Fiador.html')
+
+4) FiadorControle.js — corrigir “listas” para apontar para o seu módulo
+
+No FiadorControle.js você carrega listas por renegociacaocontrato/fiador/....
+Como você tem esses arquivos no seu módulo, ajuste para:
+
+that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorListControle.js'),
+that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorEnderecoListControle.js'),
+that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorContatoListControle.js')
+
+
+⚠️ Tem uma chamada para FiadorDocumentosListControle.js no seu FiadorControle.js mas eu não recebi esse arquivo no pacote.
+Então, para não quebrar o fluxo, faça isso:
+
+that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorDocumentosListControle.js')
+  .always(function(){ /* não bloqueia */ })
+
+
+Ou simplesmente comente essa linha enquanto testa o visual.
+
+5) “Novo Fiador” na tela de resultado — abrir o modal de abas
+
+No seu ConsultaFiadorControle.js, no clique do botão Novo Fiador, use o modal padrão bootstrap que você já usa (#frmModal / #modalBody):
+
+novoFiador: function () {
+  // garante que o modal exista (se já existe no teu layout, pode remover esse if)
+  if ($('#frmModal').length === 0) {
+    $('#divModalIncluir').html(
+      '<div id="frmModal" class="modal hide fade" tabindex="-1">' +
+      ' <div class="modal-header">' +
+      '  <button type="button" class="close" data-dismiss="modal">×</button>' +
+      '  <h3 id="modalLabel"></h3>' +
+      ' </div>' +
+      ' <div class="modal-body" id="modalBody"></div>' +
+      ' <div class="modal-footer">' +
+      '  <a href="#" class="btn" data-dismiss="modal">Fechar</a>' +
+      '  <a href="#" class="btn btn-primary" id="btnSalvar">Salvar</a>' +
+      ' </div>' +
+      '</div>'
+    );
+  }
+
+  var ctrl = new FiadorModalControle({
+    el: $('#modalBody'),
+    model: new Fiador()
+  });
+
+  ctrl.callback = function (fiadorSalvo) {
+    // aqui você decide o que faz depois (ex: recarregar lista, etc.)
+  };
+
+  $('#frmModal').modal('show');
+}
+
+O que você vai conseguir testar já nesta rodada
+
+Consulta → resultado aparece
+
+Clica Novo Fiador
+
+Abre modal com as abas organizadas (Dados/Cônjuge/Endereço/Contato) usando seu FiadorModal.html 
+
+FiadorModal
+
+Cada aba renderiza seus respectivos HTMLs do módulo
+
+Se você quiser, eu também consigo te devolver um “checklist de console” (em 30 segundos você mata 404 e undefined) para você ir validando enquanto sobe o servidor — mas com os ajustes acima, o fluxo normalmente já sobe bem.
