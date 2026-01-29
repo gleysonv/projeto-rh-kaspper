@@ -1,50 +1,103 @@
+        mantemFiador: function mantemFiador(e) {
+            $
+                .when(
+                    $
+                    .get('../fes-web/servicos/contratofies/manutencaofiador/modelo/ConsultaFiador.js'),
+                    $
+                    .get('../fes-web/servicos/contratofies/manutencaofiador/modelo/FiadorConsulta.js')
 
+                )
+                .done(
+                    function() {
+                        $('#container')
+                            .html(
+                                new ConsultaFiadorControle({
+                                    model: new ConsultaFiador()
+                                }).el);
+                    });
+        },
+		
+		
+		            {
+                "nome": "Altera&ccedil;&atilde;o e substitui&ccedil;&atilde;o de Fiador",
+                "grupo": "Manuten&ccedil;&atilde;o",
+                "subgrupo": "",
+                "subgrupo2": "",
+                "arquivos": "",
+                "controle": "",
+                "modelo": "",
+                "evento": "mantemFiador",
+                "perfil": ["FES_GESTOR", "FES_MANUT", "FES_MANUTJUR"]
+            },
+			
+			
+			
+			
+ConsultaFiador			
+			/ Model da tela: Consulta de dados do fiador por estudante (CPF / Código FIES / Agência)
+// Mantém a URL do serviço já existente.
+window.ConsultaFiador = Backbone.Model.extend({
 
-carregarDependencias: function (callbackOk) {
-  var scripts = [
-    '../fes-web/servicos/administracao/cadastrofiadorcontrato/modelo/OrgaoExpedidor.js',
-    '../fes-web/servicos/administracao/cadastrofiadorcontrato/colecao/OrgaoExpedidorColecao.js',
+  // endpoint existente no sistema
+  urlRoot: '../fes-web/emprest/contrato/consultaDadosFiadorPorEstudante',
 
-    '../fes-web/servicos/administracao/cadastrofiadorcontrato/modelo/UF.js',
-    '../fes-web/servicos/administracao/cadastrofiadorcontrato/colecao/UFColecao.js'
+  defaults: {
+    cpf: '',
+    codigoFiesConsulta: '',
+    agenciaConsulta: ''
+  },
 
-    // se precisar, adiciona aqui:
-    // '../fes-web/servicos/administracao/cadastrofiadorcontrato/controle/FiadorConjugeControle.js',
-    // '../fes-web/servicos/administracao/cadastrofiadorcontrato/controle/FiadorEnderecoControle.js',
-    // '../fes-web/servicos/administracao/cadastrofiadorcontrato/controle/FiadorContatoControle.js'
-  ];
+  initialize: function () {
+    // garante reset quando o controle chamar model.initialize()
+    this.set('cpf', '');
+    this.set('codigoFiesConsulta', '');
+    this.set('agenciaConsulta', '');
+  },
 
-  function carregarSeq(i) {
-    if (i >= scripts.length) {
-      if (callbackOk) callbackOk();
-      return;
+  validate: function (attributes) {
+    if (attributes === undefined) return true;
+
+    var errors = [];
+
+    // Pelo fluxo novo: pelo menos CPF OU Código FIES
+    if (attributes.cpf === '' && (attributes.codigoFiesConsulta === '' || attributes.codigoFiesConsulta === '0.000')) {
+      errors.push({ message: 'Informe o código FIES ou o CPF do estudante.' });
+    } else if (purificaAtributo(attributes.cpf) !== '') {
+      var msg = validarCPF(attributes.cpf);
+      if (msg !== '') errors.push({ message: msg });
     }
-    $.getScript(scripts[i])
-      .done(function () { carregarSeq(i + 1); })
-      .fail(function () {
-        console.error('Falha ao carregar script:', scripts[i]);
-      });
+
+    return errors.length > 0 ? errors : false;
+  },
+
+  buscar: function () {
+    return this.fetch({
+      type: 'GET',
+      contentType: 'application/json',
+      data: $.param({
+        cpf: this.attributes.cpf,
+        codigoFiesConsulta: purificaAtributo(this.attributes.codigoFiesConsulta),
+        agenciaConsulta: purificaAtributo(this.attributes.agenciaConsulta)
+      })
+    });
   }
+});
 
-  carregarSeq(0);
-},
-
-
+//# sourceURL=ConsultaFiador.js
 
 
 
+FiadorConsulta.js
 
 
+// Model auxiliar (linha do resultado)
+window.FiadorConsulta = Backbone.Model.extend({
+  defaults: {
+    numeroContrato: '',
+    cpfFiador: '',
+    nomeFiador: '',
+    dataNascimento: ''
+  }
+});
 
-initialize: function() {
-  var that = this;
-  console.log("initialize FiadorControle");
-
-  this.carregarDependencias(function () {
-    $.get('../fes-web/servicos/administracao/cadastrofiadorcontrato/visao/FiadorModal.html')
-      .done(function(data) {
-        that.template = _.template(data);
-        that.render();
-      });
-  });
-},
+//# sourceURL=FiadorConsulta.js
