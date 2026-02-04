@@ -141,20 +141,82 @@ window.ConsultaFiadorControle = Backbone.View.extend({
         '<td>' + (f.cpfFiador ? mascararCpf(f.cpfFiador) : '') + '</td>' +
         '<td>' + (f.nomeFiador || f.noFiador || '') + '</td>' +
         '<td>' + (f.dataNascimento || f.dtNascimento || '') + '</td>' +
-        '<td><a href="#" class="btn btn-mini btn-primary btnNovoFiadorRow">Novo Fiador</a></td>' +
+        '<td>' +
+        '<a href="#" class="btn btn-mini btn-primary btnExcluirFiadorRow">Excluir</a></td>' +
+        '<a href="#" class="btn btn-mini btn-primary btnAlteraFiadorRow">Alretar</a></td>' +
         '</tr>';
 
       var $tr = $(tr);
-      $tr.find('.btnNovoFiadorRow').click(function (e) {
+      $tr.find('.btnExcluirFiadorRow').click(function (e) {
         e.preventDefault();
-        that.novoFiador();
+        that.excluirFiador();
+      });
+
+      $tr.find('.btnAlteraFiadorRow').click(function (e) {
+        e.preventDefault();
+        that.alteraFiador();
       });
 
       $tbody.append($tr);
     });
   },
 
-  // PASSO 1 (sem modal): vai para a tela de cadastro no container
+
+  novoFiador: function (e) {
+    if (e) e.preventDefault();
+    removerMensagens();
+
+    $.when(
+      $.getScript(BASE_FIADOR + '/modelo/Fiador.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoListControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorContatoListControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeListControle.js')
+    )
+    .done(function () {
+      var modelFiador = new Fiador();
+
+      $('#container').html(
+        new FiadorControle({
+          model: modelFiador,
+          modo: 'incluir',
+          origem: 'consulta'
+        }).el
+      );
+    })
+    .fail(function () {
+      alert('Erro ao carregar a tela de cadastro do fiador.');
+    });
+  },
+
+  alteraFiador: function (e) {
+    if (e) e.preventDefault();
+    removerMensagens();
+
+    $.when(
+      $.getScript(BASE_FIADOR + '/modelo/Fiador.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoListControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorContatoListControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeListControle.js')
+    )
+    .done(function () {
+      var modelFiador = new Fiador();
+
+      $('#container').html(
+        new FiadorControle({
+          model: modelFiador,
+          modo: 'incluir',
+          origem: 'consulta'
+        }).el
+      );
+    })
+    .fail(function () {
+      alert('Erro ao carregar a tela de cadastro do fiador.');
+    });
+  },
+
+
   novoFiador: function (e) {
     if (e) e.preventDefault();
     removerMensagens();
