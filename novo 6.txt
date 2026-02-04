@@ -11,6 +11,11 @@ window.ConsultaFiadorControle = Backbone.View.extend({
     "click a#btnLocalizarCodFies": "localizarCodFies",
     "click a#btnNovoFiador": "novoFiador",
     "click a#btnSair": "sair",
+
+    // ✅ PASSO 2.3: eventos delegados na tabela
+    "click .btnAlterarFiadorRow": "alterarFiador",
+    "click .btnExcluirFiadorRow": "excluirFiador",
+
     "blur #formFiltroConsulta input": "change",
     "change #formFiltroConsulta select": "change",
     "blur #cpf": "validarCpf"
@@ -20,7 +25,7 @@ window.ConsultaFiadorControle = Backbone.View.extend({
     var that = this;
     removerMensagens();
 
-    // Se você quer GARANTIR execução, use getScript (não get)
+    // Garantir execução (se já existir, ok)
     $.getScript(BASE_FIADOR + '/modelo/Fiador.js');
     $.getScript(BASE_FIADOR + '/controle/FiadorControle.js');
 
@@ -122,6 +127,7 @@ window.ConsultaFiadorControle = Backbone.View.extend({
       });
   },
 
+  // ✅ PASSO 2.1 + 2.2: montar ações e guardar o registro na <tr>
   renderTabelaFiadores: function (fiadores) {
     var $tbody = $('#tbResultadoFiadores tbody');
     if ($tbody.length === 0) return;
@@ -133,35 +139,29 @@ window.ConsultaFiadorControle = Backbone.View.extend({
       return;
     }
 
-    var that = this;
-
     _.each(fiadores, function (f) {
-      var tr = '<tr>' +
-        '<td>' + (f.numeroContrato || f.nuContratoFormatado || '') + '</td>' +
-        '<td>' + (f.cpfFiador ? mascararCpf(f.cpfFiador) : '') + '</td>' +
-        '<td>' + (f.nomeFiador || f.noFiador || '') + '</td>' +
-        '<td>' + (f.dataNascimento || f.dtNascimento || '') + '</td>' +
-        '<td>' +
-        '<a href="#" class="btn btn-mini btn-primary btnExcluirFiadorRow">Excluir</a></td>' +
-        '<a href="#" class="btn btn-mini btn-primary btnAlteraFiadorRow">Alretar</a></td>' +
-        '</tr>';
+      var tr = ''
+        + '<tr>'
+        + '  <td>' + (f.numeroContrato || f.nuContratoFormatado || '') + '</td>'
+        + '  <td>' + (f.cpfFiador ? mascararCpf(f.cpfFiador) : '') + '</td>'
+        + '  <td>' + (f.nomeFiador || f.noFiador || '') + '</td>'
+        + '  <td>' + (f.dataNascimento || f.dtNascimento || '') + '</td>'
+        + '  <td>'
+        + '    <a href="#" class="btn btn-mini btn-warning btnAlterarFiadorRow">Alterar</a> '
+        + '    <a href="#" class="btn btn-mini btn-danger btnExcluirFiadorRow">Excluir</a>'
+        + '  </td>'
+        + '</tr>';
 
       var $tr = $(tr);
-      $tr.find('.btnExcluirFiadorRow').click(function (e) {
-        e.preventDefault();
-        that.excluirFiador();
-      });
 
-      $tr.find('.btnAlteraFiadorRow').click(function (e) {
-        e.preventDefault();
-        that.alteraFiador();
-      });
+      // ✅ PASSO 2.2: guardar o objeto inteiro para usar no alterar/excluir
+      $tr.data('fiador', f);
 
       $tbody.append($tr);
     });
   },
 
-
+  // PASSO 1 (sem modal): incluir novo
   novoFiador: function (e) {
     if (e) e.preventDefault();
     removerMensagens();
@@ -173,25 +173,29 @@ window.ConsultaFiadorControle = Backbone.View.extend({
       $.getScript(BASE_FIADOR + '/controle/FiadorContatoListControle.js'),
       $.getScript(BASE_FIADOR + '/controle/FiadorConjugeListControle.js')
     )
-    .done(function () {
-      var modelFiador = new Fiador();
+      .done(function () {
+        var modelFiador = new Fiador();
 
-      $('#container').html(
-        new FiadorControle({
-          model: modelFiador,
-          modo: 'incluir',
-          origem: 'consulta'
-        }).el
-      );
-    })
-    .fail(function () {
-      alert('Erro ao carregar a tela de cadastro do fiador.');
-    });
+        $('#container').html(
+          new FiadorControle({
+            model: modelFiador,
+            modo: 'incluir',
+            origem: 'consulta'
+          }).el
+        );
+      })
+      .fail(function () {
+        alert('Erro ao carregar a tela de cadastro do fiador.');
+      });
   },
 
-  alteraFiador: function (e) {
+  // ✅ PASSO 2.4: alterar (pega a linha clicada e abre cadastro com dados)
+  alterarFiador: function (e) {
     if (e) e.preventDefault();
     removerMensagens();
+
+    var $tr = $(e.currentTarget).closest('tr');
+    var row = $tr.data('fiador') || {};
 
     $.when(
       $.getScript(BASE_FIADOR + '/modelo/Fiador.js'),
@@ -200,48 +204,49 @@ window.ConsultaFiadorControle = Backbone.View.extend({
       $.getScript(BASE_FIADOR + '/controle/FiadorContatoListControle.js'),
       $.getScript(BASE_FIADOR + '/controle/FiadorConjugeListControle.js')
     )
-    .done(function () {
-      var modelFiador = new Fiador();
+      .done(function () {
+        var modelFiador = new Fiador();
 
-      $('#container').html(
-        new FiadorControle({
-          model: modelFiador,
-          modo: 'incluir',
-          origem: 'consulta'
-        }).el
-      );
-    })
-    .fail(function () {
-      alert('Erro ao carregar a tela de cadastro do fiador.');
-    });
+        // Pré-carrega com o que temos do resultado (mock/retorno)
+        modelFiador.set({
+          numeroContrato: row.numeroContrato || row.nuContratoFormatado || '',
+          cpf: row.cpfFiador || '',
+          nome: row.nomeFiador || row.noFiador || '',
+          dataNascimento: row.dataNascimento || row.dtNascimento || ''
+        });
+
+        $('#container').html(
+          new FiadorControle({
+            model: modelFiador,
+            modo: 'alterar',
+            origem: 'consulta'
+          }).el
+        );
+      })
+      .fail(function () {
+        alert('Erro ao carregar a tela de alteração do fiador.');
+      });
   },
 
-
-  novoFiador: function (e) {
+  // ✅ PASSO 2.5: excluir (confirma e remove linha - mock)
+  excluirFiador: function (e) {
     if (e) e.preventDefault();
     removerMensagens();
 
-    $.when(
-      $.getScript(BASE_FIADOR + '/modelo/Fiador.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoListControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorContatoListControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeListControle.js')
-    )
-    .done(function () {
-      var modelFiador = new Fiador();
+    var $tr = $(e.currentTarget).closest('tr');
+    var row = $tr.data('fiador') || {};
 
-      $('#container').html(
-        new FiadorControle({
-          model: modelFiador,
-          modo: 'incluir',
-          origem: 'consulta'
-        }).el
-      );
-    })
-    .fail(function () {
-      alert('Erro ao carregar a tela de cadastro do fiador.');
-    });
+    if (!confirm('Confirma a exclusão do fiador do contrato ' + (row.numeroContrato || row.nuContratoFormatado || '') + '?')) {
+      return;
+    }
+
+    // MOCK: remove visualmente
+    $tr.remove();
+
+    // Ponto de encaixe futuro:
+    // chamar serviço de exclusão e só remover se ok.
+    // ex:
+    // this.model.excluirFiador({ ... }).done(function(){ $tr.remove(); });
   },
 
   localizarCodFies: function () {
