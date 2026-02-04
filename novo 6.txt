@@ -1,544 +1,167 @@
-var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
-window.FiadorModalControle = Backbone.View.extend({
-  callback: null,
-  modelFiador: null,
-  events: {},
-
-      initialize: function () {
-        var that = this;
-        var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
-
-        var cloneFiador = JSON.stringify(this.model.clone());
-        this.modelFiador = new Fiador(JSON.parse(cloneFiador));
-
-        $.when(
-          $.get(BASE_FIADOR + '/controle/FiadorControle.js'),
-          $.get(BASE_FIADOR + '/controle/FiadorConjugeControle.js'),
-          $.get(BASE_FIADOR + '/controle/FiadorEnderecoControle.js'),
-          $.get(BASE_FIADOR + '/controle/FiadorContatoControle.js')
-        ).done(function () {
-          $.get(BASE_FIADOR + '/visao/FiadorModal.html').done(function (data) {
-            that.template = _.template(data);
-            that.render();
-          });
-        });
-      },
-
-      render: function () {
-        $(this.el).html(this.template(this.modelFiador)); // seu modal não depende de variáveis
-        var _this = this;
-
-        $('#modalLabel').html("Dados do Fiador");
-        $('#btnSalvar').html("Salvar mudan&ccedil;as");
-
-        // (importante) renderiza cada aba uma única vez
-        $('#tabDadosFiador').html(new FiadorControle({ model: _this.modelFiador }).render().el);
-        $('#tabConjuge').html(new FiadorConjugeControle({ model: _this.modelFiador }).render().el);
-        $('#tabEndereco').html(new FiadorEnderecoControle({ model: _this.modelFiador }).render().el);
-        $('#tabContrato').html(new FiadorContatoControle({ model: _this.modelFiador }).render().el);
-
-        // Ajuste visual (igual você já fazia)
-        $('#modalBody legend').hide();
-        $('#tabFiador2,#tabFiador3,#tabFiador4').removeClass('active');
-        $('#tabFiador1').addClass('active');
-        $('#litab2').removeClass('active');
-        $('#litab1').addClass('active');
-
-        // evita “duplicar evento” quando abrir novamente
-        $("#btnSalvar").unbind("click");
-        $('#btnSalvar').click(function () {
-          if (!_this.modelFiador.isValid()) {
-            _this.mostrarErros(_this.modelFiador.validationError);
-            $('#modalBody').animate({ scrollTop: 0 }, 500);
-            return;
-          }
-          $("#btnSalvar").attr("disabled", "disabled");
-          $('#ajaxStatus').modal('show');
-          _this.salvar();
-        });
-
-        return this;
-    },
-
-	
-	salvar: function(){
-		var _this = this;
-		this.modelFiador.salvar().done().success(function(data) {
-			$("#btnSalvar").removeAttr("disabled");
-			$('#ajaxStatus').modal('hide');
-			if (data.codigo > 0) {
-				var errors = [];
-				errors.push({
-					name: data.codigo,
-					message: data.mensagem
-				});
-				_this.mostrarErros(errors);
-				$('#modalBody').animate({scrollTop: 0}, 500);
-			} else {
-				_this.model.set(_this.modelFiador.toJSON());
-				mensagemAlerta("Comando realizado com sucesso", "OK", function() {
-					$('#modalBody').html("");
-					$('#frmModal').modal('hide');
-					_this.callback(_this.modelFiador);
-				});
-			}
-		}).error(function(data) {
-			$("#btnSalvar").removeAttr("disabled");
-			$('#ajaxStatus').modal('hide');
-			var errors = [];
-			errors.push({
-				name: "1",
-				message: "Ocorreu um erro na realização do comando, tente novamente!"
-			});
-			_this.mostrarErros(errors);
-			$('#modalBody').animate({scrollTop: 0}, 500);
-		});
-		
-	},	
-
-	localizarResumo: function(codigoFies) {
-
-		this.modelFiador = new FiadorModel();
-		var self = this;
-
-		// consulta dados do contrato
-		this.model.fetch({
-			type: "GET",
-			contentType: "application/json",
-			data: $.param({
-				"codigoFies": codigoFies
-			}),
-
-			"success": function(collection, response) {
-				console.log("localizarResumo sucesso");
-				console.log(self.modelFiador);
-				self.render();
-
-			},
-			"error": function(collection, response) {
-				alert('Ocorreu um erro na consulta, tente novamente');
-			}
-		});
-	},
-
-	mostrarErros: function(errors) {
-
-		var wMsg = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">x</button>';
-
-		_.each(errors, function(error) {
-			wMsg += error.message + "</BR>";
-
-		}, this);
-
-		wMsg += '</div>';
-
-		$('#msgModal').html(wMsg);
-	}
-
-});
-
-#############################################################
-
 <div id="msgModal"></div>
-<div class="tabbable" style="margin-bottom: 18px;">
-	<ul class="nav nav-tabs">
-		<li id="litab1" class="active"><a href="#tabFiador1" data-toggle="tab">Dados do Fiador</a></li>
-		<li id="litab2"><a href="#tabFiador2" data-toggle="tab">Dados do Conjuge</a></li>
-		<li ><a href="#tabFiador3" data-toggle="tab">Endere&ccedil;o</a></li>
-		<li><a href="#tabFiador4" data-toggle="tab">Contato</a></li>
-	</ul>
 
-	<div class="tab-content"
-		style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
-		<div class="tab-pane active" id="tabDadosFiador">tab1</div>
-		<div class="tab-pane" id="tabEndereco">tab2</div>
-		<div class="tab-pane" id="tabContrato">tab3</div>
-		<div class="tab-pane" id="tabConjuge">tab4</div>
-	</div>
+<div class="tabbable" style="margin-bottom: 18px;">
+  <ul class="nav nav-tabs">
+    <li id="litab1" class="active"><a href="#tabFiador1" data-toggle="tab">Dados do Fiador</a></li>
+    <li id="litab2"><a href="#tabFiador2" data-toggle="tab">Dados do Cônjuge</a></li>
+    <li id="litab3"><a href="#tabFiador3" data-toggle="tab">Endereço</a></li>
+    <li id="litab4"><a href="#tabFiador4" data-toggle="tab">Contato</a></li>
+  </ul>
+
+  <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
+    <!-- ✅ containers vazios, sem placeholder -->
+    <div class="tab-pane active" id="tabFiador1">
+      <div id="tabDadosFiador"></div>
+    </div>
+
+    <div class="tab-pane" id="tabFiador2">
+      <div id="tabConjuge"></div>
+    </div>
+
+    <div class="tab-pane" id="tabFiador3">
+      <div id="tabEndereco"></div>
+    </div>
+
+    <div class="tab-pane" id="tabFiador4">
+      <div id="tabContato"></div>
+    </div>
+  </div>
 </div>
 
 
 
+#####################################
 
-######################################################################
+var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
 
+window.FiadorModalControle = Backbone.View.extend({
+  callback: null,
+  modelFiador: null,
 
+  initialize: function () {
+    var that = this;
+    removerMensagens();
 
-window.FiadorControle = Backbone.View.extend({
-    modelUF: null,
-	modelExpedidor: null,
-	estadosCivis : [2, 3, 4, 5, 6, 7, 9],
-	events: {
-		'blur input': 'updateModel',
-		'change select': 'updateModel',
-		"changeDate .data": "changeDate2"
-	},
+    // clone do fiador (mantém sua lógica)
+    var cloneFiador = JSON.stringify(this.model.clone());
+    this.modelFiador = new Fiador(JSON.parse(cloneFiador));
 
-	serialize: function() {
-		return {
-			title: this.$(".title").text(),
-			start: this.$(".start-page").text(),
-			end: this.$(".end-page").text()
-		};
-	},
-
-
-    getScriptLog: function (url){
-        return $.getScript(url).fail(function (xhr, status, err){
-             console.error('[getScript FAIL', url, status, err);
+    // ✅ IMPORTANTE: carregar controllers como SCRIPT
+    $.when(
+      $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorContatoControle.js')
+    )
+    .done(function () {
+      $.get(BASE_FIADOR + '/visao/FiadorModal.html')
+        .done(function (data) {
+          that.template = _.template(data);
+          that.render();
+        })
+        .fail(function (xhr) {
+          console.error('[FiadorModalControle] Falha ao carregar FiadorModal.html', xhr && xhr.status);
         });
-    },
+    })
+    .fail(function (xhr, status, err) {
+      console.error('[FiadorModalControle] Falha ao carregar controles', status, err);
+    });
+  },
 
-	initialize: function() {
-    	var that = this;
-    	console.log("initialize FiadorControle");
-    	removerMensagens();
+  render: function () {
+    // template não precisa de variáveis, ok
+    $(this.el).html(this.template({}));
+    var _this = this;
 
-        //Carregar models dependencia
-    	$.when(
-            that.getScriptLog('../fes-web/servicos/cadastro/modelo/EstadoCivil.js'),
-            that.getScriptLog('../fes-web/servicos/cadastro/modelo/RegimeBens.js'),
-            that.getScriptLog('../fes-web/servicos/cadastro/modelo/Emancipado.js')
+    $('#modalLabel').html("Dados do Fiador");
+    $('#btnSalvar').html("Salvar mudan&ccedil;as");
 
+    // ✅ injeta cada tela no container certo
+    $('#tabDadosFiador').empty().append(new FiadorControle({ model: _this.modelFiador }).el);
+    $('#tabConjuge').empty().append(new FiadorConjugeControle({ model: _this.modelFiador }).el);
+    $('#tabEndereco').empty().append(new FiadorEnderecoControle({ model: _this.modelFiador }).el);
+    $('#tabContato').empty().append(new FiadorContatoControle({ model: _this.modelFiador }).el);
 
-    	).done(function() {
+    // ⚠️ Alguns controles só montam conteúdo em render(). Se eles tiverem render(), chama:
+    try { if (typeof $('#tabDadosFiador').children().data === 'function') {} } catch(e){}
+    if (typeof _this.modelFiador !== 'undefined') {
+      if (typeof FiadorControle !== 'undefined' && FiadorControle.prototype && FiadorControle.prototype.render) {
+        $('#tabDadosFiador').html(new FiadorControle({ model: _this.modelFiador }).render().el);
+      }
+      if (typeof FiadorConjugeControle !== 'undefined' && FiadorConjugeControle.prototype && FiadorConjugeControle.prototype.render) {
+        $('#tabConjuge').html(new FiadorConjugeControle({ model: _this.modelFiador }).render().el);
+      }
+      if (typeof FiadorEnderecoControle !== 'undefined' && FiadorEnderecoControle.prototype && FiadorEnderecoControle.prototype.render) {
+        $('#tabEndereco').html(new FiadorEnderecoControle({ model: _this.modelFiador }).render().el);
+      }
+      if (typeof FiadorContatoControle !== 'undefined' && FiadorContatoControle.prototype && FiadorContatoControle.prototype.render) {
+        $('#tabContato').html(new FiadorContatoControle({ model: _this.modelFiador }).render().el);
+      }
+    }
 
-            //carregar coleções
-            $.when(
-                that.getScriptLog('../fes-web/servicos/cadastro/modelo/OrgaoExpedidorColecao.js'),
-                that.getScriptLog('../fes-web/servicos/cadastro/modelo/EstadoCivilColecao.js'),
-                that.getScriptLog('../fes-web/servicos/cadastro/modelo/RegimeBensColecao.js'),
-                that.getScriptLog('../fes-web/servicos/cadastro/modelo/EmancipadoColecao.js'),
-                that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorListControle.js'),
-                that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorEnderecoListControle.js'),
-                that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorContatoListControle.js')
+    // ✅ ativa aba 1 corretamente (IDs existem agora)
+    $('#tabFiador1').addClass('active');
+    $('#tabFiador2,#tabFiador3,#tabFiador4').removeClass('active');
+    $('#litab1').addClass('active');
+    $('#litab2,#litab3,#litab4').removeClass('active');
 
-            ).done(function() {
+    // Ajuste visual (mantido)
+    $('#modalBody legend').hide();
 
+    // salva
+    $("#btnSalvar").off("click").on("click", function () {
+      if (!_this.modelFiador.isValid()) {
+        _this.mostrarErros(_this.modelFiador.validationError);
+        $('#modalBody').animate({ scrollTop: 0 }, 500);
+        return;
+      }
+      $("#btnSalvar").attr("disabled", "disabled");
+      $('#ajaxStatus').modal('show');
+      _this.salvar();
+    });
 
-               $.get('../fes-web/servicos/contratofies/manutencaofiador/visao/Fiador.html').done(function(data) {
-                 that.template = _.template(data);
-                 that.render();
-                 loadMask();
+    return this;
+  },
 
-                 setTimeout(function () {
-                    $('#ajaxStatus').modal('hide');
-                     }, 1000);
-                 });
+  salvar: function () {
+    var _this = this;
 
-                }).fail(function (){
-                    console.error('Erro ao carregar coleções do Fiador');
-                });
-            }).fail(function (){
-               console.error('Erro ao carregar dependencia do Fiador');
-            });
+    this.modelFiador.salvar()
+      .done(function (data) {
+        $("#btnSalvar").removeAttr("disabled");
+        $('#ajaxStatus').modal('hide');
 
-    	},
+        if (data && data.codigo > 0) {
+          var errors = [{ name: data.codigo, message: data.mensagem }];
+          _this.mostrarErros(errors);
+          $('#modalBody').animate({ scrollTop: 0 }, 500);
+        } else {
+          _this.model.set(_this.modelFiador.toJSON());
+          mensagemAlerta("Comando realizado com sucesso", "OK", function () {
+            $('#modalBody').html("");
+            $('#frmModal').modal('hide');
+            if (_this.callback) _this.callback(_this.modelFiador);
+          });
+        }
+      })
+      .fail(function () {
+        $("#btnSalvar").removeAttr("disabled");
+        $('#ajaxStatus').modal('hide');
+        _this.mostrarErros([{ name: "1", message: "Ocorreu um erro na realização do comando, tente novamente!" }]);
+        $('#modalBody').animate({ scrollTop: 0 }, 500);
+      });
+  },
 
-
-	changeDate2: function (e) {
-		console.log("call -> ConsultaGenericaControle -> changeDate2");
-		console.log($('input', e.target).attr('name'));
-
-		this.model.set($('input', e.target).attr('name'), $('input', e.target).val());
-		console.log(this.model);
-	},
-
-	render: function() {
-		var _this2;
-
-		try {
-			_this2 = this.model.toJSON();
-		} catch (e) {
-			_this2 = this.model;
-		}
-
-		$(this.el).html(this.template(_this2));
-
-		this.modelUF = new UFColecao();
-		this.modelUF.buscar().done(function(collection) {
-			var wSelecionado = _this2.identidade.uf.sigla;
-			gMontaSelect("#ufIdentidadeFiador", "sigla", "sigla", collection, wSelecionado);
-		});
-		
-		if(_this2.cpf){
-			$('#cpfFiador').attr('readonly', true);
-			$('#cpfFiador').prop('readonly', true);
-		}
-		
-		$(".cpfmodal").mask("999.999.999-99").off('blur.mask').blur(function (e) {
-			var src = e.currentTarget;
-			if (src.value != '') {
-				var wRet = validarCPF(src.value); 
-				if (wRet != ''){
-					src.value = '';
-					mostrarErrors([ {
-						message : wRet
-					} ], '#msgModal');					
-				} else {
-					removerMensagens();
-				}
-			}
-		});
-
-		this.modelExpedidor = new OrgaoExpedidorColecao();
-		this.modelExpedidor.buscar().done(function(collection) {
-			var wSelecionado = _this2.identidade.orgaoExpedidor.codigo;
-			gMontaSelect("#orgaoExpedidorFiador", "codigo", "nome", collection, wSelecionado);
-		});
-
-		this.modelRegimeBens = new RegimeBensColecao();
-
-		this.modelRegimeBens.buscar().done(function(collection) {
-			var wSelecionado = _this2.regimeBens.codigo;
-			gMontaSelect("#regimeBensFiador", "codigo", "nome", collection, wSelecionado);
-		});
-
-		this.modelEstadoCivil = new EstadoCivilColecao();
-		this.modelEstadoCivil.buscar().done(function(collection) {
-			var wSelecionado = _this2.estadoCivil.codigo;
-			gMontaSelect("#estadoCivilFiador", "codigo", "nome", collection, wSelecionado);
-
-			if (wSelecionado == 2 || wSelecionado == 9) {
-				$('#litab2').show();
-				$('#regimeBensFiador').removeAttr('disabled');
-			} else {
-				$('#litab2').hide();
-				$("#regimeBensFiador").prop("selectedIndex", 0);
-				$('#regimeBensFiador').attr('disabled', 'disabled');
-			}
-		});
-
-		gCarregarPaises("#nacionalidadeFiador", _this2.nacionalidade.codigo);
-
-		if (_this2.dataNascimento == null || _this2.dataNascimento == "") {
-			_this2.dataNascimento = "01/01/1901";
-		}
-
-		var wdataNascimento = $caixa.data.converteStrToData(_this2.dataNascimento);
-		var wIdade = moment().diff(wdataNascimento, 'years');
-
-		this.modelEmancipado = new EmancipadoColecao();
-
-		this.modelEmancipado.buscar().done(function(collection) {
-			console.log("call -> ConsultaGenericaControle -> modelEmancipado");
-
-			var wSelecionado = _this2.emancipado.codigo;
-
-			gMontaSelect("#emancipadoMotivoFiador", "codigo", "nome", collection, wSelecionado);
-
-			if (wSelecionado != "") {
-				_this2.emancipado.descricao = "S";
-				$("#emancipadoFiador").prop("selectedIndex", 1);
-			} else {
-				_this2.emancipado.descricao = "N";
-				$('#emancipadoMotivoFiador').attr('disabled', 'disabled');
-			}
-
-			if ($.inArray(parseInt(_this2.estadoCivil.codigo), this.estadosCivis) > -1) {
-				_this2.emancipado.codigo = "CAS";
-				try {
-					desabilitarCampo("#emancipadoFiador", 'disabled');
-					desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
-				} catch (exception) {}
-			} else {
-				if (wIdade >= 18) {
-					$("#emancipadoFiador").val("S");
-
-					_this2.emancipado.codigo = "MAI";
-
-					desabilitarCampo("#emancipadoFiador", 'disabled');
-					desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
-				}
-			}
-
-			$('#emancipadoMotivoFiador').val(_this2.emancipado.codigo);
-
-		});
-
-		this.combo = new Combo();
-		this.combo.set('dominioCombo', 56);
-		this.combo.set('filtroNumerico', _this2.codigoProfissao);
-
-		$fes.post('../fes-web/emprest/consultas/carregarCombo', this.combo, function sucesso(data) {
-			if (data.listaRetorno.length > 0) {
-				$("#profissao").val(data.listaRetorno[0].descricao);
-			}
-		});
-
-		var _self = this;
-		$("#profissao").autocomplete({
-			matchContains: true,
-			max: 50,
-			minLength: 3,
-			appendTo: $("#exportOrder"),
-			source: function(request, response) {
-				this.combo = new Combo();
-				this.combo.set('dominioCombo', 56);
-				this.combo.set('filtroTextual', request.term);
-
-				$fes.post('../fes-web/emprest/consultas/carregarCombo', this.combo, function sucesso(data) {
-
-					response($.map(data.listaRetorno, function(item) {
-						return {
-							value: item.identificadorNumerico,
-							label: item.descricao
-						}
-					}));
-				});
-			},
-			messages: {
-				noResults: '',
-				results: function() {}
-			},
-
-			select: function(event, ui) {
-				console.log("call -> ConsultaGenericaControle -> select");
-				event.preventDefault();
-				_self.model.set("codigoProfissao", ui.item.value);
-				$(event.target).val(ui.item.label);
-			},
-			focus: function(event, ui) {
-				console.log("call -> ConsultaGenericaControle -> focus");
-				event.preventDefault();
-				$(event.target).val(ui.item.label);
-			},
-
-			open: function() {
-				$(this).removeClass("ui-corner-all").addClass("ui-corner-top");
-			},
-			close: function() {
-				$(this).removeClass("ui-corner-top").addClass("ui-corner-all");
-			},
-			change: function(event, ui) {
-				console.log("call -> ConsultaGenericaControle -> change");
-				if (!ui.item) {
-					$(event.target).val("");
-					_self.model.set("codigoProfissao", "");
-				}
-			}
-		});
-
-		window.setTimeout(function() {
-			loadMask();
-		}, 500);
-
-		return this;
-	},
-
-	updateModel: function(el) {
-		// funcao de chamada dos inputs
-		console.log("call -> updateModel");
-
-		var $el = $(el.target);
-		var name = $el.attr('name');
-
-		if (name != undefined) {
-			console.log("call -> updateModel -> undefined");
-			this.model.set(name, $el.val());
-		}
-
-		this.model.set("cpf", purificaAtributo($("#cpfFiador").val()));
-
-		// ----------------------------------------------------------------------------
-		var wEc = this.model.get("estadoCivil");
-		wEc.codigo = $("#estadoCivilFiador").val();
-		wEc.nome = $("#estadoCivilFiador option:selected").text();
-
-		if (wEc.codigo == 2 || wEc.codigo == 9) {
-			$('#litab2').show();
-			$('#regimeBensFiador').removeAttr('disabled');
-		} else {
-			$('#litab2').hide();
-			$("#regimeBensFiador").prop("selectedIndex", 0);
-			$('#regimeBensFiador').attr('disabled', 'disabled');
-		}
-
-		var wRb = this.model.get("regimeBens");
-		wRb.codigo = $("#regimeBensFiador").val();
-		wRb.nome = $("#regimeBensFiador option:selected").text();
-
-		var wId = {
-			identidade: $("#identidadeFiador").val(),
-			orgaoExpedidor: {
-				codigo: $("#orgaoExpedidorFiador").val(),
-				nome: $("#orgaoExpedidorFiador option:selected").text()
-			},
-			dataExpedicaoIdentidade: $("#dataExpedicaoIdentidadeFiador").val(),
-
-			uf: {
-				sigla: $("#ufIdentidadeFiador").val(),
-				descricao: $("#ufIdentidadeFiador").val()
-			}
-		};
-
-		this.model.set("identidade", wId);
-		var wEm = this.model.get("emancipado");
-
-		if ($("#emancipadoFiador").val() == "N") {
-			wEm.codigo = "";
-			wEm.descricao = "N";
-			$('#emancipadoMotivoFiador').attr('disabled', 'disabled');
-			$("#emancipadoMotivoFiador").prop("selectedIndex", 0);
-		} else {
-			wEm.codigo = $('#emancipadoMotivoFiador').val();
-			wEm.descricao = "S";
-			$('#emancipadoMotivoFiador').removeAttr('disabled');
-		}
-
-		var wNas = this.model.get("nacionalidade");
-
-		wNas.codigo = $("#nacionalidadeFiador").val();
-		wNas.nome = $("#nacionalidadeFiador option:selected").text();
-
-		var wRenda = $("#rendaMensalFiador").val();
-		this.model.set("valorRendaMensal", purificaMoeda(wRenda));
-
-		if(el.currentTarget.id != "emancipadoFiador" && el.currentTarget.id != "emancipadoMotivoFiador"){
-			var wIdade = 1;
-			if (!(this.model.get("dataNascimento") == null || this.model.get("dataNascimento") == "")) {
-				var wdataNascimento = $caixa.data.converteStrToData(this.model.get("dataNascimento"));
-				wIdade = (new Date()).differenceInYears(wdataNascimento);
-			}
-	
-			if (($.inArray(parseInt(wEc.codigo), this.estadosCivis) > -1) && wEc.codigo != 9) {
-				console.log("call -> updateModel -> casado2");
-				wEm.codigo = "CAS";
-				$("#emancipadoFiador").val("S");
-				$('#emancipadoMotivoFiador').val(wEm.codigo);
-			} else if(wEc.codigo == 9){
-				console.log("call -> updateModel ->  uniao estavel");
-				wEm.codigo = "MAI";
-				$("#emancipadoFiador").val("S");
-				$('#emancipadoMotivoFiador').val("MAI");
-			} else {
-				if (wIdade >= 18) {
-					console.log("call -> updateModel ->  18");
-					wEm.codigo = "MAI";
-					$("#emancipadoFiador").val("S");
-					$('#emancipadoMotivoFiador').val("MAI");
-				}
-			}
-
-			if ($.inArray(parseInt(wEc.codigo), [1, 9]) > -1 && wIdade < 18) {
-				$('#emancipadoFiador').removeAttr('disabled');
-				$('#emancipadoFiador').val("N");
-				$('#emancipadoMotivoFiador').removeAttr('disabled');
-				wEm.codigo = "";
-				wEm.descricao = "N";
-				$('#emancipadoMotivoFiador').attr('disabled', 'disabled');
-				$('#emancipadoMotivoFiador').val("");
-				if ($("#emancipadoFiador").val() != "N")
-					$('#emancipadoMotivoFiador').removeAttr('disabled');
-			} else {
-				desabilitarCampo("#emancipadoFiador", 'disabled');
-				desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
-			}
-		}
-
-	},
-
-	hideErrors: function() {
-		$('#msgModal').html("");
-	}
+  mostrarErros: function (errors) {
+    var wMsg = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">x</button>';
+    _.each(errors || [], function (error) {
+      wMsg += (error.message || '') + "</BR>";
+    });
+    wMsg += '</div>';
+    $('#msgModal').html(wMsg);
+  }
 });
+
+
+
+#####################################
