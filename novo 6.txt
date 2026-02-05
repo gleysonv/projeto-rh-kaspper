@@ -6,10 +6,11 @@ window.FiadorModalControle = Backbone.View.extend({
 
   initialize: function () {
     var that = this;
+    removerMensagens();
 
-    // garante clone (evita mexer no model original)
-    var cloneFiador = JSON.stringify(this.model.toJSON ? this.model.toJSON() : this.model);
-    that.modelFiador = new Fiador(JSON.parse(cloneFiador));
+    // clona o fiador recebido
+    var cloneFiador = JSON.stringify(this.model.clone());
+    this.modelFiador = new Fiador(JSON.parse(cloneFiador));
 
     $.when(
       $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
@@ -23,72 +24,83 @@ window.FiadorModalControle = Backbone.View.extend({
         that.render();
       });
 
-    }).fail(function (xhr, status, err) {
-      console.error('[FiadorModalControle] FAIL carregar deps', status, err);
+    }).fail(function () {
+      console.error('FiadorModalControle: falha ao carregar controles das abas');
     });
   },
 
   render: function () {
-    // renderiza o "esqueleto" das abas
-    $(this.el).html(this.template());
+    $(this.el).html(this.template(this.modelFiador.toJSON()));
 
     var _this = this;
 
-    // LIMPA e instancia subviews apontando pro EL da aba
+    $('#modalLabel').html("Dados do Fiador");
+    $('#btnSalvar').html("Salvar mudan&ccedil;as");
+
+    // ✅ IMPORTANTE: NÃO chamar .render() manualmente (eles renderizam depois que carregam template)
     $('#tabDadosFiador').empty();
+    new FiadorControle({ el: $('#tabDadosFiador'), model: _this.modelFiador });
+
     $('#tabConjuge').empty();
+    new FiadorConjugeControle({ el: $('#tabConjuge'), model: _this.modelFiador });
+
     $('#tabEndereco').empty();
-    $('#tabContato').empty();
+    new FiadorEnderecoControle({ el: $('#tabEndereco'), model: _this.modelFiador });
 
-    new FiadorControle({
-      el: $('#tabDadosFiador'),
-      model: _this.modelFiador
+    $('#tabContrato').empty();
+    new FiadorContatoControle({ el: $('#tabContrato'), model: _this.modelFiador });
+
+    // ajuste visual
+    $('#modalBody legend').hide();
+
+    $("#btnSalvar").unbind("click");
+    $('#btnSalvar').click(function () {
+      if (!_this.modelFiador.isValid()) {
+        _this.mostrarErros(_this.modelFiador.validationError);
+        $('#modalBody').animate({ scrollTop: 0 }, 500);
+        return;
+      }
+
+      $("#btnSalvar").attr("disabled", "disabled");
+      $('#ajaxStatus').modal('show');
+      _this.salvar();
     });
-
-    new FiadorConjugeControle({
-      el: $('#tabConjuge'),
-      model: _this.modelFiador
-    });
-
-    new FiadorEnderecoControle({
-      el: $('#tabEndereco'),
-      model: _this.modelFiador
-    });
-
-    new FiadorContatoControle({
-      el: $('#tabContato'),
-      model: _this.modelFiador
-    });
-
-    // título/botão (se existirem no modal “pai”)
-    if ($('#modalLabel').length) $('#modalLabel').html('Dados do Fiador');
-    if ($('#btnSalvar').length) $('#btnSalvar').html('Salvar mudanças');
 
     return this;
+  },
+
+  salvar: function () {
+    var _this = this;
+
+    this.modelFiador.salvar().done().success(function (data) {
+      $("#btnSalvar").removeAttr("disabled");
+      $('#ajaxStatus').modal('hide');
+
+      if (data.codigo > 0) {
+        _this.mostrarErros([{ name: data.codigo, message: data.mensagem }]);
+        $('#modalBody').animate({ scrollTop: 0 }, 500);
+      } else {
+        _this.model.set(_this.modelFiador.toJSON());
+        mensagemAlerta("Comando realizado com sucesso", "OK", function () {
+          $('#modalBody').html("");
+          $('#frmModal').modal('hide');
+          if (_this.callback) _this.callback(_this.modelFiador);
+        });
+      }
+    }).error(function () {
+      $("#btnSalvar").removeAttr("disabled");
+      $('#ajaxStatus').modal('hide');
+      _this.mostrarErros([{ name: "1", message: "Ocorreu um erro na realização do comando, tente novamente!" }]);
+      $('#modalBody').animate({ scrollTop: 0 }, 500);
+    });
+  },
+
+  mostrarErros: function (errors) {
+    var wMsg = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">x</button>';
+    _.each(errors, function (error) {
+      wMsg += error.message + "</BR>";
+    });
+    wMsg += '</div>';
+    $('#msgModal').html(wMsg);
   }
 });
-
-
-
-
-
-############################
-
-
-<div id="msgModal"></div>
-
-<div class="tabbable" style="margin-bottom: 18px;">
-  <ul class="nav nav-tabs">
-    <li class="active"><a href="#tabDadosFiador" data-toggle="tab">Dados do Fiador</a></li>
-    <li><a href="#tabConjuge" data-toggle="tab">Dados do Cônjuge</a></li>
-    <li><a href="#tabEndereco" data-toggle="tab">Endereço</a></li>
-    <li><a href="#tabContato" data-toggle="tab">Contato</a></li>
-  </ul>
-
-  <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
-    <div class="tab-pane active" id="tabDadosFiador"></div>
-    <div class="tab-pane" id="tabConjuge"></div>
-    <div class="tab-pane" id="tabEndereco"></div>
-    <div class="tab-pane" id="tabContato"></div>
-  </div>
-</div>
