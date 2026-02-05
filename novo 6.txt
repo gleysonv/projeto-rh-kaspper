@@ -4,9 +4,6 @@ window.ConsultaFiadorControle = Backbone.View.extend({
 
   urlTemplate: BASE_FIADOR + '/visao/ConsultaBaseFiador.html',
 
-  // estado interno do front (pra excluir e re-renderizar)
-  _fiadores: [],
-
   events: {
     "click a#btnLimpar": "limpar",
     "click a#btnConsultar": "consultar",
@@ -23,9 +20,9 @@ window.ConsultaFiadorControle = Backbone.View.extend({
     var that = this;
     removerMensagens();
 
-    // GARANTE execução (não use $.get para JS)
+    // Pré-carrega o básico (não bloqueia, mas ajuda)
     $.getScript(BASE_FIADOR + '/modelo/Fiador.js');
-    $.getScript(BASE_FIADOR + '/controle/FiadorControle.js');
+    $.getScript(BASE_FIADOR + '/controle/FiadorModalControle.js');
 
     $.get(this.urlTemplate).done(function (data) {
       that.template = _.template(data);
@@ -43,15 +40,14 @@ window.ConsultaFiadorControle = Backbone.View.extend({
   },
 
   change: function (e) {
-    var ch = {};
-    ch[e.target.name] = e.target.value;
-    this.model.set(ch);
+    var obj = {};
+    obj[e.target.name] = e.target.value;
+    this.model.set(obj);
   },
 
   validarCpf: function (e) {
     removerMensagens();
     var cpf = purificaAtributo(e.target.value);
-
     if (cpf !== '') {
       var msg = validarCPF(cpf);
       if (msg !== '') {
@@ -66,8 +62,6 @@ window.ConsultaFiadorControle = Backbone.View.extend({
     removerMensagens();
     limparFormulario('#formFiltroConsulta');
     if (this.model && this.model.initialize) this.model.initialize();
-
-    this._fiadores = [];
     $('#divResultado').hide('slow');
     $('#tbResultadoFiadores tbody').empty();
   },
@@ -85,6 +79,7 @@ window.ConsultaFiadorControle = Backbone.View.extend({
 
     $('#divResultado').hide('slow');
     removerMensagens();
+
     this.model.set('cpf', purificaAtributo(this.model.get('cpf')));
 
     if (!this.validar()) return;
@@ -98,7 +93,7 @@ window.ConsultaFiadorControle = Backbone.View.extend({
           return mostrarErrors([{ message: data.mensagem }]);
         }
 
-        // MOCK para testar visual
+        // MOCK p/ testar visual
         if (!data) data = {};
         if (!data.fiadores && !data.listaFiadores) {
           data.fiadores = [
@@ -107,21 +102,23 @@ window.ConsultaFiadorControle = Backbone.View.extend({
           ];
         }
 
-        that._fiadores = (data.fiadores || data.listaFiadores || []);
-        that.renderTabelaFiadores(that._fiadores);
-
+        that.renderTabelaFiadores(data.fiadores || data.listaFiadores || []);
         $('#divResultado').show('slow');
         $('#ajaxStatus').modal('hide');
       })
       .fail(function () {
-        that._fiadores = [
-          { numeroContrato: '24.0340.185.0000061/47', cpfFiador: '00000000000', nomeFiador: 'CARLOS GAR', dataNascimento: '04/11/1999' }
-        ];
-        that.renderTabelaFiadores(that._fiadores);
+        var mock = {
+          fiadores: [
+            { numeroContrato: '24.0340.185.0000061/47', cpfFiador: '00000000000', nomeFiador: 'CARLOS GAR', dataNascimento: '04/11/1999' }
+          ]
+        };
+        that.renderTabelaFiadores(mock.fiadores);
         $('#divResultado').show('slow');
         $('#ajaxStatus').modal('hide');
       });
   },
+
+  // ---------- PASSO 2 (Ações) ----------
 
   renderTabelaFiadores: function (fiadores) {
     var $tbody = $('#tbResultadoFiadores tbody');
@@ -136,17 +133,22 @@ window.ConsultaFiadorControle = Backbone.View.extend({
 
     var that = this;
 
-    _.each(fiadores, function (f, idx) {
+    _.each(fiadores, function (f) {
+      var numeroContrato = (f.numeroContrato || f.nuContratoFormatado || '');
+      var cpfFiador = (f.cpfFiador || f.coCpfFiador || '');
+      var nomeFiador = (f.nomeFiador || f.noFiador || '');
+      var dtNasc = (f.dataNascimento || f.dtNascimento || '');
+
       var tr =
-        '<tr data-idx="' + idx + '">' +
-        ' <td>' + (f.numeroContrato || f.nuContratoFormatado || '') + '</td>' +
-        ' <td>' + (f.cpfFiador ? mascararCpf(f.cpfFiador) : '') + '</td>' +
-        ' <td>' + (f.nomeFiador || f.noFiador || '') + '</td>' +
-        ' <td>' + (f.dataNascimento || f.dtNascimento || '') + '</td>' +
-        ' <td>' +
-        '   <a href="#" class="btn btn-mini btn-primary btnAlterarFiadorRow">Alterar</a> ' +
-        '   <a href="#" class="btn btn-mini btn-danger btnExcluirFiadorRow">Excluir</a>' +
-        ' </td>' +
+        '<tr>' +
+          '<td>' + numeroContrato + '</td>' +
+          '<td>' + (cpfFiador ? mascararCpf(cpfFiador) : '') + '</td>' +
+          '<td>' + nomeFiador + '</td>' +
+          '<td>' + dtNasc + '</td>' +
+          '<td>' +
+            '<a href="#" class="btn btn-mini btn-primary btnAlterarFiadorRow">Alterar</a> ' +
+            '<a href="#" class="btn btn-mini btn-danger btnExcluirFiadorRow">Excluir</a>' +
+          '</td>' +
         '</tr>';
 
       var $tr = $(tr);
@@ -158,75 +160,92 @@ window.ConsultaFiadorControle = Backbone.View.extend({
 
       $tr.find('.btnExcluirFiadorRow').click(function (e) {
         e.preventDefault();
-        that.excluirFiador(idx, f);
+        that.excluirFiador(f, $tr);
       });
 
       $tbody.append($tr);
     });
   },
 
-  // ✅ Novo fiador (leva para tela de cadastro, não modal)
+  excluirFiador: function (fiadorRow, $tr) {
+    removerMensagens();
+
+    if (!confirm('Confirma a exclusão do fiador selecionado?')) return;
+
+    // 1) Visual (sempre funciona)
+    // 2) Backend (liga quando tiver endpoint certo)
+    //    Exemplo: criar Fiador, setar url excluir, setar cpf/codigoFies e chamar salvar()
+
+    try {
+      // Se você tiver cpf e codigoFies, dá pra tentar chamar o backend:
+      // var m = new Fiador();
+      // m.url = "../fes-web/emprest/fiador/excluir";
+      // m.set("cpf", fiadorRow.cpfFiador || "");
+      // m.set("codigoFies", this.model.get("codigoFiesConsulta") || 0);
+      // $('#ajaxStatus').modal('show');
+      // m.salvar()
+      //   .done(function(){ $tr.remove(); $('#ajaxStatus').modal('hide'); })
+      //   .fail(function(){ $('#ajaxStatus').modal('hide'); alert('Falha ao excluir no backend.'); });
+
+      // Por enquanto, remove só na tela:
+      $tr.remove();
+    } catch (err) {
+      console.log(err);
+      alert('Falha ao excluir.');
+    }
+  },
+
+  alterarFiador: function (fiadorRow) {
+    // abre a tela de cadastro com abas e tenta preencher o que tiver
+    var model = new Fiador();
+
+    // Preenche o que vier no resultado (se existir)
+    if (fiadorRow.cpfFiador) model.set("cpf", fiadorRow.cpfFiador);
+    if (fiadorRow.nomeFiador) model.set("nome", fiadorRow.nomeFiador);
+    if (fiadorRow.dataNascimento) model.set("dataNascimento", fiadorRow.dataNascimento);
+
+    // ajuda: se sua consulta tem codigoFiesConsulta, reaproveita
+    var cod = this.model.get("codigoFiesConsulta");
+    if (cod) model.set("codigoFies", cod);
+
+    this.abrirTelaCadastroFiador(model, "alterar");
+  },
+
   novoFiador: function (e) {
     if (e) e.preventDefault();
-    removerMensagens();
-    this._abrirCadastroFiador({ modo: 'incluir', fiadorRow: null });
+    var model = new Fiador();
+
+    var cod = this.model.get("codigoFiesConsulta");
+    if (cod) model.set("codigoFies", cod);
+
+    this.abrirTelaCadastroFiador(model, "incluir");
   },
 
-  // ✅ Alterar (leva para tela de cadastro com "modo alterar")
-  alterarFiador: function (fiadorRow) {
+  // ---------- PASSO 3 (abre a tela de abas corretamente) ----------
+  abrirTelaCadastroFiador: function (modelFiador, modo) {
     removerMensagens();
-    this._abrirCadastroFiador({ modo: 'alterar', fiadorRow: fiadorRow });
-  },
-
-  // ✅ Excluir (confirma + remove da tabela — front testável)
-  excluirFiador: function (idx, fiadorRow) {
-    removerMensagens();
-
-    var nome = (fiadorRow && (fiadorRow.nomeFiador || fiadorRow.noFiador)) ? (fiadorRow.nomeFiador || fiadorRow.noFiador) : 'o fiador';
-    if (!confirm('Confirma excluir ' + nome + '?')) return;
-
-    // Se tiver endpoint depois, você troca aqui por chamada backend.
-    // Por enquanto remove da lista local:
-    this._fiadores.splice(idx, 1);
-    this.renderTabelaFiadores(this._fiadores);
-
-    mensagemAlerta('Fiador excluído com sucesso.', 'OK');
-  },
-
-  // 🔧 helper: abre a tela de cadastro carregando as dependências
-  _abrirCadastroFiador: function (opts) {
-    var modo = opts.modo; // incluir | alterar
-    var fiadorRow = opts.fiadorRow;
 
     $.when(
       $.getScript(BASE_FIADOR + '/modelo/Fiador.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorModalControle.js'),
       $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoListControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorContatoListControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeListControle.js')
+      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorContatoControle.js')
     )
     .done(function () {
-
-      // cria model com defaults do Fiador.js
-      var modelFiador = new Fiador();
-
-      // se for alteração, pré-popula o mínimo (se existir backend, aqui você faz fetch)
-      if (modo === 'alterar' && fiadorRow) {
-        if (fiadorRow.cpfFiador) modelFiador.set('cpf', fiadorRow.cpfFiador);
-        if (fiadorRow.numeroContrato) modelFiador.set('numeroContrato', fiadorRow.numeroContrato);
-
-        // se você tiver um endpoint de detalhe: modelFiador.fetch({data: ...}) e só renderiza no done
-      }
-
+      // Renderiza o "container com abas" (FiadorModalControle),
+      // e ele mesmo injeta os formulários dentro de cada aba
       $('#container').html(
-        new FiadorControle({
+        new FiadorModalControle({
+          el: $('#container'),
           model: modelFiador,
-          modo: modo,
-          origem: 'consulta'
+          modo: modo
         }).el
       );
     })
-    .fail(function () {
+    .fail(function (xhr, status, err) {
+      console.log("[abrirTelaCadastroFiador] FAIL", status, err);
       alert('Erro ao carregar a tela de cadastro do fiador.');
     });
   },
@@ -249,37 +268,33 @@ window.ConsultaFiadorControle = Backbone.View.extend({
 
 
 
-###############################
+
+
+##################################
+
 
 <div id="msgModal"></div>
 
 <div class="tabbable" style="margin-bottom: 18px;">
   <ul class="nav nav-tabs">
-    <li id="litab1" class="active">
-      <a href="#tabDadosFiador" data-toggle="tab">Dados do Fiador</a>
-    </li>
-    <li id="litab2">
-      <a href="#tabConjuge" data-toggle="tab">Dados do Conjuge</a>
-    </li>
-    <li id="litab3">
-      <a href="#tabEndereco" data-toggle="tab">Endere&ccedil;o</a>
-    </li>
-    <li id="litab4">
-      <a href="#tabContrato" data-toggle="tab">Contato</a>
-    </li>
+    <li id="litab1" class="active"><a href="#tabDadosFiador" data-toggle="tab">Dados do Fiador</a></li>
+    <li id="litab2"><a href="#tabConjuge" data-toggle="tab">Dados do Conjuge</a></li>
+    <li id="litab3"><a href="#tabEndereco" data-toggle="tab">Endere&ccedil;o</a></li>
+    <li id="litab4"><a href="#tabContato" data-toggle="tab">Contato</a></li>
   </ul>
 
   <div class="tab-content" style="padding-bottom: 9px; border-bottom: 1px solid #ddd;">
     <div class="tab-pane active" id="tabDadosFiador"></div>
     <div class="tab-pane" id="tabConjuge"></div>
     <div class="tab-pane" id="tabEndereco"></div>
-    <div class="tab-pane" id="tabContrato"></div>
+    <div class="tab-pane" id="tabContato"></div>
   </div>
 </div>
 
 
 
-##############################################
+
+######################################
 
 
 
@@ -292,9 +307,7 @@ window.FiadorModalControle = Backbone.View.extend({
 
   initialize: function () {
     var that = this;
-    removerMensagens();
 
-    // clona o fiador recebido
     var cloneFiador = JSON.stringify(this.model.clone());
     this.modelFiador = new Fiador(JSON.parse(cloneFiador));
 
@@ -304,83 +317,26 @@ window.FiadorModalControle = Backbone.View.extend({
       $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoControle.js'),
       $.getScript(BASE_FIADOR + '/controle/FiadorContatoControle.js')
     ).done(function () {
-
       $.get(BASE_FIADOR + '/visao/FiadorModal.html').done(function (data) {
         that.template = _.template(data);
         that.render();
       });
-
-    }).fail(function () {
-      console.error('FiadorModalControle: falha ao carregar controles das abas');
     });
   },
 
   render: function () {
-    // IMPORTANTÍSSIMO: os IDs do HTML precisam bater com o FiadorModal.html corrigido
-    $(this.el).html(this.template(this.modelFiador.toJSON()));
+    $(this.el).html(this.template(this.modelFiador));
 
     var _this = this;
 
-    $('#modalLabel').html("Dados do Fiador");
-    $('#btnSalvar').html("Salvar mudan&ccedil;as");
-
-    // Preenche panes (IDs do FiadorModal.html)
+    // injeta os formulários dentro das abas
     $('#tabDadosFiador').html(new FiadorControle({ model: _this.modelFiador }).render().el);
     $('#tabConjuge').html(new FiadorConjugeControle({ model: _this.modelFiador }).render().el);
     $('#tabEndereco').html(new FiadorEnderecoControle({ model: _this.modelFiador }).render().el);
-    $('#tabContrato').html(new FiadorContatoControle({ model: _this.modelFiador }).render().el);
-
-    // Ajuste visual
-    $('#modalBody legend').hide();
-
-    $("#btnSalvar").unbind("click");
-    $('#btnSalvar').click(function () {
-      if (!_this.modelFiador.isValid()) {
-        _this.mostrarErros(_this.modelFiador.validationError);
-        $('#modalBody').animate({ scrollTop: 0 }, 500);
-        return;
-      }
-
-      $("#btnSalvar").attr("disabled", "disabled");
-      $('#ajaxStatus').modal('show');
-      _this.salvar();
-    });
+    $('#tabContato').html(new FiadorContatoControle({ model: _this.modelFiador }).render().el);
 
     return this;
-  },
-
-  salvar: function () {
-    var _this = this;
-
-    this.modelFiador.salvar().done().success(function (data) {
-      $("#btnSalvar").removeAttr("disabled");
-      $('#ajaxStatus').modal('hide');
-
-      if (data.codigo > 0) {
-        _this.mostrarErros([{ name: data.codigo, message: data.mensagem }]);
-        $('#modalBody').animate({ scrollTop: 0 }, 500);
-      } else {
-        _this.model.set(_this.modelFiador.toJSON());
-        mensagemAlerta("Comando realizado com sucesso", "OK", function () {
-          $('#modalBody').html("");
-          $('#frmModal').modal('hide');
-          if (_this.callback) _this.callback(_this.modelFiador);
-        });
-      }
-    }).error(function () {
-      $("#btnSalvar").removeAttr("disabled");
-      $('#ajaxStatus').modal('hide');
-      _this.mostrarErros([{ name: "1", message: "Ocorreu um erro na realização do comando, tente novamente!" }]);
-      $('#modalBody').animate({ scrollTop: 0 }, 500);
-    });
-  },
-
-  mostrarErros: function (errors) {
-    var wMsg = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">x</button>';
-    _.each(errors, function (error) {
-      wMsg += error.message + "</BR>";
-    });
-    wMsg += '</div>';
-    $('#msgModal').html(wMsg);
   }
 });
+
+
