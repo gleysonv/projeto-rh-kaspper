@@ -1,14 +1,7 @@
-buscar: function () {
-  var cpf = purificaAtributo(this.attributes.cpf);
-  var codigoFies = purificaAtributo(this.attributes.codigoFiesConsulta); // aqui é o input do form
-
-  var params = {};
-  if (cpf) params.cpf = cpf;
-  if (codigoFies) params.codigoFies = codigoFies;   // <-- NOME QUE O BACKEND ESPERA
-
-  return this.fetch({
-    type: 'GET',
-    data: $.param(params),
-    cache: false
-  });
-}
+				 call FES.FESSP943_CONTRATO_CONSULTA ( ?, :1, :2, :3, :4, :5) 
+				 
+				 		qr.setParameter("1", 4);
+		qr.setParameter("2", usuario);
+		qr.setParameter("3", "");
+		qr.setParameter("4", codigoFies);
+		qr.setParameter("5", 0);
