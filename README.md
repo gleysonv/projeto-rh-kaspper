@@ -2,7 +2,6 @@
 
 var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
 
-
 window.ConsultaFiadorControle = Backbone.View.extend({
 
   urlTemplate: BASE_FIADOR + '/visao/ConsultaBaseFiador.html',
@@ -95,19 +94,24 @@ window.ConsultaFiadorControle = Backbone.View.extend({
 
         console.log('[consultarFiadores] retorno =', data);
 
-        // se o backend devolve "mensagem" quando dá erro de regra
+        // quando backend devolve mensagem de regra
         if (data && data.mensagem) {
           return mostrarErrors([{ message: data.mensagem }]);
         }
 
-        // tenta achar a lista no payload (robusto)
-        var lista =
-          (data && data.listaFiadores) ||
-          (data && data.fiadores) ||
-          (data && data.listaRetorno) ||
-          (data && data.retorno && data.retorno.listaRetorno) ||
-          (data && data.objeto && data.objeto.listaRetorno) ||
-          [];
+        // ✅ NORMALIZA: backend pode devolver ARRAY direto (seu caso)
+        var lista = [];
+        if ($.isArray(data)) {
+          lista = data;
+        } else if (data) {
+          lista =
+            data.listaFiadores ||
+            data.fiadores ||
+            data.listaRetorno ||
+            (data.retorno && data.retorno.listaRetorno) ||
+            (data.objeto && data.objeto.listaRetorno) ||
+            [];
+        }
 
         that.renderTabelaFiadores(lista);
         $('#divResultado').show('slow');
@@ -117,11 +121,12 @@ window.ConsultaFiadorControle = Backbone.View.extend({
         console.error('[listarFiadores] FAIL', xhr && xhr.status, xhr && xhr.responseText);
 
         mostrarErrors([{
-          message: 'Falha ao consultar fiadores. Verifique Network > Response (endpoint /fiador/consultaFiadores).'
+          message: 'Falha ao consultar fiadores. Verifique Network > Response.'
         }]);
       });
   },
-  // ---------- PASSO 2 (Ações) ----------
+
+  // ---------- TABELA ----------
 
   renderTabelaFiadores: function (fiadores) {
     var $tbody = $('#tbResultadoFiadores tbody');
@@ -137,17 +142,19 @@ window.ConsultaFiadorControle = Backbone.View.extend({
     var that = this;
 
     _.each(fiadores, function (f) {
-      var numeroContrato = (f.numeroContrato || f.nuContratoFormatado || '');
-      var cpfFiador = (f.cpfFiador || f.coCpfFiador || '');
-      var nomeFiador = (f.nomeFiador || f.noFiador || '');
-      var dtNasc = (f.dataNascimento || f.dtNascimento || '');
+
+      // ✅ MAPEAMENTO ROBUSTO (para bater com o que o backend devolver)
+      var numeroContrato = (f.numeroContrato || f.nuContratoFormatado || f.contrato || f.nuContrato || '');
+      var cpfFiador      = (f.cpfFiador || f.coCpfFiador || f.cpf || f.cpfCandidato || '');
+      var nomeFiador     = (f.nomeFiador || f.noFiador || f.nome || f.nomeCandidato || '');
+      var dtNasc         = (f.dataNascimento || f.dtNascimento || f.dataNasc || f.dtNasc || '');
 
       var tr =
         '<tr>' +
-          '<td>' + numeroContrato + '</td>' +
+          '<td>' + (numeroContrato || '') + '</td>' +
           '<td>' + (cpfFiador ? mascararCpf(cpfFiador) : '') + '</td>' +
-          '<td>' + nomeFiador + '</td>' +
-          '<td>' + dtNasc + '</td>' +
+          '<td>' + (nomeFiador || '') + '</td>' +
+          '<td>' + (dtNasc || '') + '</td>' +
           '<td>' +
             '<a href="#" class="btn btn-mini btn-primary btnAlterarFiadorRow">Alterar</a> ' +
             '<a href="#" class="btn btn-mini btn-danger btnExcluirFiadorRow">Excluir</a>' +
@@ -175,21 +182,7 @@ window.ConsultaFiadorControle = Backbone.View.extend({
 
     if (!confirm('Confirma a exclusão do fiador selecionado?')) return;
 
-    // 1) Visual (sempre funciona)
-    // 2) Backend (liga quando tiver endpoint certo)
-    //    Exemplo: criar Fiador, setar url excluir, setar cpf/codigoFies e chamar salvar()
-
     try {
-      // Se você tiver cpf e codigoFies, dá pra tentar chamar o backend:
-      // var m = new Fiador();
-      // m.url = "../fes-web/emprest/fiador/excluir";
-      // m.set("cpf", fiadorRow.cpfFiador || "");
-      // m.set("codigoFies", this.model.get("codigoFiesConsulta") || 0);
-      // $('#ajaxStatus').modal('show');
-      // m.salvar()
-      //   .done(function(){ $tr.remove(); $('#ajaxStatus').modal('hide'); })
-      //   .fail(function(){ $('#ajaxStatus').modal('hide'); alert('Falha ao excluir no backend.'); });
-
       // Por enquanto, remove só na tela:
       $tr.remove();
     } catch (err) {
@@ -199,15 +192,19 @@ window.ConsultaFiadorControle = Backbone.View.extend({
   },
 
   alterarFiador: function (fiadorRow) {
-    // abre a tela de cadastro com abas e tenta preencher o que tiver
     var model = new Fiador();
 
-    // Preenche o que vier no resultado (se existir)
-    if (fiadorRow.cpfFiador) model.set("cpf", fiadorRow.cpfFiador);
-    if (fiadorRow.nomeFiador) model.set("nome", fiadorRow.nomeFiador);
-    if (fiadorRow.dataNascimento) model.set("dataNascimento", fiadorRow.dataNascimento);
+    // ✅ pega CPF mesmo quando vem como "cpf"
+    var cpf = (fiadorRow.cpfFiador || fiadorRow.coCpfFiador || fiadorRow.cpf || '');
+    if (cpf) model.set("cpf", cpf);
 
-    // ajuda: se sua consulta tem codigoFiesConsulta, reaproveita
+    var nome = (fiadorRow.nomeFiador || fiadorRow.noFiador || fiadorRow.nome || '');
+    if (nome) model.set("nome", nome);
+
+    var dt = (fiadorRow.dataNascimento || fiadorRow.dtNascimento || fiadorRow.dataNasc || '');
+    if (dt) model.set("dataNascimento", dt);
+
+    // reaproveita codigoFiesConsulta
     var cod = this.model.get("codigoFiesConsulta");
     if (cod) model.set("codigoFies", cod);
 
@@ -224,7 +221,6 @@ window.ConsultaFiadorControle = Backbone.View.extend({
     this.abrirTelaCadastroFiador(model, "incluir");
   },
 
-  // ---------- PASSO 3 (abre a tela de abas corretamente) ----------
   abrirTelaCadastroFiador: function (modelFiador, modo) {
     removerMensagens();
 
@@ -237,8 +233,6 @@ window.ConsultaFiadorControle = Backbone.View.extend({
       $.getScript(BASE_FIADOR + '/controle/FiadorContatoControle.js')
     )
     .done(function () {
-      // Renderiza o "container com abas" (FiadorModalControle),
-      // e ele mesmo injeta os formulários dentro de cada aba
       $('#container').html(
         new FiadorModalControle({
           el: $('#container'),
@@ -267,40 +261,16 @@ window.ConsultaFiadorControle = Backbone.View.extend({
 
 });
 
-FiadorListControle.js
-
-var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
-window.FiadorListControle = Backbone.View.extend({
-
-	events: {},
-
-	initialize: function() {
-		console.log("call -> FiadorListControle");
-		var that = this;
-
-		$.get(BASE_FIADOR + '/visao/FiadorList.html').done(function(data) {
-			that.template = _.template(data);
-			that.render();
-		});
-	},
-
-	render: function() {
-		console.log("call -> FiadorListControle -> render");
-		console.log(this.model);
-		$(this.el).html(this.template(this.model.toJSON()));
-		return this;
-	}
-});
 
 
 
 
 
+//# sourceURL=ConsultaFiador.js
 
-ConsultaFiador.js
 window.ConsultaFiador = Backbone.Model.extend({
 
-  // endpoint existente no sistema
+  // ✅ endpoint do FiadorRest
   urlRoot: '../fes-web/emprest/fiador/consultaFiadores',
 
   defaults: {
@@ -310,7 +280,6 @@ window.ConsultaFiador = Backbone.Model.extend({
   },
 
   initialize: function () {
-    // garante reset quando o controle chamar model.initialize()
     this.set('cpf', '');
     this.set('codigoFiesConsulta', '');
     this.set('agenciaConsulta', '');
@@ -321,34 +290,36 @@ window.ConsultaFiador = Backbone.Model.extend({
 
     var errors = [];
 
+    var cpf = purificaAtributo(attributes.cpf || '');
+    var codigoFies = purificaAtributo(attributes.codigoFiesConsulta || '');
+
     // Pelo fluxo novo: pelo menos CPF OU Código FIES
-    if (attributes.cpf === '' && (attributes.codigoFiesConsulta === '' || attributes.codigoFiesConsulta === '0.000')) {
+    if (!cpf && (!codigoFies || codigoFies === '0.000')) {
       errors.push({ message: 'Informe o código FIES ou o CPF do estudante.' });
-    } else if (purificaAtributo(attributes.cpf) !== '') {
-      var msg = validarCPF(attributes.cpf);
+    } else if (cpf) {
+      var msg = validarCPF(cpf);
       if (msg !== '') errors.push({ message: msg });
     }
 
     return errors.length > 0 ? errors : false;
   },
 
-
   buscar: function () {
-
-    var cpf = purificaAtributo(this.attributes.cpf);
-    var codigoFies = purificaAtributo(this.attributes.codigoFiesConsulta);
+    var cpf = purificaAtributo(this.attributes.cpf || '');
+    var codigoFies = purificaAtributo(this.attributes.codigoFiesConsulta || '');
 
     var params = {};
-    if (cpf) params.cpf = cpf;
+    // ✅ o FiadorRest.consultaFiadores espera QueryParam("codigoFies")
     if (codigoFies) params.codigoFies = codigoFies;
 
+    // (se você quiser permitir filtro por cpf na lista, só se o backend aceitar esse param)
+    // if (cpf) params.cpf = cpf;
+
     return this.fetch({
-        type: 'GET',
-        data: $.param(params),
-        cache: false
+      type: 'GET',
+      data: $.param(params),
+      cache: false
     });
   }
 
 });
-
-//# sourceURL=ConsultaFiador.js
