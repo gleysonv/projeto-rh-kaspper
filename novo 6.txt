@@ -1,11 +1,1573 @@
-(function anonymous(obj, _) {
-    var __t, __p = '', __j = Array.prototype.join, print = function() {
-        __p += __j.call(arguments, '');
-    };
-    with (obj || {}) {
-        __p += '<style>\r\n/* .ui-widget {\r\n\tfont-family: Verdana, Arial, sans-serif;\r\n\tfont-size: 1.1em;\r\n}\r\n\r\n.ui-menu {\r\n\tlist-style: none;\r\n\tpadding: 0;\r\n\tmargin: 0;\r\n\tdisplay: block;\r\n\toutline: none;\r\n}\r\n\r\n.ui-autocomplete {\r\n\tposition: absolute;\r\n\ttop: 0;\r\n\tleft: 0;\r\n\tcursor: default;\r\n}\r\n\r\n.ui-front {\r\n\tz-index: 100;\r\n}\r\n\r\nul, menu, dir {\r\n\tdisplay: block;\r\n\tlist-style-type: disc;\r\n\t-webkit-margin-before: 1em;\r\n\t-webkit-margin-after: 1em;\r\n\t-webkit-margin-start: 0px;\r\n\t-webkit-margin-end: 0px;\r\n\t-webkit-padding-start: 40px;\r\n}\r\n */\r\n<!--\r\n.ui-autocomplete-input, .ui-menu, .ui-menu-item {\r\n\tz-index: 2006;\r\n}\r\n\r\n.ui-autocomplete { height: 200px; overflow-y: scroll; overflow-x: hidden;}\r\n/*\r\nui-widget-content {\r\n\tborder: 1px solid #aaaaaa;\r\n\tcolor: #222222;\r\n\tbackground-color:blue;\r\n}\r\n\r\n.ui-helper-hidden-accessible {\r\n    border: 0;\r\n    clip: rect(0 0 0 0);\r\n    height: 1px;\r\n    margin: -1px;\r\n    overflow: hidden;\r\n    padding: 0;\r\n    position: absolute;\r\n    width: 1px;\r\n}\r\n*/\r\n/*\tul.auto-complete-list {\r\n\t    list-style-type: none;\r\n\t    margin: 0;\r\n\t    padding: 0;\r\n\t    position: absolute;\r\n\t    z-index: 1500;\r\n\t    max-height: 250px;\r\n\t    overflow: auto;\r\n\t}*/\r\n-->\r\n</style>\r\n \r\n<form class="form-horizontal">\r\n\t<div class="control-group">\r\n\t\t<label class="control-label" for="nome"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> Nome:</label>\r\n\t\t<div class="controls">\r\n\t\t\t<div class="input-prepend">\r\n\t\t\t\t<input type="text" id="nome" name="nome" class="input-xxlarge"\r\n\t\t\t\t\tmaxlength="50" value="' + ((__t = (nome)) == null ? '' : __t) + '" />\r\n\t\t\t</div>\r\n\t\t</div>\r\n\t</div>\r\n</form>\r\n\r\n<form class="form-horizontal">\r\n\t<div class="row-fluid">\r\n\t\t<div class="span6">\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="ricFiador"> Registro de\r\n\t\t\t\t\tIdentidade Civil (RIC):</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<div class="input-prepend">\r\n\t\t\t\t\t\t<input type="text" id="ricFiador" name="ric" class="input-medium ric"\r\n\t\t\t\t\t\t\tmaxlength="11" value="' + ((__t = (ric)) == null ? '' : __t) + '" />\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="cpfFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> CPF / Seq. Dependente:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<div class="input-prepend">\r\n\t\t\t\t\t\t<input type="text" id="cpfFiador" class="span8 cpfmodal" maxlength="14"\r\n\t\t\t\t\t\t\tvalue="' + ((__t = (cpf)) == null ? '' : __t) + '" /> <input type="text" id="dependenteFiador"\r\n\t\t\t\t\t\t\tclass="span2" maxlength="1" value="' + ((__t = (dependenteCPF)) == null ? '' : __t) + '" readonly />\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label for="dataNascimentoFiador" class="control-label"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span>Data Nascimento:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<div class="input-append data">\r\n\t\t\t\t\t\t<input type="text" value="' + ((__t = (dataNascimento)) == null ? '' : __t) + '" size="16"\r\n\t\t\t\t\t\t\tclass="data dataKeepInvalid input-small" id="dataNascimentoFiador"\r\n\t\t\t\t\t\t\tname="dataNascimento" data-format="dd/MM/yyyy"> <span\r\n\t\t\t\t\t\t\tclass="add-on"><i class="icon-calendar"></i></span>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="nacionalidadeFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> Nacionalidade:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<select id="nacionalidadeFiador" class="span7">\r\n\t\t\t\t\t\t<option selected>' + ((__t = (nacionalidade.nome)) == null ? '' : __t) + '</option>\r\n\t\t\t\t\t</select>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="estadoCivilFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> Estado Civil:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<select id="estadoCivilFiador" class="span10">\r\n\t\t\t\t\t\t<option value="' + ((__t = (estadoCivil.codigoEstadoCivil)) == null ? '' : __t) + '" selected>' + ((__t = (estadoCivil.estadoCivil)) == null ? '' : __t) + '</option>\r\n\t\t\t\t\t</select>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="regimeBensFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> Regime de Bens:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<select id="regimeBensFiador" class="span10">\r\n\t\t\t\t\t\t<option value="' + ((__t = (regimeBens.codigoRegimeBens)) == null ? '' : __t) + '" selected>' + ((__t = (regimeBens.regimeBens)) == null ? '' : __t) + '</option>\r\n\t\t\t\t\t</select>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="profissao"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> Profiss&atilde;o:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<input type="text" id="profissao" class="span10" maxlength="70" value="" />\r\n\t\t\t\t\t<div id="#exportOrder"></div>\r\n\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t</div>\r\n\r\n\t\t<div class="span6 pull-right">\r\n\r\n\t\t\t<div class="control-group">\r\n\r\n\t\t\t\t<label class="control-label" for="identidadeFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span>Identidade:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<div class="input-prepend">\r\n\t\t\t\t\t\t<input type="text" id="identidadeFiador" class="input-medium"\r\n\t\t\t\t\t\t\tmaxlength="14" value="' + ((__t = (identidade.identidade)) == null ? '' : __t) + '" />\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="orgaoExpedidorFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span>Org&atilde;o Expedidor:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<select id="orgaoExpedidorFiador" class="span10" style="width: 70%;">\r\n\t\t\t\t\t\t<option value="' + ((__t = (identidade.orgaoExpedidor.codigo)) == null ? '' : __t) + '" selected>\r\n\t\t\t\t\t\t\t' + ((__t = (identidade.orgaoExpedidor.nome)) == null ? '' : __t) + '</option>\r\n\t\t\t\t\t</select> <select id="ufIdentidadeFiador" class="span2" style="width: 20%;">\r\n\t\t\t\t\t\t<option>--</option>\r\n\t\t\t\t\t</select>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label for="dataExpedicaoIdentidadeFiador" class="control-label"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span>Data Expedi&ccedil;&atilde;o:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<div class="input-append data">\r\n\t\t\t\t\t\t<input type="text" id="dataExpedicaoIdentidadeFiador"\r\n\t\t\t\t\t\t\tname="dataExpedicaoIdentidadeFiador"\r\n\t\t\t\t\t\t\tvalue="' + ((__t = (identidade.dataExpedicaoIdentidade)) == null ? '' : __t) + '" size="16"\r\n\t\t\t\t\t\t\tclass="data dataKeepInvalid input-small" data-format="dd/MM/yyyy"> <span\r\n\t\t\t\t\t\t\tclass="add-on"><i class="icon-calendar"></i></span>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="emancipadoFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> Emancipado:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<select id="emancipadoFiador" class="span4">\r\n\t\t\t\t\t\t<option value="N">N&atilde;o</option>\r\n\t\t\t\t\t\t<option value="S">Sim</option>\r\n\t\t\t\t\t</select>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="emancipadoMotivoFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> Motivo Emancipa&ccedil;&atilde;o:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<select id="emancipadoMotivoFiador" class="span10">\r\n\t\t\t\t\t</select>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="rendaMensalFiador"><span\r\n\t\t\t\t\tclass="obrigatorio">*</span> Valor\r\n\t\t\t\t\tRenda Mensal:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<input type="text" id="rendaMensalFiador"\r\n\t\t\t\t\t\tclass="input-medium moeda" maxlength="9"\r\n\t\t\t\t\t\tvalue="' + ((__t = (valorRendaMensal * 100)) == null ? '' : __t) + '" />\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="control-group">\r\n\t\t\t\t<label class="control-label" for="dependentesFiador"><span\r\n\t\t\t\t\t\tclass="obrigatorio">*</span> nº de Dependentes:</label>\r\n\t\t\t\t<div class="controls">\r\n\t\t\t\t\t<input type="text" id="dependentesFiador"\r\n\t\t\t\t\t\t   class="input-small number" maxlength="2"\r\n\t\t\t\t\t\t   value = "' + ((__t = (dependentes || '')) == null ? '' : __t) + '" />\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t</div>\r\n\r\n\t</div>\r\n</form>';
-    }
-    return __p;
+package br.gov.caixa.fes.negocio;
 
+import br.gov.caixa.arqrefcore.excecao.BusinessException;
+import br.gov.caixa.arqrefcore.log.Logging;
+import br.gov.caixa.est.util.FESException;
+import br.gov.caixa.fes.dao.BasicDAOOracle;
+import br.gov.caixa.fes.dominio.*;
+import br.gov.caixa.fes.dominio.transicao.*;
+import br.gov.caixa.fes.dto.contrato.DadosCpfRetorno;
+import br.gov.caixa.fes.dto.contrato.FiadorContratacao;
+import br.gov.caixa.fes.dto.contrato.FiadorContratacaoComplementar;
+import br.gov.caixa.fes.dto.contrato.ValidacaoFiadorContratacaoApp;
+import br.gov.caixa.fes.dto.contrato.fiador.DadosFiador;
+import br.gov.caixa.fes.dto.contrato.fiador.FiadorAPP;
+import br.gov.caixa.fes.dto.contrato.fiador.FiadorRetorno;
+import br.gov.caixa.fes.integracao.CicsSFWPO401;
+import br.gov.caixa.fes.negocio.enums.SituacaoFiadorContratacaoEnum;
+import br.gov.caixa.fes.negocio.enums.TipoRelacionamentoEnum;
+import br.gov.caixa.fes.transacao.PadraoRetornoSICPF;
+import br.gov.caixa.fes.util.Constantes;
+import br.gov.caixa.fes.util.FesUtil;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
+import javax.inject.Inject;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Level;
+
+@Stateless
+@LocalBean
+@Logging
+@SuppressWarnings("unchecked")
+@TransactionManagement(TransactionManagementType.CONTAINER)
+public class FiadorBean extends BasicDAOOracle implements FiadorService {
+
+	private static final long serialVersionUID = 5660634174669344364L;
+	private static final String CODIGOFIES = "codigoFies";
+	private static final String LOG_CPF = "######### O CPF ";
+	private static final String FIADOR_NAO_LOCALIZADO = "Fiador não localizado!";
+	private static final String MSG_SUCESSO = "Sucesso";
+	private static final String NO_ENTITY_FOUND = "No entity found for query";
+	private static final String EMAIL = "email";
+	private static final String CPF_NAO_ENCONTRADO_SICPF = "O CPF informado não foi encontrado no cadastro do SICPF.";
+	private static final String CPF = "cpf";
+	private static final String CPF_FIADOR = "cpfFiador";
+
+	private static final int TIPO_FIADOR = 3;
+
+	@Inject
+	private SipesBean sipesBean;
+	
+	@Inject
+	private CicsSFWPO401 sicpf;
+	
+	@Inject
+	private AuditoriaBean auditoriaBean;
+
+	@Inject
+	private ContratoService contratoService;
+
+	public List<Fiador> consultarFiadores(String usuario, Long codigoFies) {
+		List<Fiador> wRf = new ArrayList<>();
+
+		String wMsg = "";
+
+		if (codigoFies < 0) {
+			wMsg = "Não foi informado o código fies ou o cpf do estudante!";
+			Fiador wR = new Fiador();
+			wR.setMensagem(wMsg);
+			wRf.add(wR);
+			return wRf;
+		}
+
+		Query qr = super.getEm().createNamedQuery(FiadorTO.QUERY_NAME);
+
+		qr.setParameter("1", 4);
+		qr.setParameter("2", usuario);
+		qr.setParameter("3", "");
+		qr.setParameter("4", codigoFies);
+		qr.setParameter("5", 0);
+
+		try {
+			Object wObj = qr.getResultList();
+
+			List<FiadorTO> wFiadores = (List<FiadorTO>) wObj;
+
+			for (FiadorTO wRsp : wFiadores) {
+
+				Nacionalidade nacionalidade = new Nacionalidade(wRsp.getNacionalidade(), wRsp.getNacionalidade());
+
+				EstadoCivil estadoCivil = new EstadoCivil(wRsp.getCodigoEstadoCivil());
+
+				RegimeBens regimeBens = new RegimeBens(wRsp.getCodigoRegimeBens());
+
+				Emancipado emancipado = new Emancipado(wRsp.getCodigoMotivoEmancipado());
+
+				Cidade cidade = new Cidade(wRsp.getCodigoCidade(), wRsp.getNomeCidade(), new UF(wRsp.getUf()));
+				Endereco endereco = new Endereco(wRsp.getEndereco(), "", wRsp.getBairro(), wRsp.getCep(), cidade);
+
+				Telefone wTr = new Telefone(wRsp.getDddTelefone(), wRsp.getNumeroTelefone());
+				Telefone wTc = new Telefone(wRsp.getDddTelefoneCelular(), wRsp.getNumeroTelefoneCelular());
+				Telefone wTb = new Telefone(wRsp.getDddTelefoneComercio(), wRsp.getNumeroTelefoneComercio());
+				Contato contato = new Contato("", wTr, wTc, wTb);
+
+				OrgaoExpedidor wOrgao = new OrgaoExpedidor(wRsp.getCodigoOrgaoExpedidor(), wRsp.getOrgaoExpedidor());
+
+				Identidade identidade = new Identidade(wRsp.getIdentidade(), wOrgao, new UF(wRsp.getUfExpedicao()),
+						wRsp.getDataExpedicaoIdentidade());
+
+				// Conjuge
+				Conjuge conjuge = new Conjuge();
+				conjuge.setNome(wRsp.getNomeConjuge());
+				conjuge.setCpf(wRsp.getCpfConjuge());
+
+				conjuge.setDependenteCPF(wRsp.getDependenteCPFConjuge());
+				conjuge.setRic(wRsp.getRicConjuge());
+
+				conjuge.setNacionalidade(new Nacionalidade(wRsp.getNacionalidadeConjuge(), wRsp
+						.getNacionalidadeConjuge()));
+				conjuge.setDataNascimento(wRsp.getDataNacimentoConjuge());
+
+				Identidade wIdentidadeConjuge = new Identidade(wRsp.getIdentidadeConjuge(), new OrgaoExpedidor(
+						wRsp.getCodigoOrgaoExpedidorConjuge()), new UF(wRsp.getUfExpedicaoConjuge()),
+						wRsp.getDataExpedicaoIdentidadeConjuge());
+
+				conjuge.setIdentidade(wIdentidadeConjuge);
+
+				Fiador wR = new Fiador(wRsp.getCodigoFies(), wRsp.getCpf(), wRsp.getDependenteCPF(), wRsp.getNome(),
+						wRsp.getDataNascimento(), wRsp.getRic(), nacionalidade, identidade, estadoCivil, regimeBens,
+						endereco, contato, conjuge, emancipado);
+				wR.setConjuge(conjuge);
+				wR.setSequencial(wRsp.getCodigoFiador());
+				wR.setValorRendaMensal(wRsp.getRendaBrutaMensal());
+				wR.setCodigoProfissao(wRsp.getCodigoProfissao());
+				wR.setDataAtualizacao(wRsp.getDataAtualizacao());
+				wRf.add(wR);
+
+			}
+		} catch (Exception e) {
+			wMsg = e.getMessage();
+			if (wMsg.indexOf(NO_ENTITY_FOUND) > -1)
+				wMsg = FIADOR_NAO_LOCALIZADO;
+
+			Fiador wR = new Fiador();
+			wR.setMensagem(wMsg);
+			wRf.add(wR);
+			return wRf;
+		}
+
+		return wRf;
+	}
+
+	@Override
+	public Fiador consultar(String usuario, Long codigoFies, String cpf) {
+
+		List<Fiador> wFiadores = consultarFiadores(usuario, codigoFies);
+
+		for (Fiador wF : wFiadores) {
+			if (wF.getCpf().equals(cpf))
+				return wF;
+		}
+
+		Fiador wR = new Fiador();
+		wR.setCodigo(1L);
+		wR.setMensagem("Não foi localizado o fiador");
+
+		return wR;
+	}
+
+	@Override
+	public Retorno validarRenegociacao(String usuario, Fiador fiador, Long codigoSolicitacao) {
+		return salvar("V", usuario, fiador, codigoSolicitacao);
+	}
+
+	@Override
+	public Retorno salvarRenegociacao(String usuario, Fiador fiador, Long codigoSolicitacao) {
+		return salvar("I", usuario, fiador, codigoSolicitacao);
+	}
+
+	@Override
+	public Retorno excluirRenegociacao(String usuario, Fiador fiador, Long codigoSolicitacao) {
+		return salvar("E", usuario, fiador, codigoSolicitacao);
+	}
+
+	private Retorno salvar(String operacao, String usuario, Fiador fiador) {
+		return salvar(operacao, usuario, fiador, null);
+	}
+
+	private Retorno salvar(String operacao, String usuario, Fiador fiador, Long codigoSolicitacao) {
+		Retorno wR = new Retorno();
+		wR.setCodigo(0L);
+
+		String wParametro = ":0, :1, :2, :3, :4, :5, :6, :7, :8, :9, ";
+		wParametro += ":10, :11, :12, :13, :14, :15, :16, :17, :18, :19, ";
+		wParametro += ":20, :21, :22, :23, :24, :25, :26, :27, :28, :29, ";
+		wParametro += ":30, :31, :32, :33, :34, :35, :36, :37, :38, :39, ";
+		wParametro += ":40, :41, :42 ";
+		Query qr;
+		if (codigoSolicitacao == null) {
+			qr = super.getEm().createNativeQuery("{call FES.FESSP947_INCLUI_FIADOR ( " + wParametro + ") }");
+		}else {
+			wParametro+=", :43 ";
+			qr = super.getEm().createNativeQuery("{call FES.FESSPZC9_PRE_FIADOR_RNGCCO ( " + wParametro + ") }");
+
+		}
+		
+
+		int wTemRestricao = 0;
+
+		if (!operacao.equals("E")){
+			if (fiador.getNome().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("Nome não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getCpf().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("CPF não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getDataNascimento().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("Data nascimento não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getIdentidade().getIdentidade().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("Identidade não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getIdentidade().getOrgaoExpedidor().getCodigo() < 1) {
+				wR.setCodigo(1L);
+				wR.setMensagem("Orgão expedidor da identidade não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getIdentidade().getUf().getSigla().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("UF do Orgão expedidor da Identidade não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getIdentidade().getDataExpedicaoIdentidade().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("Data da expedição da identidade não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getEndereco().getEndereco().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("Endereço não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getEndereco().getCidade().getCodigoCidade() < 0) {
+				wR.setCodigo(1L);
+				wR.setMensagem("Cidade não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getEndereco().getCidade().getUf().getSigla().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("UF não foi informado!");
+				return wR;
+			}
+	
+			if (fiador.getEstadoCivil().getCodigo() == 2 || fiador.getEstadoCivil().getCodigo() == 9) {
+				if (fiador.getConjuge().getNome().equals("")) {
+					wR.setCodigo(1L);
+					wR.setMensagem("UF não foi informado!");
+					return wR;
+				}
+	
+				if (fiador.getConjuge().getCpf().trim().equals("")) {
+					wR.setCodigo(1L);
+					wR.setMensagem("CPF do conjuge não foi informado!");
+					return wR;
+				}
+	
+				if (fiador.getConjuge().getDataNascimento().trim().equals("")) {
+					wR.setCodigo(1L);
+					wR.setMensagem("Data nascimento do conjuge não foi informado!");
+					return wR;
+				}
+	
+				if (fiador.getConjuge().getIdentidade().getIdentidade().equals("")) {
+					wR.setCodigo(1L);
+					wR.setMensagem("Identidade do conjuge não foi informado!");
+					return wR;
+				}
+	
+				if (fiador.getConjuge().getIdentidade().getOrgaoExpedidor().getCodigo() < 0) {
+					wR.setCodigo(1L);
+					wR.setMensagem("Orgão expedidor da identidade do conjuge não foi informado!");
+					return wR;
+				}
+	
+				if (fiador.getConjuge().getIdentidade().getUf().getSigla().trim().equals("")) {
+					wR.setCodigo(1L);
+					wR.setMensagem("UF do Orgão expedidor da Identidade do conjuge não foi informado!");
+					return wR;
+				}
+	
+				if (fiador.getConjuge().getIdentidade().getDataExpedicaoIdentidade().trim().equals("")) {
+					wR.setCodigo(1L);
+					wR.setMensagem("Data da expedição da identidade do conjuge não foi informado!");
+					return wR;
+				}
+			}
+	
+			if (fiador.getCodigoProfissao().trim().equals("")) {
+				wR.setCodigo(1L);
+				wR.setMensagem("Profissão não foi informado!");
+				return wR;
+			}
+	
+			qr.setParameter("0", "C");
+
+			// Verifica a Idoneidade do Fiador
+			try {
+				if(codigoSolicitacao==null || codigoSolicitacao==0L) {
+					ResumoPesquisaCadastral wR2 = sipesBean.consultar(fiador.getCodigoFies(), fiador.getCpf(), usuario);
+					if (wR2 != null) {
+						if (wR2.getSinad() != null)
+							wTemRestricao = Boolean.TRUE.equals(wR2.getSinad().getExisteRestricao()) ? 1 : 0;
+	
+						if (wR2.getCadin() != null)
+							wTemRestricao = Boolean.TRUE.equals(wR2.getCadin().getExisteRestricao()) ? 1 : 0;
+	
+						if (wR2.getSerasa() != null)
+							wTemRestricao = Boolean.TRUE.equals(wR2.getSerasa().getExisteRestricao()) ? 1 : 0;
+	
+						if (wR2.getCcf() != null)
+							wTemRestricao = Boolean.TRUE.equals(wR2.getCcf().getExisteRestricao()) ? 1 : 0;
+	
+						if (wR2.getSpc() != null)
+							wTemRestricao = Boolean.TRUE.equals(wR2.getSpc().getExisteRestricao()) ? 1 : 0;
+					}
+				}
+			} catch (Exception e) {
+				getEm().flush();
+				logger.log(Level.SEVERE, "Falha ao salvar fiador.", e);
+			}
+		} else {
+			qr.setParameter("0", "E");
+		}
+	
+		qr.setParameter("1", usuario.toUpperCase());
+		qr.setParameter("2", fiador.getCodigoFies());
+		qr.setParameter("3", getNotNullString(fiador.getNome()));
+		qr.setParameter("4", fiador.getCpf());
+		qr.setParameter("5", fiador.getDependenteCPF());
+		qr.setParameter("6", getNotNullString(fiador.getDataNascimento()));
+
+		qr.setParameter("7", getNotNullString(fiador.getIdentidade().getIdentidade()));
+		qr.setParameter("8", getNotNullNumeric(fiador.getIdentidade().getOrgaoExpedidor().getCodigo()));
+		qr.setParameter("9", getNotNullString(fiador.getIdentidade().getUf().getSigla()));
+		qr.setParameter("10", getNotNullString(fiador.getIdentidade().getDataExpedicaoIdentidade()));
+
+		qr.setParameter("11", getNotNullString(FesUtil.removerCaractereDiferenteDeNumero(fiador.getRic())));
+		qr.setParameter("12", getNotNullString(fiador.getNacionalidade().getCodigo()));
+
+		if (fiador.getEmancipado() == null || StringUtils.isBlank(fiador.getEmancipado().getCodigo()))
+			qr.setParameter("13", "N");
+		else
+			qr.setParameter("13", "S");
+
+		qr.setParameter("14", fiador.getEmancipado() != null && fiador.getEmancipado().getCodigo().equals("MAI") ? "" : fiador.getEmancipado().getCodigo());
+		qr.setParameter("15", getNotNullString(fiador.getEndereco().getEndereco()));
+		qr.setParameter("16", getNotNullString(fiador.getEndereco().getBairro()));
+		qr.setParameter("17", getNotNullNumeric(fiador.getEndereco().getCidade().getCodigoCidade()));
+		qr.setParameter("18", getNotNullString(fiador.getEndereco().getCidade().getUf().getSigla()));
+		qr.setParameter("19", getNotNullString(fiador.getEndereco().getCep()));
+		qr.setParameter("20", getNotNullString(fiador.getContato().getTelefoneResidencial().getDdd()));
+		qr.setParameter("21", getNotNullString(fiador.getContato().getTelefoneResidencial().getNumero()));
+		qr.setParameter("22", fiador.getSequencial());
+		qr.setParameter("23", fiador.getEstadoCivil().getCodigo());
+		qr.setParameter("24", fiador.getRegimeBens().getCodigo());
+
+		if (fiador.getEstadoCivil().getCodigo() == 2 || fiador.getEstadoCivil().getCodigo() == 9) {
+			qr.setParameter("25", fiador.getConjuge().getNome());
+			qr.setParameter("26", fiador.getConjuge().getCpf());
+			qr.setParameter("27", fiador.getConjuge().getDependenteCPF());
+			qr.setParameter("28", fiador.getConjuge().getDataNascimento());
+			qr.setParameter("29", fiador.getConjuge().getIdentidade().getIdentidade());
+			qr.setParameter("30", fiador.getConjuge().getIdentidade().getOrgaoExpedidor().getCodigo());
+			qr.setParameter("31", fiador.getConjuge().getIdentidade().getUf().getSigla());
+			qr.setParameter("32", fiador.getConjuge().getIdentidade().getDataExpedicaoIdentidade());
+			qr.setParameter("33", fiador.getConjuge().getRic());
+			qr.setParameter("34", fiador.getConjuge().getNacionalidade().getCodigo());
+		} else {
+			qr.setParameter("25", "");
+			qr.setParameter("26", "");
+			qr.setParameter("27", 0);
+			qr.setParameter("28", "");
+			qr.setParameter("29", "");
+			qr.setParameter("30", "");
+			qr.setParameter("31", "");
+			qr.setParameter("32", "");
+			qr.setParameter("33", "");
+			qr.setParameter("34", "");
+		}
+
+		qr.setParameter("35", getNotNullString(fiador.getContato().getTelefoneComercial().getDdd()));
+		qr.setParameter("36", getNotNullString(fiador.getContato().getTelefoneComercial().getNumero()));
+		qr.setParameter("37", getNotNullString(fiador.getContato().getTelefoneCelular().getDdd()));
+		qr.setParameter("38", getNotNullString(fiador.getContato().getTelefoneCelular().getNumero()));
+		qr.setParameter("39", fiador.getValorRendaMensal());
+		qr.setParameter("40", 0);
+		qr.setParameter("41", getNotNullNumeric(fiador.getCodigoProfissao()));
+		qr.setParameter("42", wTemRestricao); 
+		
+		if (codigoSolicitacao != null)
+			qr.setParameter("43", codigoSolicitacao);
+
+		try {
+			qr.executeUpdate();
+
+			wR = new Retorno(0L, "Comando realizado com sucesso!");
+
+		} catch (PersistenceException e) {
+			logger.severe(e.getMessage());
+			wR.setCodigo(1L);
+			String wMsg = "Ocorreu um erro na realização do comando, tente novamente!";
+			if(e.getCause() instanceof java.sql.SQLException || e.getCause().getCause() instanceof java.sql.SQLException){
+				wMsg = e.getCause().getCause().getMessage().split("\n")[0].split(": ", 2)[1];
+				logger.severe(wMsg);
+			}
+			wR.setMensagem(wMsg);
+		} catch (Exception e) {
+			logger.severe(e.getMessage());
+			wR.setCodigo(1L);
+			wR.setMensagem("Ocorreu um erro na realização do comando, tente novamente!");
+		}
+
+		return wR;
+	}
+
+	@Override
+	public Retorno salvar(String usuario, Fiador fiador) {
+		// inclui ou atualiza
+		return salvar("I", usuario, fiador);
+	}
+
+	public Retorno excluir(String usuario, Fiador fiador) {
+
+		return salvar("E", usuario, fiador);
+	}
+
+	@Override
+	public List<Fiador> consultarSPC(String uf, String ag) {
+		List<Fiador> listaFiador = new ArrayList<>();
+		Estudante wR = new Estudante();
+		String wMsg = "";
+
+		Query qr = super.getEm().createNamedQuery("consultarFiadorSPC");
+		qr.setParameter("1", uf);
+		qr.setParameter("2", Long.valueOf(ag));
+		qr.setParameter("3", TIPO_FIADOR);
+
+		try {
+			List<FiadorSpcTO> wFiador = qr.getResultList();
+
+			for (FiadorSpcTO estudanteTO : wFiador) {
+				Fiador fiador = new Fiador();
+				Conjuge conjuge = new Conjuge();
+				conjuge.setNome(estudanteTO.getNomeConjuge());
+				conjuge.setCpf(estudanteTO.getCpfConjuge());
+
+				fiador.setConjuge(conjuge);
+				fiador.setCpf(estudanteTO.getCpf());
+				fiador.setNome(estudanteTO.getNome());
+				listaFiador.add(fiador);
+			}
+
+		} catch (Exception e) {
+			wMsg = e.getMessage();
+			if (wMsg.indexOf(NO_ENTITY_FOUND) > -1)
+				wMsg = "Não foram encontrados registros para a consulta!";
+
+			wR.setMensagem(wMsg);
+		}
+
+		return listaFiador;
+	}
+
+	private String getNotNullString(String param) {
+		return StringUtils.isEmpty(param) ? "" : param;
+	}
+
+	private int getNotNullNumeric(Integer param) {
+		return param == null ? 0 : param;
+	}
+
+	private int getNotNullNumeric(String param) {
+		return StringUtils.isEmpty(param) ? 0 : new Integer(param);
+	}
+
+	@Override
+	public SolicitacaoAcesso getFiadorPorCpf(String cpf) throws ParseException {
+		try {
+			Query query = getEm().createNamedQuery(FiadorConsultaTO.POR_CPF_FIADOR);
+			query.setParameter("cpf", cpf);
+			List<FiadorConsultaTO> result = (List<FiadorConsultaTO>)query.getResultList();
+
+			if(CollectionUtils.isNotEmpty(result)) {
+				FiadorConsultaTO fiador = result.get(0);
+				SolicitacaoAcesso acesso = new SolicitacaoAcesso();
+				acesso.setNuCpf(fiador.getCpf());
+				acesso.setDeNome(fiador.getNome());
+				acesso.setDtNasc(fiador.getDataNascimento());
+				acesso.setDeEmail(fiador.getEmailFiador());
+				acesso.setPerfil(Constantes.FES_FIADOR);
+				acesso.setNuMantenedora(0L);
+				acesso.setNuIes(0L);
+				acesso.setNuCampus(0L);
+				acesso.setNuSeguradora(0L);
+				return acesso;
+			}
+		} catch(Exception e) {
+			return null;
+		}
+		return null;
+	}
+
+	@Override
+	public SolicitacaoAcesso getConjugeFiadorPorCpfConjuge(String cpf) throws ParseException {
+		try {
+			Query query = getEm().createNamedQuery(FiadorConsultaTO.POR_CPF_CONJUGE_FIADOR);
+			query.setParameter("cpf", cpf);
+			FiadorConsultaTO conjuge = (FiadorConsultaTO)query.getSingleResult();
+
+			if(conjuge != null) {
+				SolicitacaoAcesso acesso = new SolicitacaoAcesso();
+				acesso.setNuCpf(conjuge.getCpfConjuge());
+				acesso.setDeNome(conjuge.getNomeConjuge());
+				acesso.setDtNasc(conjuge.getDataNacimentoConjuge());
+				acesso.setDeEmail(conjuge.getEmailConjuge());
+				acesso.setPerfil(Constantes.FES_CONJUGE);
+				acesso.setNuMantenedora(0L);
+				acesso.setNuIes(0L);
+				acesso.setNuCampus(0L);
+				acesso.setNuSeguradora(0L);
+				return acesso;
+			}
+		} catch(Exception e) {
+			return null;
+		}
+		return null;
+	}
+	
+	@Override
+	public Retorno incluirFiadorApp(FiadorContratacao fiador, Long codigoFies) throws BusinessException {
+		Retorno retorno = new Retorno();
+		try {
+			logger.log(Level.SEVERE, "######### INICIO DO METODO SALVAR FIADOR CONTRATACAO DIGITAL. ");
+
+			DadosCpfRetorno dadosCpfRetorno = consultarCpfNoSICPF(fiador.getCpf());
+
+			if (dadosCpfRetorno.getSituacaoCPF() == 0) {
+				retorno.setCodigo(-1L);
+				retorno.setMensagem("CPF informado com restrição. Favor regularizar o CPF para continuar a contratação!");
+				return retorno;
+			}
+
+			List<FiadorContratacao> listaFiador = retornaListaFiadorPorCandidato(codigoFies);
+			int sequencial = listaFiador == null ? 0 : listaFiador.get(0).getSequenciaFiador();
+			salvarFiador(fiador, codigoFies, sequencial);
+
+			if(contratoService.validaRegistroCadastroComplementarBasico(fiador.getCpf()))
+				contratoService.gravarDadosParticipantesExtenosContrato(fiador.getCpf(), TipoRelacionamentoEnum.FIADOR.getValor(), codigoFies, 1, "N");
+
+			retorno.setCodigo(0L);
+			retorno.setMensagem("Fiador cadastrado com sucesso.");
+			
+			gravarAuditoria(fiador.getCpf(), fiador, Constantes.INCLUSAO);
+			logger.log(Level.SEVERE, "######### FIM DO METODO SALVAR FIADOR CONTRATACAO DIGITAL. ");
+			
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "######### ERRO AO INCLUIR FIADOR CONTRATAÇÃO DIGITAL CPF " + fiador.getCpf(), e);
+			throw new BusinessException(e.getLocalizedMessage());
+		}
+		return retorno;
+	}
+	
+	public FiadorRetorno listarFiador(Long codigoFies) throws BusinessException {
+
+		String wMsg = "";
+		String sql = sqlRetornoFiador();	
+				
+		FiadorRetorno wR = new FiadorRetorno();
+
+		if (codigoFies < 0) {
+			wMsg = "Não foi informado o código fies ou o cpf do estudante!";
+			wR.setMensagem(wMsg);
+			return wR;
+		}
+		
+		Query query = super.getEm().createNativeQuery(sql);
+		query.setParameter(CODIGOFIES, codigoFies);
+		
+		try {
+			
+			List<Object[]> wObj = query.getResultList();
+
+			for (Object[] obj : wObj) {
+
+				FiadorAPP wRsp = this.convertObjectToFiadorAPP(obj);
+				Nacionalidade nacionalidade = new Nacionalidade(wRsp.getNacionalidade(), wRsp.getNacionalidade());
+				EstadoCivil estadoCivil = new EstadoCivil(wRsp.getCodigoEstadoCivil());
+				RegimeBens regimeBens = new RegimeBens(wRsp.getCodigoRegimeBens());
+				Emancipado emancipado = new Emancipado(wRsp.getCodigoMotivoEmancipado());
+
+				UF uf = montarUF(wRsp);
+				
+				Cidade cidade = new Cidade(wRsp.getCodigoCidade(), wRsp.getNomeCidade(), uf);
+				Endereco endereco = new Endereco(wRsp.getEndereco(), "", wRsp.getBairro(), wRsp.getCep(), cidade);
+
+				Telefone wTr = new Telefone(wRsp.getDddTelefone(), wRsp.getNumeroTelefone());
+				Telefone wTc = new Telefone(wRsp.getDddTelefoneCelular(), wRsp.getNumeroTelefoneCelular());
+				Telefone wTb = new Telefone(wRsp.getDddTelefoneComercio(), wRsp.getNumeroTelefoneComercio());
+				Contato contato = new Contato("", wTr, wTc, wTb);
+
+				OrgaoExpedidor wOrgao = new OrgaoExpedidor(wRsp.getCodigoOrgaoExpedidor(), wRsp.getOrgaoExpedidor());
+
+				Identidade identidade = montarUFIdententidade(wRsp, wOrgao);
+
+				Conjuge conjuge = montarConjuge(wRsp);
+				
+				UF ufConjuge = montarUFConjuge(wRsp);
+
+				OrgaoExpedidor orgExpConjuge = new OrgaoExpedidor(
+					wRsp.getCodigoOrgaoExpedidorConjuge());
+				orgExpConjuge.setNome(wRsp.getOrgaoExpedidorConjuge());
+				
+				Identidade wIdentidadeConjuge = new Identidade(wRsp.getIdentidadeConjuge(),orgExpConjuge , ufConjuge,
+						wRsp.getDataExpedicaoIdentidadeConjuge());
+
+				conjuge.setIdentidade(wIdentidadeConjuge);
+				conjuge.setEstadoCivil(estadoCivil);
+				DadosFiador dadosFiador = montarDadosFiador(wRsp, nacionalidade, estadoCivil, regimeBens, emancipado,
+						endereco, contato, identidade, conjuge);
+				dadosFiador.setCodigo(0L);
+				dadosFiador.setMensagem("");
+				dadosFiador.setTipo(MSG_SUCESSO);
+				wR.add(dadosFiador);
+			}
+		} catch (Exception e) {
+			wMsg = e.getMessage();
+			if (wMsg.indexOf(NO_ENTITY_FOUND) > -1)
+				wMsg = FIADOR_NAO_LOCALIZADO;
+			
+			wR.setMensagem(wMsg);
+			return wR;
+		}
+
+		if(CollectionUtils.isNotEmpty(wR.getDadosFiador())) 
+			wR.setMensagem("Lista de fiadores obtida com sucesso.");
+		 else 
+			 wR.setMensagem("Não existe fiadores cadastrado para o candidato.");
+		
+		wR.setCodigo(0L);
+		wR.setTipo(MSG_SUCESSO);
+		
+		return wR;
+	}
+
+	private DadosFiador montarDadosFiador(FiadorAPP wRsp, Nacionalidade nacionalidade, EstadoCivil estadoCivil,
+			RegimeBens regimeBens, Emancipado emancipado, Endereco endereco, Contato contato, Identidade identidade,
+			Conjuge conjuge) {
+		DadosFiador dadosFiador = new DadosFiador(wRsp.getCodigoFies(), wRsp.getCpf(), wRsp.getDependenteCPF(), wRsp.getNome(),
+				wRsp.getDataNascimento(), wRsp.getRic(), nacionalidade, identidade, estadoCivil, regimeBens,
+				endereco, contato, conjuge, emancipado);
+		dadosFiador.setConjuge(conjuge);
+		dadosFiador.setSequencial(wRsp.getCodigoFiador());
+		dadosFiador.setValorRendaMensal(wRsp.getRendaBrutaMensal());
+		dadosFiador.setCodigoProfissao(wRsp.getCodigoProfissao());
+		dadosFiador.setDataExpedicaoIdentidadeFiador(wRsp.getDataExpedicaoIdentidade());
+		return dadosFiador;
+	}
+
+	private UF montarUFConjuge(FiadorAPP wRsp) {
+		UF ufConjuge = new UF();
+		ufConjuge.setCodigo(200L);
+		ufConjuge.setMensagem("");
+		ufConjuge.setTipo(MSG_SUCESSO);
+		ufConjuge.setEditavel(false);
+		ufConjuge.setSigla(wRsp.getUfExpedicaoConjuge());
+		ufConjuge.setDescricao(wRsp.getDescricaoUFConjuge());
+		ufConjuge.setRegiao(wRsp.getRegiaoUFConjuge());
+		return ufConjuge;
+	}
+
+	private Conjuge montarConjuge(FiadorAPP wRsp) {
+		// Conjuge
+		Conjuge conjuge = new Conjuge();
+		conjuge.setCodigo(200L);
+		conjuge.setMensagem("");
+		conjuge.setTipo(MSG_SUCESSO);
+		conjuge.setEditavel(false);
+		conjuge.setNome(wRsp.getNomeConjuge());
+		conjuge.setCpf(wRsp.getCpfConjuge());
+
+		conjuge.setDependenteCPF(wRsp.getDependenteCPFConjuge());
+		conjuge.setRic(wRsp.getRicConjuge());
+
+		conjuge.setNacionalidade(new Nacionalidade(wRsp.getNacionalidadeConjuge(), wRsp
+				.getNacionalidadeConjuge()));
+		conjuge.setDataNascimento(wRsp.getDataNacimentoConjuge());
+		return conjuge;
+	}
+
+	private Identidade montarUFIdententidade(FiadorAPP wRsp, OrgaoExpedidor wOrgao) {
+		UF ufIdentidade = new UF();
+		ufIdentidade.setCodigo(200L);
+		ufIdentidade.setMensagem("");
+		ufIdentidade.setTipo(MSG_SUCESSO);
+		ufIdentidade.setEditavel(false);
+		ufIdentidade.setSigla(wRsp.getUfExpedicao());
+		ufIdentidade.setDescricao(wRsp.getNomeUFIdentidade());
+		ufIdentidade.setRegiao(wRsp.getRegiaoIdentidade());
+		Identidade identidade = new Identidade(wRsp.getIdentidade(), wOrgao, ufIdentidade,
+				wRsp.getDataExpedicaoIdentidade());
+		return identidade;
+	}
+
+	private UF montarUF(FiadorAPP wRsp) {
+		UF uf = new UF();
+		uf.setCodigo(200L);
+		uf.setMensagem("");
+		uf.setTipo(MSG_SUCESSO);
+		uf.setEditavel(false);
+		uf.setSigla(wRsp.getUf());
+		uf.setDescricao(wRsp.getDescricaoUF());
+		uf.setRegiao(wRsp.getRegiaoUF());
+		return uf;
+	}
+	
+	private FiadorAPP convertObjectToFiadorAPP(Object[] obj) {
+		
+		FiadorAPP wRsp = new FiadorAPP();
+		
+		informacoes1(obj, wRsp);
+		informacaoes2(obj, wRsp);
+		informacoes3(obj, wRsp);
+		wRsp.setRicConjuge(obj[42] != null ? String.valueOf(obj[42]) : null);
+		wRsp.setRendaBrutaMensal(obj[43] != null ? Float.parseFloat(String.valueOf(obj[43])) : Float.valueOf("0.00")); 
+		wRsp.setCodigoProfissao(obj[44] != null ? String.valueOf(obj[44]) : null);
+		wRsp.setNomeUFIdentidade(obj[45] != null ? String.valueOf(obj[45]) : null);
+		wRsp.setRegiaoIdentidade(obj[46] != null ? String.valueOf(obj[46]) : null);
+		wRsp.setOrgaoExpedidorConjuge(obj[47] != null ? String.valueOf(obj[47]) : null);
+		return wRsp;
+	}
+
+	private void informacoes3(Object[] obj, FiadorAPP wRsp) {
+		wRsp.setNumeroTelefoneComercio(obj[28] != null ? String.valueOf(obj[28]) : null);
+		wRsp.setEmancipado(obj[29] != null ? String.valueOf(obj[29]) : null);
+		wRsp.setCodigoMotivoEmancipado(obj[30] != null ? String.valueOf(obj[30]) : null);
+		wRsp.setNomeConjuge(obj[31] != null ? String.valueOf(obj[31]) : null);
+		wRsp.setCpfConjuge(obj[32] != null ? String.valueOf(obj[32]) : null);
+		wRsp.setDependenteCPFConjuge(obj[33] != null ? Integer.parseInt(String.valueOf(obj[33])) : null);
+		wRsp.setNacionalidadeConjuge(obj[34] != null ? String.valueOf(obj[34]) : null);
+		wRsp.setDataNacimentoConjuge(obj[35] != null ? String.valueOf(obj[35]) : null);
+		wRsp.setIdentidadeConjuge(obj[36] != null ? String.valueOf(obj[36]) : null);
+		wRsp.setCodigoOrgaoExpedidorConjuge(obj[37] != null ? Integer.parseInt(String.valueOf(obj[37])) : null);
+		wRsp.setUfExpedicaoConjuge(obj[38] != null ? String.valueOf(obj[38]) : null);
+		wRsp.setDescricaoUFConjuge(obj[39] != null ? String.valueOf(obj[39]) : null);
+		wRsp.setRegiaoUFConjuge(obj[40] != null ? String.valueOf(obj[40]) : null);
+		wRsp.setDataExpedicaoIdentidadeConjuge(obj[41] != null ? String.valueOf(obj[41]) : null);
+	}
+
+	private void informacaoes2(Object[] obj, FiadorAPP wRsp) {
+		wRsp.setEndereco(obj[15] != null ? String.valueOf(obj[15]) : null);
+		wRsp.setBairro(obj[16] != null ? String.valueOf(obj[16]) : null);
+		wRsp.setCep(obj[17] != null ? String.valueOf(obj[17]) : null);
+		wRsp.setUf(obj[18] != null ? String.valueOf(obj[18]) : null);
+		wRsp.setDescricaoUF(obj[19] != null ? String.valueOf(obj[19]) : null);
+		wRsp.setRegiaoUF(obj[20] != null ? String.valueOf(obj[20]) : null);
+		wRsp.setCodigoCidade(obj[21] !=null ? Integer.parseInt(String.valueOf(obj[21])) : null);
+		wRsp.setNomeCidade(obj[22] != null ? String.valueOf(obj[22]) : null);
+		wRsp.setDddTelefone(obj[23] != null ? String.valueOf(obj[23]) : null);
+		wRsp.setNumeroTelefone(obj[24] != null ? String.valueOf(obj[24]) : null);
+		wRsp.setDddTelefoneCelular(obj[25] != null ? String.valueOf(obj[25]) : null);
+		wRsp.setNumeroTelefoneCelular(obj[26] != null ? String.valueOf(obj[26]) : null);
+		wRsp.setDddTelefoneComercio(obj[27] != null ? String.valueOf(obj[27]) : null);
+	}
+
+	private void informacoes1(Object[] obj, FiadorAPP wRsp) {
+		wRsp.setCodigoFiador(Long.parseLong(String.valueOf(obj[0])));
+		wRsp.setCodigoFies(Long.parseLong(String.valueOf(obj[1])));
+		wRsp.setCpf(obj[2] != null ? String.valueOf(obj[2]) : null);
+		wRsp.setDependenteCPF(Integer.parseInt(String.valueOf(obj[3])));
+		wRsp.setNome(obj[4] != null ? String.valueOf(obj[4]) : null);
+		wRsp.setDataNascimento(obj[5] != null ? String.valueOf(obj[5]) : null);
+		wRsp.setRic(obj[6] != null ? String.valueOf(obj[6]) : null);
+		wRsp.setNacionalidade(obj[7] != null ? String.valueOf(obj[7]) : null);
+		wRsp.setIdentidade(obj[8] != null ? String.valueOf(obj[8]) : null);
+		wRsp.setUfExpedicao(obj[9] != null ? String.valueOf(obj[9]) : null);
+		wRsp.setCodigoOrgaoExpedidor(obj[10] != null ? Integer.parseInt(obj[10].toString()) : null);
+		wRsp.setOrgaoExpedidor(obj[11] != null ? String.valueOf(obj[11]) : null);
+		wRsp.setCodigoEstadoCivil(obj[12] != null ? Integer.parseInt(String.valueOf(obj[12])) : null);
+		wRsp.setCodigoRegimeBens(obj[13] != null ? Integer.parseInt(String.valueOf(obj[13])) : null);
+		wRsp.setDataExpedicaoIdentidade(obj[14] != null ? String.valueOf(obj[14]) : null);
+	}
+	
+	@Override
+	public Retorno alterarFiadorApp(FiadorContratacao fiador, Long codigoFies) throws BusinessException {
+		Retorno retorno = new Retorno();
+		try {
+			logger.log(Level.SEVERE, "######### INICIO DO METODO ALTERAR FIADOR CONTRATACAO DIGITAL. ");
+			
+			validaFiadorExistente(fiador.getCpf(), codigoFies);
+			verificarEmailValido(fiador.getEmail());
+			
+			alterarFiador(fiador, codigoFies);
+			retorno.setCodigo(0L);
+			retorno.setMensagem("Fiador alterado com sucesso.");
+			
+			gravarAuditoria(fiador.getCpf(), fiador, Constantes.ALTERACAO);
+			
+			logger.log(Level.SEVERE, "######### FIM DO METODO ALTERAR FIADOR CONTRATACAO DIGITAL. ");
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "######### ERRO AO ALTERAR FIADOR CONTRATAÇÃO DIGITAL CPF " + fiador.getCpf(), e.getLocalizedMessage());
+			if(e instanceof BusinessException)
+				throw new BusinessException(e.getLocalizedMessage());
+			else 
+				throw new BusinessException("Erro ao alterar Fiador Contratação Digital.");
+		}
+		return retorno;
+	}
+	
+	private void verificarEmailValido(String email) throws BusinessException {
+		if(!FesUtil.verificaEmailValido(email)) {
+			throw new BusinessException("E-mail nulo ou inválido.");
+		}
+	}
+
+	private void validaFiadorExistente(String cpf, Long codigoFies) throws BusinessException {
+		String sql = "SELECT COUNT(CO_CPF_FIADOR) FROM fes.FESTB012_FIADOR WHERE CO_CPF_FIADOR = :cpf AND NU_CANDIDATO_FK10 = :codigoFies ";
+		Query query = getEm().createNativeQuery(sql);
+		query.setParameter(CPF, cpf);
+		query.setParameter(CODIGOFIES, codigoFies);
+		BigDecimal result = (BigDecimal)query.getSingleResult();
+		
+		if(result != null && result.intValue() == 0)
+			throw new BusinessException("Fiador não Localizado.");
+	}
+
+	@Override
+	public ValidacaoFiadorContratacaoApp validarCriteriosFiador(String cpfFiador, Long codigoFies, String cpf) throws BusinessException {
+		ValidacaoFiadorContratacaoApp retorno = new ValidacaoFiadorContratacaoApp();
+		List<String> validacao = new ArrayList<>();
+		
+		try {
+			logger.log(Level.SEVERE, "######### INICIO DO METODO VALIDAR FIADOR CONTRATACAO DIGITAL. ");
+			
+			validarNumerosFiadores(validacao, codigoFies);
+			validarFiadorAssociadoOutroContrato(cpfFiador, validacao);
+			validarRestricoes(cpfFiador, codigoFies, validacao);
+			validarFiadorConjugeCandidato(cpfFiador, cpf, validacao);
+			
+			if(validacao.isEmpty()) {
+				retorno.setCodigo(0L);
+				retorno.setMensagem("Fiador sem restrições cadastrais.");
+			} else {
+				retorno.setCodigo(-2L);
+				retorno.setMensagem("Fiador com restrições cadastrais.");
+			}
+			
+		} catch (Exception e) {
+			if(!StringUtils.isBlank(e.getLocalizedMessage()) && e.getLocalizedMessage().equalsIgnoreCase(CPF_NAO_ENCONTRADO_SICPF)) {
+				validacao.add(CPF_NAO_ENCONTRADO_SICPF);
+				retorno.setCodigo(-2L);
+				retorno.setMensagem("Fiador com restrições cadastrais.");
+			} else {
+				logger.log(Level.SEVERE, "######### ERRO AO VALIDAR CRITÉRIOS FIADOR CONTRATAÇÃO DIGITAL - CPF: " + cpfFiador);
+				retorno.setCodigo(-1L);
+				retorno.setMensagem("Erro ao validar critérios do fiador.");
+			}
+		}
+		
+		retorno.setListaValidacao(validacao);
+		
+		logger.log(Level.SEVERE, "######### FIM DO METODO VALIDAR FIADOR CONTRATACAO DIGITAL. ");
+		return retorno;
+	}
+
+	private DadosCpfRetorno consultarCpfNoSICPF(String cpf) throws FESException {
+		PadraoRetornoSICPF padraoSicpf = new PadraoRetornoSICPF();
+		padraoSicpf.setUsuario(cpf);
+		padraoSicpf.setCpf(cpf);
+	padraoSicpf = sicpf.buscarDadosSICPF(padraoSicpf);
+		if (StringUtils.isBlank(padraoSicpf.getNome())) {
+			MessageFormat mf = new MessageFormat(CPF_NAO_ENCONTRADO_SICPF);
+			throw new FESException(mf.format(new Object[] { cpf }));
+		}
+		DadosCpfRetorno retorno = new DadosCpfRetorno(padraoSicpf);
+		retorno.setCodigo(0L);
+		retorno.setMensagem("Informações obtidas com sucesso.");
+		return retorno;
+	}
+
+	private int verificarRestricoesCadastraisFiador(String cpf, Long codigoFies) throws BusinessException {
+		try {
+			int retorno = 0;
+			ResumoPesquisaCadastral restricao = sipesBean.consultar(codigoFies, cpf, cpf);
+			if (restricao != null) {
+				retorno = validarSinad(retorno, restricao);
+				retorno = validarCadin(retorno, restricao);
+				retorno = validarSerasa(retorno, restricao);
+				retorno = validarCcf(retorno, restricao);
+				retorno = validarSpc(retorno, restricao);
+			}
+			return retorno;
+		} catch(BusinessException e) {
+			throw new BusinessException("Não foi possível realizar pesquisa de restrição. Tente novamente mais tarde.");
+		}
+	}
+
+	private int validarSpc(int retorno, ResumoPesquisaCadastral restricao) {
+		if (restricao.getSpc() != null && Boolean.TRUE.equals(restricao.getSpc().getExisteRestricao()))
+			retorno = 1;
+		return retorno;
+	}
+
+	private int validarCcf(int retorno, ResumoPesquisaCadastral restricao) {
+		if (restricao.getCcf() != null && Boolean.TRUE.equals(restricao.getCcf().getExisteRestricao()))
+			retorno = 1;
+		return retorno;
+	}
+
+	private int validarSerasa(int retorno, ResumoPesquisaCadastral restricao) {
+		if (restricao.getSerasa() != null && Boolean.TRUE.equals(restricao.getSerasa().getExisteRestricao()))
+			retorno = 1;
+		return retorno;
+	}
+
+	private int validarCadin(int retorno, ResumoPesquisaCadastral restricao) {
+		if (restricao.getCadin() != null && Boolean.TRUE.equals(restricao.getCadin().getExisteRestricao()))
+			retorno = 1;
+		return retorno;
+	}
+
+	private int validarSinad(int retorno, ResumoPesquisaCadastral restricao) {
+		if (restricao.getSinad() != null && Boolean.TRUE.equals(restricao.getSinad().getExisteRestricao()))
+			retorno = 1;
+		return retorno;
+	}
+	
+	@SuppressWarnings({"rawtypes"})
+	private List<FiadorContratacao> retornaListaFiadorPorCandidato(Long codigoFies) {
+		Query query = super.getEm().createNativeQuery("SELECT * FROM fes.FESTB012_FIADOR WHERE NU_CANDIDATO_FK10 = :codigoFies"); 
+		query.setParameter(CODIGOFIES, codigoFies);
+		List<Object[]> objs = query.getResultList();
+		List<FiadorContratacao> retorno = null;
+		if(CollectionUtils.isNotEmpty(objs)) {
+			retorno = new ArrayList();
+			for(Object[] obj : objs) {
+				FiadorContratacao fiador = new FiadorContratacao(obj);
+				retorno.add(fiador);
+			}
+		}
+		return retorno;
+	}
+	
+	private void salvarFiador(FiadorContratacao fiador, Long codigoFies, Integer sequencial) throws BusinessException {
+		try {
+			String sql = " INSERT INTO FES.FESTB012_FIADOR "
+					+ " (NU_CANDIDATO_FK10, CO_CPF_FIADOR, NU_SEQ_FIADOR, NU_DEPENDENTE_CPF_FIADOR, NO_FIADOR, DT_NASCIMENTO, DE_EMAIL_FIADOR, IC_SITUACAO_FIADOR, VR_RENDA_BRUTA_MENSAL) "
+					+ " VALUES(:codigoFies, :cpf, :sequenciaFiador, 0, :nome, TO_DATE(:dataNascimento, 'dd/MM/yyyy'), :email, :situacao, :renda) ";
+			Query query = getEm().createNativeQuery(sql);
+			
+			query.setParameter(CODIGOFIES, codigoFies);
+			query.setParameter("cpf", fiador.getCpf());
+			query.setParameter("sequenciaFiador", sequencial+1);
+			query.setParameter("nome", fiador.getNome());
+			query.setParameter("dataNascimento", fiador.getDtNascimento());
+			query.setParameter(EMAIL, fiador.getEmail());
+			query.setParameter("situacao", SituacaoFiadorContratacaoEnum.AGUARDANDO_CADASTRO_COMPLEMENTAR.getValor());
+			query.setParameter("renda", fiador.getRendaFiador());
+			query.executeUpdate();
+			
+		} catch (Exception e) {
+			if(e.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
+				throw new BusinessException("Fiador encontra-se cadastrado para o candidato.");
+			} else {
+				throw new BusinessException("Erro ao persistir informações do Fiador. " + e.getLocalizedMessage());
+			}
+		}
+	}
+	
+	private void alterarFiador(FiadorContratacao fiador, Long codigoFies) throws BusinessException {
+		try {
+			String sql = " UPDATE FES.FESTB012_FIADOR SET DE_EMAIL_FIADOR = :email, IC_SITUACAO_FIADOR = :situacao, VR_RENDA_BRUTA_MENSAL = :renda WHERE CO_CPF_FIADOR = :cpfFiador AND "
+					+ " NU_CANDIDATO_FK10 = :codigoFies ";
+			Query query = getEm().createNativeQuery(sql);
+			
+			query.setParameter(CODIGOFIES, codigoFies);
+			query.setParameter(EMAIL, fiador.getEmail());
+			query.setParameter("renda", fiador.getRendaFiador());
+			query.setParameter("situacao", SituacaoFiadorContratacaoEnum.AGUARDANDO_CADASTRO_COMPLEMENTAR.getValor());
+			query.setParameter(CPF_FIADOR, fiador.getCpf());
+			query.executeUpdate();
+			
+		} catch (Exception e) {
+			throw new BusinessException(e.getLocalizedMessage());
+		}
+	}
+	
+	private void validarNumerosFiadores(List<String> validacao, Long codigoFies) throws BusinessException {
+		List<FiadorContratacao> listaFiador = retornaListaFiadorPorCandidato(codigoFies);
+		if(listaFiador != null && listaFiador.size() >= 2) {
+			validacao.add("Numero de fiadores cadastrados excedidos.");
+		}
+	}
+
+	private void validarRestricoes(String cpfFiador, Long codigoFies, List<String> validacao)
+			throws BusinessException, FESException {
+		
+		int restricaoCadastral = verificarRestricoesCadastraisFiador(cpfFiador, codigoFies);
+		DadosCpfRetorno dadoCpf = consultarCpfNoSICPF(cpfFiador);
+		
+		if(dadoCpf.getSituacaoCPF() > 0 && restricaoCadastral == 1) {
+			if(dadoCpf.getSituacaoCPF() > 0) 
+				logger.log(Level.SEVERE, LOG_CPF + cpfFiador + " ENCONTRA-SE PENDENTE DE REGULARIZAÇÃO JUNTO À RECEITA FEDERAL! ");
+			
+			if(restricaoCadastral == 1)
+				logger.log(Level.SEVERE, LOG_CPF + cpfFiador + " POSSUI RESTRIÇÕES CADASTRAIS! ");
+			
+			validacao.add("Fiador possui restrições cadastrais.");
+		}
+	}
+	
+	private void validarCamposObrigatorios(FiadorContratacao fiador) throws BusinessException {
+		List<String> validacao = new ArrayList<>();
+		
+		if(Objects.isNull(fiador)) 
+			validacao.add("Fiador nulo.");
+		
+		if(StringUtils.isBlank(fiador.getEmail()) 
+				|| !FesUtil.verificaEmailValido(fiador.getEmail()) || verificarEmailExistente(fiador.getEmail())) 
+			validacao.add("Campo e-mail nulo ou formato inválido ou existente na base do SIFES.");
+		
+		if(Objects.isNull(fiador.getRendaFiador())) 
+			validacao.add("Campo Renda familiar nulo.");
+		
+		if(StringUtils.isBlank(fiador.getCpf())) 
+			validacao.add("Campo cpf nulo.");
+		
+		if(StringUtils.isBlank(fiador.getNome())) 
+			validacao.add("Campo nome nulo.");
+		
+		if(StringUtils.isBlank(fiador.getDtNascimento())) 
+			validacao.add("Campo data nascimento nulo.");
+		
+		if(StringUtils.isBlank(fiador.getOrigem())) 
+			validacao.add("Campo origem nulo.");
+		
+		if(CollectionUtils.isNotEmpty(validacao)) {
+			for(String msg : validacao) {
+				throw new BusinessException(msg);
+			}
+		}
+	}
+	
+	private void validarFiadorAssociadoOutroContrato(String cpf, List<String> validacao) throws BusinessException {
+		String sql = " SELECT tb012.NU_CANDIDATO_FK10 "
+				+ " FROM fes.FESTB012_FIADOR tb012 "
+				+ " INNER JOIN fes.FESTB036_CONTRATO_FIES tb036 ON tb012.NU_CANDIDATO_FK10 = tb036.NU_CANDIDATO_FK11 "
+				+ " WHERE tb012.CO_CPF_FIADOR = :cpf AND tb036.NU_SITUACAO_CONTRATO_FK81 NOT IN(3,6) "
+				+ " AND tb036.NU_SITUACAO_CONTRATO_FK81 IS NOT NULL ";
+		Query query = getEm().createNativeQuery(sql);
+		query.setParameter("cpf", cpf);
+		List<BigDecimal> fiadores = query.getResultList();
+		
+		if(CollectionUtils.isNotEmpty(fiadores)) {
+			validacao.add("CPF já vinculado a um outro contrato FIES.");
+		}
+	}
+
+//	private void validarMaioridadeFiador(FiadorContratacao fiador, List<String> validacao) throws BusinessException {
+//		try {
+//			Date dtNascimento = new SimpleDateFormat(PatternDeDataUtil.getddMMyyyy()).parse(fiador.getDtNascimento());
+//			int idade = DataUtil.calculaIdade(dtNascimento);
+//			if(idade < 18 || idade > 80) {
+//				validacao.add("Fiador deve ser maior de 18 e menor que 80 anos.");
+//			}
+//		} catch (ParseException e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
+	private boolean verificarEmailExistente(String email) throws BusinessException {
+		String sql = " SELECT count(tb010.NU_SEQ_CANDIDATO) "
+				+ " FROM FES.FESTB010_CANDIDATO tb010 "
+				+ " INNER JOIN FES.FESTB012_FIADOR tb012 ON tb012.NU_CANDIDATO_FK10 = tb010.NU_SEQ_CANDIDATO "
+				+ " WHERE tb012.DE_EMAIL_FIADOR = :emailFiador OR tb010.DE_EMAIL = :emailCandidato ";
+		Query query = super.getEm().createNativeQuery(sql);
+		
+		query.setParameter("emailFiador", email);
+		query.setParameter("emailCandidato", email);
+		
+		BigDecimal result = (BigDecimal)query.getSingleResult();
+		
+		return result != null && result.intValue() > 0;
+	}
+	
+	private void validarFiadorConjugeCandidato(String cpfFiador, String cpf, List<String> validacao) {
+		String sql = " SELECT * FROM fes.FESTB012_FIADOR WHERE CO_CPF_FIADOR = :cpfFiador AND CO_CPF_CONJUGE = :cpfCandidato ";
+		Query query = getEm().createNativeQuery(sql);
+		query.setParameter(CPF_FIADOR, cpfFiador);
+		query.setParameter("cpfCandidato", cpf);
+		List<Object[]> result = query.getResultList();
+		if(CollectionUtils.isNotEmpty(result)) {
+			validacao.add("O Fiador não pode ser conjuge do candidato.");
+		}
+	}
+	
+	private String sqlRetornoFiador() {
+		return " SELECT T1.nu_seq_fiador, "
+				  + " nu_candidato_fk10, "
+				  + " T1.co_cpf_fiador, "
+				  + " T1.nu_dependente_cpf_fiador, "
+				  + " T1.no_fiador, "
+				  + " To_char(T1.dt_nascimento, 'DD/MM/YYYY') AS DT_NASCIMENTO, "
+				  + " T1.co_ric_fiador, "
+				  + " T1.de_nacionalidade, "
+				  + " T1.co_identidade, "
+				  + " T1.sg_uf_expedicao_fk07, "
+				  + " T1.nu_orgao_expedidor_fk79, "
+				  + " T79.de_orgao_expedidor, "
+				  + " Nvl(T1.nu_estado_civil, 0) NU_ESTADO_CIVIL, "
+				  + " Nvl(T1.nu_regime_bens, 0) NU_REGIME_BENS, "
+				  + " To_char(T1.dt_expedicao, 'DD/MM/YYYY') AS DT_EXPEDICAO, "
+				  + " T1.de_endereco, "
+				  + " T1.no_bairro, "
+				  + " T1.co_cep, "
+				  + " T1.sg_uf_fk08, "
+				  + " T7.no_uf, "
+				  + " T7.de_regiao, "
+				  + " T8.nu_municipio, "
+				  + " T8.no_municipio, "
+				  + " Nvl(co_ddd, '') CO_DDD, "
+				  + " Nvl(t1.co_telefone, '') CO_TEL, "
+				  + " Nvl(co_ddd_celular, '') CO_DDD_CELULAR, "
+				  + " Nvl(co_telefone_celular, '') CO_TELEFONE_CELULAR, "
+				  + " Nvl(co_ddd_comercial, '') CO_DDD_COMERCIAL, "
+				  + " Nvl(co_telefone_comercial, '') CO_TELEFONE_COMERCIAL, "
+				  + " T1.ic_emancipado, "
+				  + " T1.co_motivo_emancipacao, "
+				  + " no_conjuge, "
+				  + " co_cpf_conjuge, "
+				  + " Nvl(nu_dependente_cpf_conjuge, 0) NU_DEPENDENTE_CPF_CONJUGE,                                                                                  "
+				  + " T1.de_nacionalidade_conjuge, "
+				  + " To_char(T1.dt_nascimento_conjuge, 'DD/MM/YYYY') AS DT_NASCIMENTO_CONJUGE, "
+				  + " T1.co_identidade_conjuge, "
+				  + " Nvl(T1.nu_orgao_exp_conjuge_fk79, 0) "
+				  + " NU_ORGAO_EXPEDIDOR_CNJGE_FK79, "
+				  + " T1.sg_uf_exp_conjuge "
+				  + " SG_UF_EXPEDICAO_CONJUGE_FK07, "
+				  + " T72.no_uf no_uf_conjuge, "
+				  + " T72.de_regiao de_regiao_conjuge,"
+				  + " To_char(T1.dt_expedicao_conjuge, 'DD/MM/YYYY')  AS DT_EXPEDICAO_CONJUGE, "
+				  + " T1.co_ric_conjuge, "
+				  + " Nvl(T1.vr_renda_bruta_mensal, 0) VR_RENDA_BRUTA_MENSAL, "
+				  + " Nvl(To_char(T1.nu_ocupacao_pc1), '') CO_OCUPACAO, "
+				  + " T73.no_uf no_uf_identidade, "
+				  + " T73.de_regiao de_regiao_identidade, "
+				  + " T792.DE_ORGAO_EXPEDIDOR orgao_expedidor_conjuge " 
+				  + " FROM   fes.festb012_fiador T1 "
+				  + " LEFT OUTER JOIN fes.festb008_municipio T8 "
+				  + " ON T8.nu_municipio = T1.nu_municipio_fk08 "
+				  + " AND T8.sg_uf_fk07 = T1.sg_uf_fk08 "
+				  + " LEFT OUTER JOIN fes.festb007_uf T7 "
+				  + " ON T1.sg_uf_fk08 = T7.sg_uf "
+				  + " LEFT OUTER JOIN fes.festb079_orgao_expedidor T79 "
+				  + " ON T79.nu_orgao_expedidor = nu_orgao_expedidor_fk79 "
+			      + " LEFT OUTER JOIN fes.festb007_uf T72 "
+                + " ON T1.sg_uf_exp_conjuge = T72.sg_uf "
+                + " LEFT OUTER JOIN fes.festb007_uf T73 "
+                + " ON T1.sg_uf_expedicao_fk07 = T73.sg_uf "
+                + " LEFT OUTER JOIN fes.festb079_orgao_expedidor T792 "
+                + " ON T792.nu_orgao_expedidor = Nvl(T1.nu_orgao_exp_conjuge_fk79, 0) "				  					      
+				  + " WHERE  T1.nu_candidato_fk10 = :codigoFies ";
+	}
+	
+	private void gravarAuditoria(String cpf, Object fiador, String tipo) {
+		try {
+			auditoriaBean.gravaAuditoria(cpf, "12", tipo, fiador);
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "######### ERRO AO GRAVAR AUDITORIA DE INCLUSÃO/ALTERAÇÃO! " + cpf, e);
+		}
+	}
+
+	@Override
+	public Retorno incluirFiadorComplementar(FiadorContratacaoComplementar fiador) throws BusinessException {
+		Retorno retorno = new Retorno();
+		try {
+			logger.log(Level.SEVERE, "######### INICIO DO METODO SALVAR FIADOR DADOS COMPLEMENTAR. ");
+			
+			validarCamposObrigatoriosFiadorComplementar(fiador);
+
+			Long codigoFies = contratoService.buscarCandidatoAssociadoParticipante(fiador.getCpf(), TipoRelacionamentoEnum.FIADOR.getValor());
+			if(codigoFies == null)
+				throw new BusinessException("Usuário não possui vínculo com nenhum estudante.");
+			
+			FiadorContratacao fiadorCadastrado = recuperarFiadorCandidato(fiador.getCpf(), codigoFies);
+			if(fiadorCadastrado == null)
+				throw new BusinessException("CPF informado para o Fiador não localizado.");
+			
+			verificarEmailFiadorExistente(fiadorCadastrado, fiador);
+			salvarFiadorComplementar(fiador, codigoFies);
+			salvarInformacaoCadastroComplementar(fiador, codigoFies);
+
+			retorno.setCodigo(0L);
+			retorno.setMensagem("Cadastro complementar realizado com sucesso.");
+			
+			gravarAuditoria(fiador.getCpf(), fiador, Constantes.INCLUSAO);
+			
+			logger.log(Level.SEVERE, "######### FIM DO METODO SALVAR FIADOR DADOS COMPLEMENTAR. ");
+			
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "######### ERRO AO INCLUIR FIADOR DADOS COMPLEMENTAR CPF " + "", e);
+			throw new BusinessException(e.getLocalizedMessage());
+		}
+		return retorno;
+	}
+
+	private void salvarInformacaoCadastroComplementar(FiadorContratacaoComplementar fiador, Long codigoFies) throws BusinessException {
+		if(contratoService.validaRegistroCadastroComplementar(fiador.getCpf())) {
+			contratoService.gravarDadosParticipantesExtenosContrato(fiador.getCpf(), TipoRelacionamentoEnum.FIADOR.getValor(), codigoFies, 2, "S");
+			if(fiador.getCodigoEstadoCivil() == 2 && contratoService.validaRegistroCadastroComplementarBasico(fiador.getCpfConjuge()))
+				contratoService.gravarDadosParticipantesExtenosContrato(fiador.getCpfConjuge(), TipoRelacionamentoEnum.CONJUGE_FIADOR.getValor(), codigoFies, 1, "N");
+		}
+	}
+
+	private void verificarEmailFiadorExistente(FiadorContratacao fiadorCadastrado, FiadorContratacaoComplementar fiador) throws BusinessException {
+		if(!fiadorCadastrado.getEmail().trim().toLowerCase().equalsIgnoreCase(fiador.getEmailFiador().trim().toLowerCase())) {
+			boolean emailExistente = verificarEmailExistente(fiador.getEmailFiador()); 
+			if(emailExistente)
+				throw new BusinessException("E-mail existente na base do SIFES.");
+		}
+	}
+
+	private FiadorContratacao recuperarFiadorCandidato(String cpf, Long codigoFies) {
+		String sql = " SELECT NO_FIADOR, DE_EMAIL_FIADOR FROM fes.FESTB012_FIADOR "
+				   + " WHERE CO_CPF_FIADOR = :cpf AND NU_CANDIDATO_FK10 = :codigoFies ";
+		Query query = getEm().createNativeQuery(sql);
+		query.setParameter(CODIGOFIES, codigoFies);
+		query.setParameter(CPF, cpf);
+		
+		FiadorContratacao fiador = null;
+		Object[] obj = (Object[]) query.getSingleResult();
+		
+		if(obj != null) {
+			fiador = new FiadorContratacao();
+			fiador.setNome(obj[0].toString());
+			fiador.setEmail(obj[1].toString());
+		}
+		
+		return fiador;
+	}
+
+	private void salvarFiadorComplementar(FiadorContratacaoComplementar fiador, Long codigoFies) throws BusinessException {
+		try {
+			String sql = " UPDATE FES.FESTB012_FIADOR SET CO_IDENTIDADE = :identidade, NU_ORGAO_EXPEDIDOR_FK79 = :codigoOrgaoExpedidor, SG_UF_EXPEDICAO_FK07 = :ufExpedicao, "
+					+ " DT_EXPEDICAO = TO_DATE(:dataExpedicaoIdentidade, 'dd/MM/yyyy'), NU_ESTADO_CIVIL = :codigoEstadoCivil, DE_ENDERECO = :endereco, NO_BAIRRO = :bairro, "
+					+ " SG_UF_FK08 = :uf, NU_MUNICIPIO_FK08 = :codigoCidade, CO_CEP = :cep, CO_DDD = :dddTelefone, CO_TELEFONE = :numeroTelefone, CO_DDD_CELULAR = :dddTelefoneCelular, "
+					+ " CO_TELEFONE_CELULAR = :numeroTelefoneCelular, CO_DDD_COMERCIAL = :dddTelefoneComercio, CO_TELEFONE_COMERCIAL = :numeroTelefoneComercio, "
+					+ " DE_NACIONALIDADE = :nacionalidade, DE_EMAIL_FIADOR = :emailFiador, CO_CPF_CONJUGE = :cpfConjuge, NU_DEPENDENTE_CPF_CONJUGE = :numeroDependenteConjuge, "
+					+ " DT_NASCIMENTO_CONJUGE = TO_DATE(:dataNacimentoConjuge, 'dd/MM/yyyy'), NO_CONJUGE = :nomeConjuge, DE_EMAIL_CONJUGE_FIADOR = :emailConjugeFiador, "
+					+ " CO_DDD_CONJUGE = :dddConjuge, NU_CELULAR_CONJUGE = :celularConjuge "
+					+ " WHERE CO_CPF_FIADOR = :cpf AND NU_CANDIDATO_FK10 = :codigoFies ";
+			
+			Query query = getEm().createNativeQuery(sql);
+			
+			query.setParameter("identidade", fiador.getIdentidade());
+			query.setParameter("codigoOrgaoExpedidor", fiador.getCodigoOrgaoExpedidor());
+			query.setParameter("ufExpedicao", fiador.getUfExpedicao());
+			query.setParameter("dataExpedicaoIdentidade", fiador.getDataExpedicaoIdentidade());
+			query.setParameter("codigoEstadoCivil", fiador.getCodigoEstadoCivil());
+			query.setParameter("endereco", fiador.getEndereco());
+			query.setParameter("bairro", fiador.getBairro());
+			query.setParameter("uf", fiador.getUf());
+			query.setParameter("codigoCidade", fiador.getCodigoCidade());
+			query.setParameter("cep", fiador.getCep());
+			query.setParameter("dddTelefone", fiador.getDddTelefone());
+			query.setParameter("numeroTelefone", fiador.getNumeroTelefone());
+			query.setParameter("dddTelefoneCelular", fiador.getDddTelefoneCelular());
+			query.setParameter("numeroTelefoneCelular", fiador.getNumeroTelefoneCelular());
+			query.setParameter("dddTelefoneComercio", fiador.getDddTelefoneComercio());
+			query.setParameter("numeroTelefoneComercio", fiador.getNumeroTelefoneComercio());
+			query.setParameter("nacionalidade", fiador.getNacionalidade());
+			query.setParameter("emailFiador", fiador.getEmailFiador());
+			query.setParameter("cpfConjuge", fiador.getCpfConjuge());
+			query.setParameter("numeroDependenteConjuge", fiador.getNumeroDependenteConjuge());
+			query.setParameter("dataNacimentoConjuge", fiador.getDataNacimentoConjuge());
+			query.setParameter("nomeConjuge", fiador.getNomeConjuge());
+			query.setParameter("emailConjugeFiador", fiador.getEmailConjugeFiador());
+			query.setParameter("dddConjuge", fiador.getDddConjuge());
+			query.setParameter("celularConjuge", fiador.getCelularConjuge());
+			
+			query.setParameter(CODIGOFIES, codigoFies);
+			query.setParameter(CPF, fiador.getCpf());
+			
+			query.executeUpdate();
+			
+		} catch (Exception e) {
+			throw new BusinessException("Erro ao persistir informações do Fiador complementar. " + e.getLocalizedMessage());
+		}
+	}
+	
+	private void validarCamposObrigatoriosFiadorComplementar(FiadorContratacaoComplementar fiador) throws BusinessException {
+		List<String> validacao = new ArrayList<>();
+		
+		if(fiador != null) {
+			
+			validarBlocoIdentificacao(fiador, validacao);
+			validarBlocoEndereco(fiador, validacao);
+			validarBlocoComunicacao(fiador, validacao);
+			
+			if(StringUtils.isBlank(fiador.getOrigem())) 
+				validacao.add("Campo origem nulo.");
+			
+			if(fiador.getCodigoEstadoCivil() == 2) 
+				validarConjugeFiador(fiador, validacao);
+			
+			if(CollectionUtils.isNotEmpty(validacao)) {
+				for(String msg : validacao) {
+					throw new BusinessException(msg);
+				}
+			}
+		} 
+	}
+
+	private void validarBlocoComunicacao(FiadorContratacaoComplementar fiador, List<String> validacao) {
+		if(StringUtils.isBlank(fiador.getDddTelefone())) 
+			validacao.add("Campo ddd telefone nulo.");
+		
+		if(StringUtils.isBlank(fiador.getNumeroTelefone())) 
+			validacao.add("Campo número telefone nulo.");
+		
+		if(StringUtils.isBlank(fiador.getDddTelefoneCelular())) 
+			validacao.add("Campo ddd celular nulo.");
+		
+		if(StringUtils.isBlank(fiador.getNumeroTelefoneCelular())) 
+			validacao.add("Campo telefone celular nulo.");
+		
+		if(StringUtils.isBlank(fiador.getDddTelefoneComercio())) 
+			validacao.add("Campo ddd telefone comercial nulo.");
+		
+		if(StringUtils.isBlank(fiador.getNumeroTelefoneComercio())) 
+			validacao.add("Campo telefone comercial nulo.");
+		
+		if(StringUtils.isBlank(fiador.getEmailFiador()) || !FesUtil.verificaEmailValido(fiador.getEmailFiador())) 
+			validacao.add("Campo email fiador nulo ou inválido.");
+	}
+
+	private void validarBlocoEndereco(FiadorContratacaoComplementar fiador, List<String> validacao) {
+		if(StringUtils.isBlank(fiador.getEndereco())) 
+			validacao.add("Campo endereço nulo.");
+		
+		if(StringUtils.isBlank(fiador.getBairro())) 
+			validacao.add("Campo bairro nulo.");
+		
+		if(StringUtils.isBlank(fiador.getUf())) 
+			validacao.add("Campo uf nulo.");
+		
+		if(Objects.isNull(fiador.getCodigoCidade())) 
+			validacao.add("Campo código município nulo.");
+		
+		if(StringUtils.isBlank(fiador.getCep())) 
+			validacao.add("Campo cep nulo.");
+	}
+
+	private void validarBlocoIdentificacao(FiadorContratacaoComplementar fiador, List<String> validacao) {
+		if(StringUtils.isBlank(fiador.getCpf())) 
+			validacao.add("Campo cpf nulo.");
+		
+		if(StringUtils.isBlank(fiador.getIdentidade())) 
+			validacao.add("Campo identidade nulo.");
+		
+		if(Objects.isNull(fiador.getCodigoOrgaoExpedidor())) 
+			validacao.add("Campo órgão expedidor nulo.");
+		
+		if(StringUtils.isBlank(fiador.getUfExpedicao())) 
+			validacao.add("Campo uf expedição identidade nulo.");
+		
+		if(StringUtils.isBlank(fiador.getDataExpedicaoIdentidade())) 
+			validacao.add("Campo data expedição identidade nulo.");
+		
+		if(Objects.isNull(fiador.getCodigoEstadoCivil())) 
+			validacao.add("Campo estado civil nulo.");
+		
+		if(StringUtils.isBlank(fiador.getNacionalidade())) 
+			validacao.add("Campo nacionalidade nulo.");
+	}
+	
+	private void validarConjugeFiador(FiadorContratacaoComplementar fiador, List<String> validacao) throws BusinessException {
+
+		if(StringUtils.isBlank(fiador.getCpfConjuge())) 
+			validacao.add("Campo cpf conjuge fiador nulo.");
+		
+		if(Objects.isNull(fiador.getNumeroDependenteConjuge())) 
+			validacao.add("Campo número dependente conjuge nulo.");
+		
+		if(StringUtils.isBlank(fiador.getDataNacimentoConjuge())) 
+			validacao.add("Campo data nacimento conjuge nulo.");
+		
+		if(StringUtils.isBlank(fiador.getNomeConjuge())) 
+			validacao.add("Campo nome conjuge nulo.");
+
+		if(StringUtils.isBlank(fiador.getEmailConjugeFiador()) 
+				|| !FesUtil.verificaEmailValido(fiador.getEmailConjugeFiador()) || verificarEmailExistente(fiador.getEmailConjugeFiador())) 
+			validacao.add("Campo e-mail nulo ou formato inválido ou existente na base do SIFES.");
+		
+		if(StringUtils.isBlank(fiador.getDddConjuge())) 
+			validacao.add("Campo ddd celular conjuge nulo.");
+		
+		if(StringUtils.isBlank(fiador.getCelularConjuge())) 
+			validacao.add("Campo celular conjuge nulo.");
+		
+	}
+
+	@Override
+	public boolean possuiFiadorParaCandidato(Long codigoFies, String cpfFiador) {
+		try {
+			final Query query = super
+					.getEm()
+					.createNativeQuery("SELECT COUNT(f.NU_CANDIDATO_FK10) FROM FES.FESTB012_FIADOR f WHERE f.NU_CANDIDATO_FK10 = :fies AND f.CO_CPF_FIADOR = :cpf")
+					.setParameter("fies", codigoFies)
+					.setParameter("cpf", cpfFiador);
+
+			return Integer.parseInt(query.getSingleResult().toString()) >= 1;
+		} catch (Exception e) {
+			logger.severe(e.getLocalizedMessage());
+			return false;
+		}
+	}
+
+	@Override
+	public boolean excluir(Long codigoFies, String cpfFiador) {
+		final Query query = super
+				.getEm()
+				.createNativeQuery("DELETE FROM FES.FESTB012_FIADOR f WHERE NU_CANDIDATO_FK10 = :codigoFies AND f.CO_CPF_FIADOR = :cpfFiador")
+				.setParameter(CODIGOFIES, codigoFies)
+				.setParameter(CPF_FIADOR, cpfFiador);
+		return query.executeUpdate() >= 1;
+	}
+
+	@Override
+	public Fiador popularDadosFiador(String cpf) {
+		try {
+			final Query query = super.getEm().createNativeQuery("SELECT " +
+							"NU_CANDIDATO_FK10 codigoFies, " +
+							"NO_FIADOR nome, " +
+							"CO_CPF_FIADOR cpf," +
+							"DT_NASCIMENTO " +
+							"FROM FES.FESTB012_FIADOR " +
+							"WHERE CO_CPF_FIADOR = :cpf")
+					.setParameter("cpf", cpf);
+
+			final Object[] resultado = (Object[]) query.getSingleResult();
+
+			Fiador fiador = new Fiador();
+			fiador.setCodigoFies(Long.parseLong(resultado[0].toString()));
+			fiador.setNome(resultado[1].toString());
+			fiador.setCpf(resultado[2].toString());
+			fiador.setDataNascimento(resultado[3].toString());
+			return fiador;
+		} catch (Exception e){
+			logger.severe(e.getLocalizedMessage());
+			return null;
+		}
+	}
 }
-)
+
+
+
+jquery.js:17 
+            
+            
+           GET http://localhost:8080/fes-web/emprest/fiador/consultaFiadores?codigoFies=&_=1772217127927 412 (Precondition Failed)
+send @ jquery.js:17
+ajax @ jquery.js:16
+a.ajax @ backbone-min.js:1
+a.sync @ backbone-min.js:1
+sync @ backbone-min.js:1
+fetch @ backbone-min.js:1
+buscar @ VM234:50
+consultar @ ConsultaFiadorControle.js:91
+dispatch @ jquery.js:7
+v.handle @ jquery.js:7
+ConsultaFiadorControle.js:121 [listarFiadores] FAIL 412 {"sistema":"","origemErro":"java.lang.NumberFormatException","paragrafoErro":"","categoriaErro":"Internal Server Error - Erro Sistema","codigoErro":"500","mensagemNegocial":[],"mensagemErro":["java.lang.NumberFormatException: For input string: \"\""],"severidade":1,"severidadeDescricao":null,"informacoesAdicionais":"java.lang.NumberFormatException: For input string: \"\"\r\n\tat java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)\r\n\tat java.lang.Long.parseLong(Long.java:601)\r\n\tat java.lang.Long.<init>(Long.java:965)\r\n\tat sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)\r\n\tat sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)\r\n\tat sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)\r\n\tat java.lang.reflect.Constructor.newInstance(Constructor.java:422)\r\n\tat org.jboss.resteasy.core.StringParameterInjector.extractValue(StringParameterInjector.java:347)\r\n\tat org.jboss.resteasy.core.StringParameterInjector.extractValues(StringParameterInjector.java:299)\r\n\tat org.jboss.resteasy.core.QueryParamInjector.inject(QueryParamInjector.java:59)\r\n\tat org.jboss.resteasy.core.MethodInjectorImpl.injectArguments(MethodInjectorImpl.java:92)\r\n\tat org.jboss.resteasy.core.MethodInjectorImpl.invoke(MethodInjectorImpl.java:115)\r\n\tat org.jboss.resteasy.core.ResourceMethodInvoker.invokeOnTarget(ResourceMethodInvoker.java:295)\r\n\tat org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:249)\r\n\tat org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:236)\r\n\tat org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:406)\r\n\tat org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:213)\r\n\tat org.jboss.resteasy.plugins.server.servlet.ServletContainerDispatcher.service(ServletContainerDispatcher.java:228)\r\n\tat org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.service(HttpServletDispatcher.java:56)\r\n\tat org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.service(HttpServletDispatcher.java:51)\r\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:790)\r\n\tat io.undertow.servlet.handlers.ServletHandler.handleRequest(ServletHandler.java:85)\r\n\tat io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:129)\r\n\tat br.gov.caixa.fes.filter.FilterSifes.doFilter(FilterSifes.java:26)\r\n\tat io.undertow.servlet.core.ManagedFilter.doFilter(ManagedFilter.java:61)\r\n\tat io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:131)\r\n\tat io.undertow.servlet.handlers.FilterHandler.handleRequest(FilterHandler.java:84)\r\n\tat io.undertow.servlet.handlers.security.ServletSecurityRoleHandler.handleRequest(ServletSecurityRoleHandler.java:62)\r\n\tat io.undertow.servlet.handlers.ServletDispatchingHandler.handleRequest(ServletDispatchingHandler.java:36)\r\n\tat org.wildfly.extension.undertow.security.SecurityContextAssociationHandler.handleRequest(SecurityContextAssociationHandler.java:78)\r\n\tat io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)\r\n\tat org.keycloak.adapters.undertow.UndertowAuthenticatedActionsHandler.handleRequest(UndertowAuthenticatedActionsHandler.java:66)\r\n\tat io.undertow.servlet.handlers.security.SSLInformationAssociationHandler.handleRequest(SSLInformationAssociationHandler.java:131)\r\n\tat io.undertow.servlet.handlers.security.ServletAuthenticationCallHandler.handleRequest(ServletAuthenticationCallHandler.java:57)\r\n\tat io.undertow.server.handlers.DisableCacheHandler.handleRequest(DisableCacheHandler.java:33)\r\n\tat io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)\r\n\tat io.undertow.security.handlers.AuthenticationConstraintHandler.handleRequest(AuthenticationConstraintHandler.java:53)\r\n\tat io.undertow.security.handlers.AbstractConfidentialityHandler.handleRequest(AbstractConfidentialityHandler.java:46)\r\n\tat io.undertow.servlet.handlers.security.ServletConfidentialityConstraintHandler.handleRequest(ServletConfidentialityConstraintHandler.java:64)\r\n\tat io.undertow.servlet.handlers.security.ServletSecurityConstraintHandler.handleRequest(ServletSecurityConstraintHandler.java:59)\r\n\tat io.undertow.security.handlers.AuthenticationMechanismsHandler.handleRequest(AuthenticationMechanismsHandler.java:60)\r\n\tat io.undertow.servlet.handlers.security.CachedAuthenticatedSessionHandler.handleRequest(CachedAuthenticatedSessionHandler.java:77)\r\n\tat io.undertow.security.handlers.NotificationReceiverHandler.handleRequest(NotificationReceiverHandler.java:50)\r\n\tat io.undertow.security.handlers.AbstractSecurityContextAssociationHandler.handleRequest(AbstractSecurityContextAssociationHandler.java:43)\r\n\tat io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)\r\n\tat org.wildfly.extension.undertow.security.jacc.JACCContextIdHandler.handleRequest(JACCContextIdHandler.java:61)\r\n\tat io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)\r\n\tat org.wildfly.extension.undertow.deployment.GlobalRequestControllerHandler.handleRequest(GlobalRequestControllerHandler.java:68)\r\n\tat org.keycloak.adapters.undertow.ServletPreAuthActionsHandler.handleRequest(ServletPreAuthActionsHandler.java:69)\r\n\tat io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)\r\n\tat io.undertow.servlet.handlers.ServletInitialHandler.handleFirstRequest(ServletInitialHandler.java:292)\r\n\tat io.undertow.servlet.handlers.ServletInitialHandler.access$100(ServletInitialHandler.java:81)\r\n\tat io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:138)\r\n\tat io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:135)\r\n\tat io.undertow.servlet.core.ServletRequestContextThreadSetupAction$1.call(ServletRequestContextThreadSetupAction.java:48)\r\n\tat io.undertow.servlet.core.ContextClassLoaderSetupAction$1.call(ContextClassLoaderSetupAction.java:43)\r\n\tat org.wildfly.extension.undertow.security.SecurityContextThreadSetupAction.lambda$create$0(SecurityContextThreadSetupAction.java:105)\r\n\tat org.wildfly.extension.undertow.security.SecurityContextThreadSetupAction$$Lambda$1184/790689669.call(Unknown Source)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1185/393515984.call(Unknown Source)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1185/393515984.call(Unknown Source)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1185/393515984.call(Unknown Source)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1185/393515984.call(Unknown Source)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)\r\n\tat org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1185/393515984.call(Unknown Source)\r\n\tat io.undertow.servlet.handlers.ServletInitialHandler.dispatchRequest(ServletInitialHandler.java:272)\r\n\tat io.undertow.servlet.handlers.ServletInitialHandler.access$000(ServletInitialHandler.java:81)\r\n\tat io.undertow.servlet.handlers.ServletInitialHandler$1.handleRequest(ServletInitialHandler.java:104)\r\n\tat io.undertow.server.Connectors.executeRootHandler(Connectors.java:326)\r\n\tat io.undertow.server.HttpServerExchange$1.run(HttpServerExchange.java:812)\r\n\tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)\r\n\tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)\r\n\tat java.lang.Thread.run(Thread.java:745)\r\n"}
+eval @ ConsultaFiadorControle.js:121
+c @ jquery.js:4
+fireWith @ jquery.js:4
+k @ jquery.js:16
+r @ jquery.js:17
+XMLHttpRequest.send
+send @ jquery.js:17
+ajax @ jquery.js:16
+a.ajax @ backbone-min.js:1
+a.sync @ backbone-min.js:1
+sync @ backbone-min.js:1
+fetch @ backbone-min.js:1
+buscar @ VM234:50
+consultar @ ConsultaFiadorControle.js:91
+dispatch @ jquery.js:7
+v.handle @ jquery.js:7
+
+quando consulto só por codfies ele exige o CPF e deve ser consultado por um ou por outro;
+
+ao consultar pelos 2 campos ele traz os fiadores mas não preencheu o nº do contrato
+
+ao clickar em novo fiador aparece as abas para o cadastro mas uma delas está contrato e deveria ser contato
+
+ao moeçar a digitar a profissão no campo autocomplete ele deveria travar a tela após 3 digitos e gerar a lista, pois o usuário fica digitando sem saber que o campo é ummautocomplete
+
+
+ao preencher todos os dados e salvar ele dá o erro Ocorreu um erro na realização do comando, tente novamente!
+no console aparece: 
+VM291:31 call -> fiadorContatoControle -> updateModel
+Fiador.js:44 call -> FiadorModel -> validate
+Fiador.js:292 call -> Fiador -> salvar
+Fiador.js:44 call -> FiadorModel -> validate
+fes-web/emprest/fiador/salva:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+
+		   
+ao consultar e clicar em novo fiador, se clickar em cancelar ele não executa nada
+
+no console:
+VM367:93 Uncaught ReferenceError: cloneFiador is not defined
+    at HTMLAnchorElement.eval (eval at <anonymous> (jquery.js:3:4904), <anonymous>:93:40)
+    at HTMLAnchorElement.dispatch (jquery.js:7:3780)
+    at v.handle (jquery.js:7:485)
+
+VM373:78 call -> FiadorEnderecoControle -> atulizaCidade
+VM373:93 call -> FiadorEnderecoControle -> CidadeColecao
+VM373:107 call -> FiadorEnderecoControle -> updateModel;
+VM373:109 
+r {cid: 'c445', attributes: {…}, _changing: false, _previousAttributes: {…}, changed: {…}, …}
+﻿
+
+ao entrar em um fiador já cadastrado e alterar os dados 
+Ocorreu um erro na realização do comando, tente novamente!
+no console:
+
+call -> FiadorModel -> validate
+Fiador.js:292 call -> Fiador -> salvar
+Fiador.js:44 call -> FiadorModel -> validate
+jquery.js:17 
+            
+            
+           POST http://localhost:8080/fes-web/emprest/fiador/salva 400 (Bad Request)
