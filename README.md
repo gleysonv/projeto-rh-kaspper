@@ -1,113 +1,149 @@
-<ul class="breadcrumb">
-  <li><a href="index.html">In&iacute;cio</a> <span class="divider">&gt;</span></li>
-  <li>Contrato FIES <span class="divider">&gt;</span></li>
-  <li>Manuten&ccedil;&atilde;o <span class="divider">&gt;</span></li>
-  <li class="active">Altera&ccedil;&atilde;o/Substitui&ccedil;&atilde;o de Fiador</li>
-</ul>
+// === AJUSTE AQUI ===
+// Se sua aplicação já tem um helper de URL, use ele.
+// Caso contrário, deixe '' se o REST estiver no mesmo contexto.
+var BASE_URL = ''; // ex: '/fes' ou '/api' ou ''
 
-<h1>Informa&ccedil;&otilde;es do Estudante</h1>
+(function ($) {
 
-<form class="form-horizontal" id="formFiltroConsulta">
+  function getCodigoFiesDigitado() {
+    return $.trim($('#codigoFiesConsulta').val() || '');
+  }
 
-  <div class="row-fluid noprint" id="divConsultar">
-    <div class="span6">
+  function getCpfDigitado() {
+    return $.trim($('#cpf').val() || '');
+  }
 
-      <div class="control-group">
-        <label class="control-label" for="cpf">CPF:</label>
-        <div class="controls">
-          <input type="text" id="cpf" name="cpf" class="input-medium cpf" maxlength="14">
-        </div>
-      </div>
+  function limparResultado() {
+    $('#divResultado').hide();
+    $('#divTabelaFiadores').hide();
+    $('#divAcoesPosConsulta').hide();
+    $('#tbResultadoFiadores tbody').empty();
 
-      <div class="control-group">
-        <label class="control-label" for="codigoFiesConsulta">C&oacute;digo Fies:</label>
-        <div class="controls">
-          <input type="text" id="codigoFiesConsulta" name="codigoFiesConsulta" class="input-medium fies" maxlength="11">
+    $('#codigoFies').text('');
+    $('#cpfEstudante').text('');
+    $('#contratoSIAPI').text('');
+    $('#nomeEstudante').text('');
+    $('#cursoTurno').text('');
+  }
 
-          <a href="#" class="btn btn-primary" title="Localizar" id="btnLocalizarCodFies">
-            <i class="icon-search icon-white"></i>
-            Localizar C&oacute;d. Fies
-          </a>
-        </div>
-      </div>
+  // Preenche o “Resultado” do estudante (mínimo pra tela fazer sentido)
+  // Se você tiver um REST específico do contrato/estudante, substitua aqui.
+  function preencherCabecalhoMinimo(codigoFies, cpf) {
+    $('#codigoFies').text(codigoFies);
+    $('#cpfEstudante').text(cpf || '-');
 
-      <div class="control-group">
-        <label class="control-label" for="agenciaConsulta">Ag&ecirc;ncia:</label>
-        <div class="controls">
-          <input type="text" id="agenciaConsulta" name="agenciaConsulta" class="input-medium" maxlength="6">
-        </div>
-      </div>
+    // placeholders (troque quando tiver endpoint real)
+    $('#contratoSIAPI').text('-');
+    $('#nomeEstudante').text('-');
+    $('#cursoTurno').text('-');
 
-    </div>
-  </div>
+    $('#divResultado').show();
+  }
 
-  <br>
+  function renderFiadores(fiadores) {
+    var $tbody = $('#tbResultadoFiadores tbody');
+    $tbody.empty();
 
-  <div class="form-actions noprint">
-    <a href="#" class="btn btn-primary" title="Consultar" id="btnConsultar">
-      <i class="icon-search icon-white"></i>
-      Consultar
-    </a>
-    <a href="#" class="btn btn-limpar" title="Limpar" id="btnLimpar">Limpar</a>
-    <a href="#" class="btn btn-primary" title="Voltar" id="btnVoltar">Voltar</a>
-  </div>
+    if (!fiadores || !fiadores.length) {
+      $tbody.append(
+        '<tr><td colspan="5" style="text-align:center;">Nenhum fiador encontrado.</td></tr>'
+      );
+      return;
+    }
 
-  <!-- RESULTADO (mostra depois da consulta) -->
-  <div class="row-fluid" id="divResultado" style="display:none;">
-    <div class="span6">
-      <div class="control-group">
-        <label class="control-label">C&oacute;digo Fies:</label>
-        <div class="controls resultado"><span id="codigoFies"></span></div>
-      </div>
+    fiadores.forEach(function (f, idx) {
+      // Ajuste os nomes conforme o JSON real do seu backend
+      var contrato = f.numeroContrato || f.contrato || f.nrContrato || '';
+      var cpfFiador = f.cpf || f.cpfFiador || '';
+      var nome = f.nome || f.nomeFiador || '';
+      var dtNasc = f.dataNascimento || f.dtNascimento || '';
 
-      <div class="control-group">
-        <label class="control-label">CPF:</label>
-        <div class="controls resultado"><span id="cpfEstudante"></span></div>
-      </div>
+      var btnAlterar = '<a href="#" class="btn btn-mini btn-primary btnAlterarFiador" data-index="' + idx + '">Alterar</a>';
 
-      <div class="control-group">
-        <label class="control-label">Contrato SIAPI:</label>
-        <div class="controls resultado"><span id="contratoSIAPI"></span></div>
-      </div>
-    </div>
+      var tr = ''
+        + '<tr>'
+        +   '<td>' + contrato + '</td>'
+        +   '<td>' + cpfFiador + '</td>'
+        +   '<td>' + nome + '</td>'
+        +   '<td>' + dtNasc + '</td>'
+        +   '<td>' + btnAlterar + '</td>'
+        + '</tr>';
 
-    <div class="span6 pull-right">
-      <div class="control-group">
-        <label class="control-label">Nome do Estudante:</label>
-        <div class="controls resultado"><span id="nomeEstudante"></span></div>
-      </div>
+      $tbody.append(tr);
+    });
 
-      <div class="control-group">
-        <label class="control-label">Curso/Turno:</label>
-        <div class="controls resultado"><span id="cursoTurno"></span></div>
-      </div>
-    </div>
-  </div>
+    $('#divTabelaFiadores').show();
+    $('#divAcoesPosConsulta').show();
+  }
 
-  <!-- Tabela de fiadores (mostra depois da consulta) -->
-  <div class="span12" id="divTabelaFiadores" style="margin-top:10px; display:none;">
-    <table class="table table-bordered table-striped" id="tbResultadoFiadores">
-      <caption>Lista de fiadores vinculados ao contrato FIES consultado</caption>
-      <thead>
-        <tr>
-          <th>N&ordm; Contrato</th>
-          <th>CPF Fiador</th>
-          <th>Nome Fiador</th>
-          <th>Data Nasc.</th>
-          <th>A&ccedil;&otilde;es</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  function consultarFiadoresPorCodigoFies(codigoFies) {
+    // Endpoint conforme seu exemplo: @Path("/fiador") + @Path("/consultaFiadores")
+    var url = BASE_URL + '/fiador/consultaFiadores';
 
-  <!-- Ações pós consulta -->
-  <div class="form-actions" id="divAcoesPosConsulta" style="display:none;">
-    <a href="#" class="btn btn-primary" title="Novo Fiador" id="btnNovoFiador">Novo Fiador</a>
-    <a href="#" class="btn" title="Sair" id="btnSair">Sair</a>
-  </div>
+    return $.ajax({
+      url: url,
+      method: 'GET',
+      dataType: 'json',
+      data: { codigoFies: codigoFies }
+    });
+  }
 
-</form>
+  function acaoConsultar() {
+    var codigoFies = getCodigoFiesDigitado();
+    var cpf = getCpfDigitado();
 
-<!-- Modal Incluir -->
-<div id="divModalIncluir"></div>
+    if (!codigoFies) {
+      alert('Informe o C\u00F3digo Fies.');
+      $('#codigoFiesConsulta').focus();
+      return;
+    }
+
+    preencherCabecalhoMinimo(codigoFies, cpf);
+
+    // Carrega fiadores
+    consultarFiadoresPorCodigoFies(codigoFies)
+      .done(function (data) {
+        renderFiadores(data);
+      })
+      .fail(function (xhr) {
+        console.error('Erro ao consultar fiadores', xhr);
+        alert('N\u00E3o foi poss\u00EDvel consultar os fiadores. Verifique o endpoint e o console.');
+      });
+  }
+
+  $(document).ready(function () {
+
+    // Garantia de bind (o seu problema atual costuma ser aqui)
+    $(document).off('click', '#btnLocalizarCodFies');
+    $(document).on('click', '#btnLocalizarCodFies', function (e) {
+      e.preventDefault();
+      acaoConsultar();
+    });
+
+    $(document).off('click', '#btnConsultar');
+    $(document).on('click', '#btnConsultar', function (e) {
+      e.preventDefault();
+      acaoConsultar();
+    });
+
+    $(document).off('click', '#btnLimpar');
+    $(document).on('click', '#btnLimpar', function (e) {
+      e.preventDefault();
+      $('#cpf').val('');
+      $('#codigoFiesConsulta').val('');
+      $('#agenciaConsulta').val('');
+      limparResultado();
+    });
+
+    // Exemplo de ação no botão Alterar (só pra não ficar morto)
+    $(document).off('click', '.btnAlterarFiador');
+    $(document).on('click', '.btnAlterarFiador', function (e) {
+      e.preventDefault();
+      alert('Clique em Alterar detectado (implementar abertura da tela/modal de altera\u00E7\u00E3o aqui).');
+    });
+
+    // Estado inicial
+    limparResultado();
+  });
+
+})(jQuery);
