@@ -1,63 +1,81 @@
-alterarFiador: function (fiadorRow) {
-    var that = this;
+package br.gov.caixa.fes.rest;
 
-    // 1) cria o model vazio
-    var model = new Fiador();
+import java.util.List;
 
-    // 2) pega cpf da grid (você já faz isso)
-    var cpf = (fiadorRow.cpfFiador || fiadorRow.coCpfFiador || fiadorRow.cpf || '');
-    cpf = (cpf || '').toString().replace(/\D/g, ''); // <<< limpa máscara
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
-    // 3) pega codigoFies (prefiro do model principal, como você já faz)
-    var codigoFies = this.model.get('codigoFiesConsulta') || this.model.get('codigoFies') || '';
-    codigoFies = (codigoFies || '').toString().replace(/\D/g, ''); // <<< remove pontos etc.
+import br.gov.caixa.arqrefcore.validacao.Validation;
+import br.gov.caixa.fes.dominio.Fiador;
+import br.gov.caixa.fes.dominio.Retorno;
+import br.gov.caixa.fes.dominio.renegociacaocontrato.vo.SolicitacaoRenegociacaoContratoVO;
+import br.gov.caixa.fes.negocio.FiadorService;
 
-    if (!cpf || !codigoFies) {
-        mostrarErrors([{ message: 'Não foi possível alterar: CPF ou Código FIES não informado.' }], '#msgModal');
-        return;
-    }
+@RequestScoped
+@Path("/fiador")
+public class FiadorRest extends AbstractSecurityRest {
 
-    // opcional: seta já no model
-    model.set('cpf', cpf);
-    model.set('codigoFies', codigoFies);
+	@Inject
+	private FiadorService serv;
 
-    // 4) carrega o fiador completo antes de abrir a tela
-    try { $('#ajaxStatus').modal('show'); } catch (e) {}
+	@GET
+	@Path("/consultaFiadores")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public List<Fiador> consultaFiadores(@QueryParam("codigoFies") Long codigoFies) {
 
-    $.ajax({
-        url: '../fes-web/emprest/fiador/consulta',
-        type: 'GET',
-        dataType: 'json',
-        data: {
-            codigoFies: codigoFies,
-            cpf: cpf
-        }
-    }).done(function (data) {
-        try { $('#ajaxStatus').modal('hide'); } catch (e) {}
+		String usuario = getUsuarioLogado();
 
-        if (!data) {
-            mostrarErrors([{ message: 'Consulta não retornou dados do fiador.' }], '#msgModal');
-            return;
-        }
+		return serv.consultarFiadores(usuario, codigoFies);
+	}
 
-        // garante que codigoFies/cpf estejam consistentes no model
-        data.codigoFies = codigoFies;
-        data.cpf = cpf;
+	@GET
+	@Path("/consulta")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public Fiador consulta(@QueryParam("codigoFies") Long codigoFies, String cpf) {
 
-        // popula o model com o retorno COMPLETO (identidade, endereco, contato, etc.)
-        model.set(data);
+		String usuario = getUsuarioLogado();
 
-        // 5) agora sim abre a tela de alteração com tudo carregado
-        that.abrirTelaCadastroFiador(model, 'alterar');
+		return serv.consultar(usuario, codigoFies, cpf);
+	}
 
-    }).fail(function (xhr) {
-        try { $('#ajaxStatus').modal('hide'); } catch (e) {}
+	@POST
+	@Path("/salva")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Validation
+	public Retorno salva(Fiador fiador) {
+		String usuario = getUsuarioLogado();
 
-        var msg = 'Erro ao consultar fiador completo para alteração.';
-        try {
-            if (xhr && xhr.responseText) msg += ' ' + xhr.responseText;
-        } catch (e) {}
+		return serv.salvar(usuario, fiador);
+	}
 
-        mostrarErrors([{ message: msg }], '#msgModal');
-    });
-},
+	@POST
+	@Path("/excluir")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Validation
+	public Retorno excluir(Fiador fiador) {
+		String usuario = getUsuarioLogado();
+
+		return serv.excluir(usuario, fiador);
+	}
+
+	@POST
+	@Path("/validarRenegociacao")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Validation
+	public Retorno validar(SolicitacaoRenegociacaoContratoVO renegociacao) {
+		String usuario = getUsuarioLogado();
+
+		Fiador fiador = new Fiador();
+		fiador.setCpf(renegociacao.getDadosEstudante().getCpf());
+		fiador.setCodigoFies(Long.valueOf(renegociacao.getDadosEstudante().getCodFies()));
+
+		return serv.validarRenegociacao(usuario, fiador, renegociacao.getCodigo());
+	}
+}
