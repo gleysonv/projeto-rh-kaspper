@@ -1,183 +1,402 @@
-var CadastroAlteraSemestreControle = Backbone.View.extend({
-
-	urlTemplate : '../fes-web/servicos/contratofies/alterasemestre/visao/CadastroAlteraSemestre.html',
-	
-    initialize : function initialize () {
-    	$.get('../fes-web/servicos/contratofies/consultagenericaestudante/controle/ConsultaGenericaEstudanteModalControle.js');
-    	$.get('../fes-web/servicos/contratofies/consultagenericaestudante/modelo/Estudante.js');
-    	var that = this;
-    	removerMensagens();
-    	
-    	$.get(this.urlTemplate)
-		.done(function(data) {
-			that.template = _.template(data);
-			that.render();
-			loadMask();
-			removeAutoComplete('cpf', 'cpf');
-		});
-    	
+window.FiadorControle = Backbone.View.extend({
+    modelUF: null,
+    modelExpedidor: null,
+    estadosCivis : [2, 3, 4, 5, 6, 7, 9],
+    events: {
+        'blur input': 'updateModel',
+        'change select': 'updateModel',
+        "changeDate .data": "changeDate2"
     },
-	
-    events : {
-    	"click a#btnSalvar" : "salvar",
-		"click a#btnIncluir" : "incluir",
-		"click a#btnLimpar" : "limpar",
-		"click a#btnConsultar" : "consultar",
-		"click a#btnVoltar" : "voltar",
-		"click a#btnLocalizarCodFies" : "localizarCodFies",
-		"blur #formFiltroConsulta input" : "change",
-		"change #formFiltroConsulta select" : "change",
-		'blur #cpf' : 'validarCpf'
-		
-	},
 
-	validarCpf : function validarCpf(e) {
-		removerMensagens();
-		
-		var cpf = purificaAtributo(e.target.value);
-		
-		if(cpf != '') {
-			var msg =  validarCPF(cpf);
-			
-			if (msg != '') {
-				return mostrarErrors([{message: msg}]);
-			}
-		}
-		return true;
-	},  
-	
-	change : function change(e) {
-		var change = {};
-		change[e.target.name] = e.target.value;
-		this.model.set(change);
-	},
-	
-    limpar : function limpar() {
-    	removerMensagens();
-    	limparFormulario('#formFiltroConsulta');
-    	this.model.initialize();
-    	$('#divResultado').hide('slow');
-	},
-    
-    localizarCodFies : function localizarCodFies() {
-    	$('#divResultado').hide();
-    	this.detalhe = new ConsultaGenericaEstudanteModalControle({el : $('#divModalIncluir'), model : new Estudante(), modelAnterior : this.model });
+    serialize: function() {
+        return {
+            title: this.$(".title").text(),
+            start: this.$(".start-page").text(),
+            end: this.$(".end-page").text()
+        };
     },
-	
-    consultar : function consultar() {
-    	$('#divResultado').hide('slow');
-    	removerMensagens();
-    	this.model.set('cpf', purificaAtributo(this.model.get('cpf')));
-    	
-		var that = this;
-		
-		if (this.validar()) {
-			$('#ajaxStatus').modal('show');
-			this.model.buscar()
-			.done(function sucesso(data) {
-				if (data.mensagem != "" && data.mensagem != null) {
-					$('#ajaxStatus').modal('hide');	
-					return mostrarErrors([{message: data.mensagem}]);
-				}
-				that.renderResult(data);
-				$('#divResultado').show('slow');
-			}).error(function erro(e) {
-				console.log(e);
-				mostrarErrors([{message: 'Ocorreu um erro na consulta, tente novamente!'}]);
-				$('#ajaxStatus').modal('hide');
-			});
-		}else
-		
-		$('#ajaxStatus').modal('hide');	
-	},
-	
-	renderResult : function renderResult(_data) {
-		if (_data != null && _data.dadosCandidato != null) {
-			$("#codigoFies").text(mascararCodigoFies(_data.dadosCandidato.nuCandidato));
-			$("#cpfEstudade").text(mascararCpf(_data.consultaPreAdit.coCpf));
-			$("#unidadeAdmCampus").text(_data.cursoHabilitacao.noCampus);
-			$("#areaEspecifica").text(_data.cursoHabilitacao.noAreaEspecifica);
-			$("#contratoSIAPI").text(_data.nuContratoFormatado);
-			$("#codigoIESUF").text(_data.cursoHabilitacao.noIes +'/'+_data.consultaPreAdit.ufIEs);
-			$("#cursoTurno").text(_data.cursoHabilitacao.noCurso +''+_data.cursoHabilitacao.deTurno+'');
-			$("#nomeEstudade").text(_data.consultaPreAdit.noCandidato);
-			$("#areGeral").text(_data.cursoHabilitacao.noAreaGeral);
-			$('#ultimoSemestre').val(_data.consultaPreAdit.nuMinSemestre);
-		}
-			
-    	$('#ajaxStatus').modal('hide');
-	},
 
-	validar : function validar() {
-		if (!this.model.isValid()){
-			mostrarErrors(this.model.validationError);
-			return false;
-		}
-		
-		return true;
-	},
-	voltar : function voltar() {
-    	abrirPagina('../fes-web/fes-index.html');
+    getScriptLog: function (url){
+        return $.getScript(url).fail(function (xhr, status, err){
+             console.error('[getScript FAIL', url, status, err);
+        });
     },
-    
-    salvar : function salvar () {
-    	  var that = this;
-    	  if($("#novoSemestre").val() ==''||$("#novoSemestre").val()== null){
-    			mostrarErrors([{message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o semestre atual!'}]);
-    			return false;
-    	  }else{
-    		  if($("#novoSemestre").val() > $("#ultimoSemestre").val()){
-    			 mostrarErrors([{message: 'Prazo informado maior que o previsto para conclusão do curso.'}]);
-      			return false;
-    		  }  
-    		  if($("#novoSemestre").val() < 1){
-     			 mostrarErrors([{message: 'Este Campo não pode ser MENOR ou IGUAL a 0.'}]);
-       			 return false;
-     		  }  
-    	  }
-    	  
-    	  var semestre = new Semestre();
-		  semestre.set('novoSemestre', $("#novoSemestre").val());
-		  semestre.set('ano',  that.model.attributes.ano);
-		  semestre.set('semestre', that.model.attributes.semestre);
-		  semestre.set('codigoFies', purificaAtributo(that.model.attributes.dadosCandidato.nuCandidato));
-		
-		 
-		  mensagemConfirmacao('Tem certeza da alteração?\n\nCaso seja confirmada a quantidade errada, uma nova correção'+
-    			              ' somente será possível até o término do prazo para ADITAMENTO e desde que o contrato não tenha'+
-    			              ' sido confirmado pela IES e a CAIXA, e a RM ou Termo de Anuência não tenham sido impressos.\n\nDeseja realmente alterar? '+
-    			              ' Se sim clique no botão Confirmar.','Cancelar','Confirmar',
-    				function() {
-    					$fes.post('../fes-web/emprest/contrato/confirmaAlteracaoSemestre', semestre, function sucesso(data){
-    						if (data.tipo == 'alert-error') {
-        		    			mostrarErrors([{message: data.mensagem}], '#messageContainerModal', data.tipo);
-        		    		} else {
-        		    			mostrarErrors([{message: data.mensagem}],  '#messageContainer','alert-success');
-        		    			$('#divResultado').hide();
-        		    		}
-    					}).error(function(data) {
-    						errors.push({message : 'Ocorreu um erro na consulta, tente novamente!'});
-    					}); 
 
-    						
-    			});
+    initialize: function() {
+        var that = this;
+        console.log("initialize FiadorControle");
+        removerMensagens();
+
+        //Carregar models dependencia
+        $.when(
+            that.getScriptLog('../fes-web/servicos/cadastro/modelo/EstadoCivil.js'),
+            that.getScriptLog('../fes-web/servicos/cadastro/modelo/RegimeBens.js'),
+            that.getScriptLog('../fes-web/servicos/cadastro/modelo/Emancipado.js')
+        ).done(function() {
+
+            //carregar coleções
+            $.when(
+                that.getScriptLog('../fes-web/servicos/cadastro/modelo/OrgaoExpedidorColecao.js'),
+                that.getScriptLog('../fes-web/servicos/cadastro/modelo/EstadoCivilColecao.js'),
+                that.getScriptLog('../fes-web/servicos/cadastro/modelo/RegimeBensColecao.js'),
+                that.getScriptLog('../fes-web/servicos/cadastro/modelo/EmancipadoColecao.js'),
+                that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorListControle.js'),
+                that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorEnderecoListControle.js'),
+                that.getScriptLog('../fes-web/servicos/contratofies/manutencaofiador/controle/FiadorContatoListControle.js')
+            ).done(function() {
+
+               $.get('../fes-web/servicos/contratofies/manutencaofiador/visao/Fiador.html').done(function(data) {
+                 that.template = _.template(data);
+                 that.render();
+                 loadMask();
+
+                 setTimeout(function () {
+                    $('#ajaxStatus').modal('hide');
+                 }, 1000);
+               });
+
+            }).fail(function (){
+                console.error('Erro ao carregar coleções do Fiador');
+            });
+        }).fail(function (){
+           console.error('Erro ao carregar dependencia do Fiador');
+        });
+
     },
-	
-    render : function render () {
-    	$(this.el).html(this.template(this.model.toJSON()));
-    	//console.log('altera semestre RENDER');
-    	
-    	gCarregarComboSemestre('#selectSemestre', '');
-    	gCarregarComboAnos('#selectAno', '');
-    	
-    	this.model.set('ano', this.model.get('ano') == 0 ? obterAnoAtual() : this.model.get('ano'));
-    	this.model.set('semestre', this.model.get('semestre') == 0 ? obterMesAtual() : this.model.get('semestre'));
-    	$('#divResultado').hide();
 
-    	return this;
+    changeDate2: function (e) {
+        console.log("call -> ConsultaGenericaControle -> changeDate2");
+        console.log($('input', e.target).attr('name'));
 
+        this.model.set($('input', e.target).attr('name'), $('input', e.target).val());
+        console.log(this.model);
+    },
+
+    render: function() {
+        var _this2;
+
+        try {
+            _this2 = this.model.toJSON();
+        } catch (e) {
+            _this2 = this.model;
+        }
+
+        $(this.el).html(this.template(_this2));
+
+        this.modelUF = new UFColecao();
+        this.modelUF.buscar().done(function(collection) {
+            var wSelecionado = _this2.identidade.uf.sigla;
+            gMontaSelect("#ufIdentidadeFiador", "sigla", "sigla", collection, wSelecionado);
+        });
+
+        if(_this2.cpf){
+            $('#cpfFiador').attr('readonly', true);
+            $('#cpfFiador').prop('readonly', true);
+        }
+
+        $(".cpfmodal").mask("999.999.999-99").off('blur.mask').blur(function (e) {
+            var src = e.currentTarget;
+            if (src.value != '') {
+                var wRet = validarCPF(src.value);
+                if (wRet != ''){
+                    src.value = '';
+                    mostrarErrors([ {
+                        message : wRet
+                    } ], '#msgModal');
+                } else {
+                    removerMensagens();
+                }
+            }
+        });
+
+        $(".dependenteCPF").mask("99").off('blur.mask').blur(function (e) {
+            var src = e.currentTarget;
+            src.value = src.value.replace(/\D/g,'').slice(0,2);
+        });
+
+        this.modelExpedidor = new OrgaoExpedidorColecao();
+        this.modelExpedidor.buscar().done(function(collection) {
+            var wSelecionado = _this2.identidade.orgaoExpedidor.codigo;
+            gMontaSelect("#orgaoExpedidorFiador", "codigo", "nome", collection, wSelecionado);
+        });
+
+        this.modelRegimeBens = new RegimeBensColecao();
+        this.modelRegimeBens.buscar().done(function(collection) {
+            var wSelecionado = _this2.regimeBens.codigo;
+            gMontaSelect("#regimeBensFiador", "codigo", "nome", collection, wSelecionado);
+        });
+
+        this.modelEstadoCivil = new EstadoCivilColecao();
+        this.modelEstadoCivil.buscar().done(function(collection) {
+            var wSelecionado = _this2.estadoCivil.codigo;
+            gMontaSelect("#estadoCivilFiador", "codigo", "nome", collection, wSelecionado);
+
+            if (wSelecionado == 2 || wSelecionado == 9) {
+                $('#litab2').show();
+                $('#regimeBensFiador').removeAttr('disabled');
+            } else {
+                $('#litab2').hide();
+                $("#regimeBensFiador").prop("selectedIndex", 0);
+                $('#regimeBensFiador').attr('disabled', 'disabled');
+            }
+        });
+
+        gCarregarPaises("#nacionalidadeFiador", _this2.nacionalidade.codigo);
+
+        if (_this2.dataNascimento == null || _this2.dataNascimento == "") {
+            _this2.dataNascimento = "01/01/1901";
+        }
+
+        var wdataNascimento = $caixa.data.converteStrToData(_this2.dataNascimento);
+        var wIdade = moment().diff(wdataNascimento, 'years');
+
+        this.modelEmancipado = new EmancipadoColecao();
+        this.modelEmancipado.buscar().done(function(collection) {
+            console.log("call -> ConsultaGenericaControle -> modelEmancipado");
+
+            var wSelecionado = _this2.emancipado.codigo;
+
+            gMontaSelect("#emancipadoMotivoFiador", "codigo", "nome", collection, wSelecionado);
+
+            if (wSelecionado != "") {
+                _this2.emancipado.descricao = "S";
+                $("#emancipadoFiador").prop("selectedIndex", 1);
+            } else {
+                _this2.emancipado.descricao = "N";
+                $('#emancipadoMotivoFiador').attr('disabled', 'disabled');
+            }
+
+            if ($.inArray(parseInt(_this2.estadoCivil.codigo), this.estadosCivis) > -1) {
+                _this2.emancipado.codigo = "CAS";
+                try {
+                    desabilitarCampo("#emancipadoFiador", 'disabled');
+                    desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
+                } catch (exception) {}
+            } else {
+                if (wIdade >= 18) {
+                    $("#emancipadoFiador").val("S");
+
+                    _this2.emancipado.codigo = "MAI";
+
+                    desabilitarCampo("#emancipadoFiador", 'disabled');
+                    desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
+                }
+            }
+
+            $('#emancipadoMotivoFiador').val(_this2.emancipado.codigo);
+        });
+
+        this.combo = new Combo();
+        this.combo.set('dominioCombo', 56);
+        this.combo.set('filtroNumerico', _this2.codigoProfissao);
+
+        // ===== AUTOCOMPLETE PROFISSÃO (CORRIGIDO SEM QUEBRAR O RESTO) =====
+var _self = this;
+var $prof = $("#profissao");
+
+// evita duplicação ao re-renderizar
+try { $prof.autocomplete("destroy"); } catch(e){}
+
+// garante que o menu fique visível
+$.ui.autocomplete.prototype._resizeMenu = function () {
+    this.menu.element.outerWidth(this.element.outerWidth());
+};
+
+$prof.autocomplete({
+    minLength: 3,
+    delay: 300,
+    appendTo: "body", // ⚠️ FORÇA render fora do container
+
+    source: function(request, response) {
+
+        var term = (request.term || "").trim();
+        if (term.length < 3) {
+            response([]);
+            return;
+        }
+
+        var combo = new Combo();
+        combo.set('dominioCombo', 56);
+        combo.set('filtroTextual', term);
+
+        // feedback leve (sem travar campo)
+        try { $('#ajaxStatus').modal('show'); } catch(e){}
+
+        try {
+            $fes.post('../fes-web/emprest/consultas/carregarCombo', combo, function sucesso(data) {
+
+                try { $('#ajaxStatus').modal('hide'); } catch(e){}
+
+                var lista = (data && data.listaRetorno) ? data.listaRetorno : [];
+
+                response($.map(lista, function(item) {
+                    return {
+                        id: item.identificadorNumerico,
+                        label: item.descricao,
+                        value: item.descricao
+                    };
+                }));
+            });
+        } catch(err) {
+            console.error("Erro ao consultar profissão:", err);
+            try { $('#ajaxStatus').modal('hide'); } catch(e){}
+            response([]);
+        }
+
+        // fail safe
+        setTimeout(function(){
+            try { $('#ajaxStatus').modal('hide'); } catch(e){}
+        }, 6000);
+    },
+
+    select: function(event, ui) {
+        $prof.val(ui.item.value);
+        _self.model.set("codigoProfissao", ui.item.id);
+        return false;
+    },
+
+    change: function(event, ui) {
+        if (!ui.item) {
+            _self.model.set("codigoProfissao", "");
+        }
     }
-    
 });
 
-//# sourceURL=CadastroAlteraSemestreControle.js
+// limpa código quando digita manualmente
+$prof.off("input.profissao");
+$prof.on("input.profissao", function() {
+    _self.model.set("codigoProfissao", "");
+});
+        // ===== FIM AUTOCOMPLETE PROFISSÃO =====
+
+        window.setTimeout(function() {
+            loadMask();
+        }, 500);
+
+        return this;
+    },
+
+    updateModel: function(el) {
+        console.log("call -> updateModel");
+
+        var $el = $(el.target);
+        var name = $el.attr('name');
+
+        if (name != undefined) {
+            console.log("call -> updateModel -> undefined");
+            this.model.set(name, $el.val());
+        }
+
+        this.model.set("cpf", purificaAtributo($("#cpfFiador").val()));
+
+        // ----------------------------------------------------------------------------
+        // ⚠️ (não mexi no seu fluxo, mas isso aqui estava errado sem # ou .)
+        // se seu input é id="dependentesFiador", use:
+        var dep = $("#dependenteCPF").val();
+        if (dep == null || dep === undefined) {
+            // fallback se for class="dependentesFiador"
+            dep = $(".dependenteCPF").val();
+        }
+        this.model.set("dependenteCPF", dep ? dep.replace(/\D/g, '') : "");
+
+        var wEc = this.model.get("estadoCivil");
+        wEc.codigo = $("#estadoCivilFiador").val();
+        wEc.nome = $("#estadoCivilFiador option:selected").text();
+
+        if (wEc.codigo == 2 || wEc.codigo == 9) {
+            $('#litab2').show();
+            $('#regimeBensFiador').removeAttr('disabled');
+        } else {
+            $('#litab2').hide();
+            $("#regimeBensFiador").prop("selectedIndex", 0);
+            $('#regimeBensFiador').attr('disabled', 'disabled');
+        }
+
+        var wRb = this.model.get("regimeBens");
+        wRb.codigo = $("#regimeBensFiador").val();
+        wRb.nome = $("#regimeBensFiador option:selected").text();
+
+        var wId = {
+            identidade: $("#identidadeFiador").val(),
+            orgaoExpedidor: {
+                codigo: $("#orgaoExpedidorFiador").val(),
+                nome: $("#orgaoExpedidorFiador option:selected").text()
+            },
+            dataExpedicaoIdentidade: $("#dataExpedicaoIdentidadeFiador").val(),
+
+            uf: {
+                sigla: $("#ufIdentidadeFiador").val(),
+                descricao: $("#ufIdentidadeFiador").val()
+            }
+        };
+
+        this.model.set("identidade", wId);
+        var wEm = this.model.get("emancipado");
+
+        if ($("#emancipadoFiador").val() == "N") {
+            wEm.codigo = "";
+            wEm.descricao = "N";
+            $('#emancipadoMotivoFiador').attr('disabled', 'disabled');
+            $("#emancipadoMotivoFiador").prop("selectedIndex", 0);
+        } else {
+            wEm.codigo = $('#emancipadoMotivoFiador').val();
+            wEm.descricao = "S";
+            $('#emancipadoMotivoFiador').removeAttr('disabled');
+        }
+
+        var wNas = this.model.get("nacionalidade");
+
+        wNas.codigo = $("#nacionalidadeFiador").val();
+        wNas.nome = $("#nacionalidadeFiador option:selected").text();
+
+        var wRenda = $("#rendaMensalFiador").val();
+        this.model.set("valorRendaMensal", purificaMoeda(wRenda));
+
+        if(el.currentTarget.id != "emancipadoFiador" && el.currentTarget.id != "emancipadoMotivoFiador"){
+            var wIdade = 1;
+            if (!(this.model.get("dataNascimento") == null || this.model.get("dataNascimento") == "")) {
+                var wdataNascimento = $caixa.data.converteStrToData(this.model.get("dataNascimento"));
+                wIdade = (new Date()).differenceInYears(wdataNascimento);
+            }
+
+            if (($.inArray(parseInt(wEc.codigo), this.estadosCivis) > -1) && wEc.codigo != 9) {
+                console.log("call -> updateModel -> casado2");
+                wEm.codigo = "CAS";
+                $("#emancipadoFiador").val("S");
+                $('#emancipadoMotivoFiador').val(wEm.codigo);
+            } else if(wEc.codigo == 9){
+                console.log("call -> updateModel ->  uniao estavel");
+                wEm.codigo = "MAI";
+                $("#emancipadoFiador").val("S");
+                $('#emancipadoMotivoFiador').val("MAI");
+            } else {
+                if (wIdade >= 18) {
+                    console.log("call -> updateModel ->  18");
+                    wEm.codigo = "MAI";
+                    $("#emancipadoFiador").val("S");
+                    $('#emancipadoMotivoFiador').val("MAI");
+                }
+            }
+
+            if ($.inArray(parseInt(wEc.codigo), [1, 9]) > -1 && wIdade < 18) {
+                $('#emancipadoFiador').removeAttr('disabled');
+                $('#emancipadoFiador').val("N");
+                $('#emancipadoMotivoFiador').removeAttr('disabled');
+                wEm.codigo = "";
+                wEm.descricao = "N";
+                $('#emancipadoMotivoFiador').attr('disabled', 'disabled');
+                $('#emancipadoMotivoFiador').val("");
+                if ($("#emancipadoFiador").val() != "N")
+                    $('#emancipadoMotivoFiador').removeAttr('disabled');
+            } else {
+                desabilitarCampo("#emancipadoFiador", 'disabled');
+                desabilitarCampo("#emancipadoMotivoFiador", 'disabled');
+            }
+        }
+
+    },
+
+    hideErrors: function() {
+        $('#msgModal').html("");
+    }
+});
