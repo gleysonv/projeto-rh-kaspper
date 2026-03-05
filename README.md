@@ -1,149 +1,183 @@
-// === AJUSTE AQUI ===
-// Se sua aplicação já tem um helper de URL, use ele.
-// Caso contrário, deixe '' se o REST estiver no mesmo contexto.
-var BASE_URL = ''; // ex: '/fes' ou '/api' ou ''
+var CadastroAlteraSemestreControle = Backbone.View.extend({
 
-(function ($) {
+	urlTemplate : '../fes-web/servicos/contratofies/alterasemestre/visao/CadastroAlteraSemestre.html',
+	
+    initialize : function initialize () {
+    	$.get('../fes-web/servicos/contratofies/consultagenericaestudante/controle/ConsultaGenericaEstudanteModalControle.js');
+    	$.get('../fes-web/servicos/contratofies/consultagenericaestudante/modelo/Estudante.js');
+    	var that = this;
+    	removerMensagens();
+    	
+    	$.get(this.urlTemplate)
+		.done(function(data) {
+			that.template = _.template(data);
+			that.render();
+			loadMask();
+			removeAutoComplete('cpf', 'cpf');
+		});
+    	
+    },
+	
+    events : {
+    	"click a#btnSalvar" : "salvar",
+		"click a#btnIncluir" : "incluir",
+		"click a#btnLimpar" : "limpar",
+		"click a#btnConsultar" : "consultar",
+		"click a#btnVoltar" : "voltar",
+		"click a#btnLocalizarCodFies" : "localizarCodFies",
+		"blur #formFiltroConsulta input" : "change",
+		"change #formFiltroConsulta select" : "change",
+		'blur #cpf' : 'validarCpf'
+		
+	},
 
-  function getCodigoFiesDigitado() {
-    return $.trim($('#codigoFiesConsulta').val() || '');
-  }
+	validarCpf : function validarCpf(e) {
+		removerMensagens();
+		
+		var cpf = purificaAtributo(e.target.value);
+		
+		if(cpf != '') {
+			var msg =  validarCPF(cpf);
+			
+			if (msg != '') {
+				return mostrarErrors([{message: msg}]);
+			}
+		}
+		return true;
+	},  
+	
+	change : function change(e) {
+		var change = {};
+		change[e.target.name] = e.target.value;
+		this.model.set(change);
+	},
+	
+    limpar : function limpar() {
+    	removerMensagens();
+    	limparFormulario('#formFiltroConsulta');
+    	this.model.initialize();
+    	$('#divResultado').hide('slow');
+	},
+    
+    localizarCodFies : function localizarCodFies() {
+    	$('#divResultado').hide();
+    	this.detalhe = new ConsultaGenericaEstudanteModalControle({el : $('#divModalIncluir'), model : new Estudante(), modelAnterior : this.model });
+    },
+	
+    consultar : function consultar() {
+    	$('#divResultado').hide('slow');
+    	removerMensagens();
+    	this.model.set('cpf', purificaAtributo(this.model.get('cpf')));
+    	
+		var that = this;
+		
+		if (this.validar()) {
+			$('#ajaxStatus').modal('show');
+			this.model.buscar()
+			.done(function sucesso(data) {
+				if (data.mensagem != "" && data.mensagem != null) {
+					$('#ajaxStatus').modal('hide');	
+					return mostrarErrors([{message: data.mensagem}]);
+				}
+				that.renderResult(data);
+				$('#divResultado').show('slow');
+			}).error(function erro(e) {
+				console.log(e);
+				mostrarErrors([{message: 'Ocorreu um erro na consulta, tente novamente!'}]);
+				$('#ajaxStatus').modal('hide');
+			});
+		}else
+		
+		$('#ajaxStatus').modal('hide');	
+	},
+	
+	renderResult : function renderResult(_data) {
+		if (_data != null && _data.dadosCandidato != null) {
+			$("#codigoFies").text(mascararCodigoFies(_data.dadosCandidato.nuCandidato));
+			$("#cpfEstudade").text(mascararCpf(_data.consultaPreAdit.coCpf));
+			$("#unidadeAdmCampus").text(_data.cursoHabilitacao.noCampus);
+			$("#areaEspecifica").text(_data.cursoHabilitacao.noAreaEspecifica);
+			$("#contratoSIAPI").text(_data.nuContratoFormatado);
+			$("#codigoIESUF").text(_data.cursoHabilitacao.noIes +'/'+_data.consultaPreAdit.ufIEs);
+			$("#cursoTurno").text(_data.cursoHabilitacao.noCurso +''+_data.cursoHabilitacao.deTurno+'');
+			$("#nomeEstudade").text(_data.consultaPreAdit.noCandidato);
+			$("#areGeral").text(_data.cursoHabilitacao.noAreaGeral);
+			$('#ultimoSemestre').val(_data.consultaPreAdit.nuMinSemestre);
+		}
+			
+    	$('#ajaxStatus').modal('hide');
+	},
 
-  function getCpfDigitado() {
-    return $.trim($('#cpf').val() || '');
-  }
+	validar : function validar() {
+		if (!this.model.isValid()){
+			mostrarErrors(this.model.validationError);
+			return false;
+		}
+		
+		return true;
+	},
+	voltar : function voltar() {
+    	abrirPagina('../fes-web/fes-index.html');
+    },
+    
+    salvar : function salvar () {
+    	  var that = this;
+    	  if($("#novoSemestre").val() ==''||$("#novoSemestre").val()== null){
+    			mostrarErrors([{message: 'Não foi informado um dos parâmetros obrigatórios, por favor informar o semestre atual!'}]);
+    			return false;
+    	  }else{
+    		  if($("#novoSemestre").val() > $("#ultimoSemestre").val()){
+    			 mostrarErrors([{message: 'Prazo informado maior que o previsto para conclusão do curso.'}]);
+      			return false;
+    		  }  
+    		  if($("#novoSemestre").val() < 1){
+     			 mostrarErrors([{message: 'Este Campo não pode ser MENOR ou IGUAL a 0.'}]);
+       			 return false;
+     		  }  
+    	  }
+    	  
+    	  var semestre = new Semestre();
+		  semestre.set('novoSemestre', $("#novoSemestre").val());
+		  semestre.set('ano',  that.model.attributes.ano);
+		  semestre.set('semestre', that.model.attributes.semestre);
+		  semestre.set('codigoFies', purificaAtributo(that.model.attributes.dadosCandidato.nuCandidato));
+		
+		 
+		  mensagemConfirmacao('Tem certeza da alteração?\n\nCaso seja confirmada a quantidade errada, uma nova correção'+
+    			              ' somente será possível até o término do prazo para ADITAMENTO e desde que o contrato não tenha'+
+    			              ' sido confirmado pela IES e a CAIXA, e a RM ou Termo de Anuência não tenham sido impressos.\n\nDeseja realmente alterar? '+
+    			              ' Se sim clique no botão Confirmar.','Cancelar','Confirmar',
+    				function() {
+    					$fes.post('../fes-web/emprest/contrato/confirmaAlteracaoSemestre', semestre, function sucesso(data){
+    						if (data.tipo == 'alert-error') {
+        		    			mostrarErrors([{message: data.mensagem}], '#messageContainerModal', data.tipo);
+        		    		} else {
+        		    			mostrarErrors([{message: data.mensagem}],  '#messageContainer','alert-success');
+        		    			$('#divResultado').hide();
+        		    		}
+    					}).error(function(data) {
+    						errors.push({message : 'Ocorreu um erro na consulta, tente novamente!'});
+    					}); 
 
-  function limparResultado() {
-    $('#divResultado').hide();
-    $('#divTabelaFiadores').hide();
-    $('#divAcoesPosConsulta').hide();
-    $('#tbResultadoFiadores tbody').empty();
+    						
+    			});
+    },
+	
+    render : function render () {
+    	$(this.el).html(this.template(this.model.toJSON()));
+    	//console.log('altera semestre RENDER');
+    	
+    	gCarregarComboSemestre('#selectSemestre', '');
+    	gCarregarComboAnos('#selectAno', '');
+    	
+    	this.model.set('ano', this.model.get('ano') == 0 ? obterAnoAtual() : this.model.get('ano'));
+    	this.model.set('semestre', this.model.get('semestre') == 0 ? obterMesAtual() : this.model.get('semestre'));
+    	$('#divResultado').hide();
 
-    $('#codigoFies').text('');
-    $('#cpfEstudante').text('');
-    $('#contratoSIAPI').text('');
-    $('#nomeEstudante').text('');
-    $('#cursoTurno').text('');
-  }
+    	return this;
 
-  // Preenche o “Resultado” do estudante (mínimo pra tela fazer sentido)
-  // Se você tiver um REST específico do contrato/estudante, substitua aqui.
-  function preencherCabecalhoMinimo(codigoFies, cpf) {
-    $('#codigoFies').text(codigoFies);
-    $('#cpfEstudante').text(cpf || '-');
-
-    // placeholders (troque quando tiver endpoint real)
-    $('#contratoSIAPI').text('-');
-    $('#nomeEstudante').text('-');
-    $('#cursoTurno').text('-');
-
-    $('#divResultado').show();
-  }
-
-  function renderFiadores(fiadores) {
-    var $tbody = $('#tbResultadoFiadores tbody');
-    $tbody.empty();
-
-    if (!fiadores || !fiadores.length) {
-      $tbody.append(
-        '<tr><td colspan="5" style="text-align:center;">Nenhum fiador encontrado.</td></tr>'
-      );
-      return;
     }
+    
+});
 
-    fiadores.forEach(function (f, idx) {
-      // Ajuste os nomes conforme o JSON real do seu backend
-      var contrato = f.numeroContrato || f.contrato || f.nrContrato || '';
-      var cpfFiador = f.cpf || f.cpfFiador || '';
-      var nome = f.nome || f.nomeFiador || '';
-      var dtNasc = f.dataNascimento || f.dtNascimento || '';
-
-      var btnAlterar = '<a href="#" class="btn btn-mini btn-primary btnAlterarFiador" data-index="' + idx + '">Alterar</a>';
-
-      var tr = ''
-        + '<tr>'
-        +   '<td>' + contrato + '</td>'
-        +   '<td>' + cpfFiador + '</td>'
-        +   '<td>' + nome + '</td>'
-        +   '<td>' + dtNasc + '</td>'
-        +   '<td>' + btnAlterar + '</td>'
-        + '</tr>';
-
-      $tbody.append(tr);
-    });
-
-    $('#divTabelaFiadores').show();
-    $('#divAcoesPosConsulta').show();
-  }
-
-  function consultarFiadoresPorCodigoFies(codigoFies) {
-    // Endpoint conforme seu exemplo: @Path("/fiador") + @Path("/consultaFiadores")
-    var url = BASE_URL + '/fiador/consultaFiadores';
-
-    return $.ajax({
-      url: url,
-      method: 'GET',
-      dataType: 'json',
-      data: { codigoFies: codigoFies }
-    });
-  }
-
-  function acaoConsultar() {
-    var codigoFies = getCodigoFiesDigitado();
-    var cpf = getCpfDigitado();
-
-    if (!codigoFies) {
-      alert('Informe o C\u00F3digo Fies.');
-      $('#codigoFiesConsulta').focus();
-      return;
-    }
-
-    preencherCabecalhoMinimo(codigoFies, cpf);
-
-    // Carrega fiadores
-    consultarFiadoresPorCodigoFies(codigoFies)
-      .done(function (data) {
-        renderFiadores(data);
-      })
-      .fail(function (xhr) {
-        console.error('Erro ao consultar fiadores', xhr);
-        alert('N\u00E3o foi poss\u00EDvel consultar os fiadores. Verifique o endpoint e o console.');
-      });
-  }
-
-  $(document).ready(function () {
-
-    // Garantia de bind (o seu problema atual costuma ser aqui)
-    $(document).off('click', '#btnLocalizarCodFies');
-    $(document).on('click', '#btnLocalizarCodFies', function (e) {
-      e.preventDefault();
-      acaoConsultar();
-    });
-
-    $(document).off('click', '#btnConsultar');
-    $(document).on('click', '#btnConsultar', function (e) {
-      e.preventDefault();
-      acaoConsultar();
-    });
-
-    $(document).off('click', '#btnLimpar');
-    $(document).on('click', '#btnLimpar', function (e) {
-      e.preventDefault();
-      $('#cpf').val('');
-      $('#codigoFiesConsulta').val('');
-      $('#agenciaConsulta').val('');
-      limparResultado();
-    });
-
-    // Exemplo de ação no botão Alterar (só pra não ficar morto)
-    $(document).off('click', '.btnAlterarFiador');
-    $(document).on('click', '.btnAlterarFiador', function (e) {
-      e.preventDefault();
-      alert('Clique em Alterar detectado (implementar abertura da tela/modal de altera\u00E7\u00E3o aqui).');
-    });
-
-    // Estado inicial
-    limparResultado();
-  });
-
-})(jQuery);
+//# sourceURL=CadastroAlteraSemestreControle.js
