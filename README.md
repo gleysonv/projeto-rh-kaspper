@@ -310,7 +310,8 @@ window.ConsultaFiadorControle = Backbone.View.extend({
         new FiadorModalControle({
           el: $('#container'),
           model: modelFiador,
-          modo: modo
+          modo: modo,
+          modelAnterior: modelConsultaAnterior
         }).el
       );
     })
