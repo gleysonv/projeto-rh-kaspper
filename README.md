@@ -12,9 +12,9 @@ window.FiadorModalControle = Backbone.View.extend({
     // (guarda no "this" para o Cancelar funcionar)
     this._cloneFiadorJsonString = JSON.stringify(this.model.clone());
     this.modelFiador = new Fiador(JSON.parse(this._cloneFiadorJsonString));
-    
+
     this.modelAnterior = this.options.modelAnterior || null;
-    this.modo = this.options.modo || 'incluir'; 
+    this.modo = this.options.modo || 'incluir';
 
     $.when(
       $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
@@ -32,17 +32,17 @@ window.FiadorModalControle = Backbone.View.extend({
       console.error('FiadorModalControle: falha ao carregar controles das abas');
     });
   },
-  
-  voltarParaConsulta: function (){
+
+  voltarParaConsulta: function () {
     var modelConsulta = this.modelAnterior || new ConsultaFiador();
-    
-    $('#conteiner').empty();
-    
+
+    $('#container').empty();
+
     new ConsultaFiadorControle({
-        el: $('#conteiner'),
-        model: modelConsulta
-    })
-  } 
+      el: $('#container'),
+      model: modelConsulta
+    });
+  },
 
   render: function () {
     $(this.el).html(this.template(this.modelFiador.toJSON()));
@@ -53,7 +53,7 @@ window.FiadorModalControle = Backbone.View.extend({
     $('#modalLabel').html("Dados do Fiador");
     $('#btnSalvar').html("Salvar mudan&ccedil;as");
 
-    //  IMPORTANTE: NÃO chamar .render() manualmente (eles renderizam depois que carregam template)
+    // IMPORTANTE: NÃO chamar .render() manualmente
     $('#tabDadosFiador').empty();
     new FiadorControle({ el: $('#tabDadosFiador'), model: _this.modelFiador });
 
@@ -82,11 +82,9 @@ window.FiadorModalControle = Backbone.View.extend({
       _this.salvar();
     });
 
-
     // evita duplicar bind ao reabrir
     $("#btnSalvarFiadorModal").off("click");
     $("#btnCancelarFiadorModal").off("click");
-    $("#btnSairFiadorModal").off("click");
 
     $("#btnSalvarFiadorModal").on("click", function (e) {
       e.preventDefault();
@@ -105,13 +103,13 @@ window.FiadorModalControle = Backbone.View.extend({
 
     $("#btnCancelarFiadorModal").on("click", function (e) {
       e.preventDefault();
-      // volta o model para o clone inicial (cancelar de verdade)
+
+      // volta o model para o clone inicial
       _this.modelFiador.set(JSON.parse(cloneFiador || '{}'));
-      $('#frmModal').modal('hide');
+
+      // volta para a tela de consulta
+      _this.voltarParaConsulta();
     });
-
-
-
 
     return this;
   },
@@ -121,13 +119,13 @@ window.FiadorModalControle = Backbone.View.extend({
 
     var codigoFies = _this.modelFiador.get("codigoFies");
     if (codigoFies) {
-        codigoFies = codigoFies.toString().replace(/\D/g, '');
-        _this.modelFiador.set("codigoFies", codigoFies);
+      codigoFies = codigoFies.toString().replace(/\D/g, '');
+      _this.modelFiador.set("codigoFies", codigoFies);
     }
 
     this.modelFiador.salvar().done().success(function (data) {
-    debugger;
       $("#btnSalvar").removeAttr("disabled");
+      $("#btnSalvarFiadorModal").removeAttr("disabled");
       $('#ajaxStatus').modal('hide');
 
       if (data.codigo > 0) {
@@ -137,12 +135,15 @@ window.FiadorModalControle = Backbone.View.extend({
         _this.model.set(_this.modelFiador.toJSON());
         mensagemAlerta("Comando realizado com sucesso", "OK", function () {
           $('#modalBody').html("");
-          $('#frmModal').modal('hide');
-          if (_this.callback) _this.callback(_this.modelFiador);
+          if (_this.callback) {
+            _this.callback(_this.modelFiador);
+          }
+          _this.voltarParaConsulta();
         });
       }
     }).error(function () {
       $("#btnSalvar").removeAttr("disabled");
+      $("#btnSalvarFiadorModal").removeAttr("disabled");
       $('#ajaxStatus').modal('hide');
       _this.mostrarErros([{ name: "1", message: "Ocorreu um erro na realização do comando, tente novamente!" }]);
       $('#modalBody').animate({ scrollTop: 0 }, 500);
