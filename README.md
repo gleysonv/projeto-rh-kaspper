@@ -1,76 +1,160 @@
-window.ConsultaFiador = Backbone.Model.extend({
+var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
 
-    // novo endpoint do backend
-    urlRoot: '../fes-web/emprest/fiador/consultaFiadoresPorCpfCodFiesAgencia',
+window.FiadorModalControle = Backbone.View.extend({
+  callback: null,
+  modelFiador: null,
 
-    defaults: {
-        cpf: '',
-        codigoFiesConsulta: '',
-        agenciaConsulta: ''
-    },
+  initialize: function () {
+    var that = this;
+    removerMensagens();
 
-    initialize: function () {
-        this.set('cpf', '');
-        this.set('codigoFiesConsulta', '');
-        this.set('agenciaConsulta', '');
-    },
+    // clona o fiador recebido
+    // (guarda no "this" para o Cancelar funcionar)
+    this._cloneFiadorJsonString = JSON.stringify(this.model.clone());
+    this.modelFiador = new Fiador(JSON.parse(this._cloneFiadorJsonString));
 
-    validate: function (attributes) {
-        if (attributes === undefined) {
-            return true;
-        }
+    this.modelAnterior = this.options.modelAnterior || null;
+    this.modo = this.options.modo || 'incluir';
 
-        var errors = [];
+    $.when(
+      $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoControle.js'),
+      $.getScript(BASE_FIADOR + '/controle/FiadorContatoControle.js')
+    ).done(function () {
 
-        var cpf = purificaAtributo(attributes.cpf || '');
-        var codigoFies = purificaAtributo(attributes.codigoFiesConsulta || '');
-        var agencia = purificaAtributo(attributes.agenciaConsulta || '');
+      $.get(BASE_FIADOR + '/visao/FiadorModal.html').done(function (data) {
+        that.template = _.template(data);
+        that.render();
+      });
 
-        // agência obrigatória
-        if (!agencia) {
-            errors.push({ message: 'Informe a agência.' });
-        }
+    }).fail(function () {
+      console.error('FiadorModalControle: falha ao carregar controles das abas');
+    });
+  },
 
-        // exige CPF ou Código FIES
-        if (!cpf && !codigoFies) {
-            errors.push({ message: 'Informe o CPF ou o Código FIES.' });
-        }
+  voltarParaConsulta: function (){
+    var modelConsulta = this.modelAnterior || new ConsultaFiador();
 
-        // valida CPF somente se ele tiver sido informado
-        if (cpf) {
-            var msg = validarCPF(cpf);
-            if (msg !== '') {
-                errors.push({ message: msg });
-            }
-        }
+    $('#container').empty();
 
-        return errors.length > 0 ? errors : false;
-    },
+    new ConsultaFiadorControle({
+        el: $('#container'),
+        model: modelConsulta
+    });
+  },
 
-    buscar: function () {
-        var cpf = purificaAtributo(this.attributes.cpf || '');
-        var codigoFies = purificaAtributo(this.attributes.codigoFiesConsulta || '');
-        var agencia = purificaAtributo(this.attributes.agenciaConsulta || '');
+  render: function () {
+    $(this.el).html(this.template(this.modelFiador.toJSON()));
 
-        var params = {};
+    var _this = this;
+    var cloneFiador = _this._cloneFiadorJsonString; // snapshot inicial
 
-        if (codigoFies) {
-            params.codigoFies = codigoFies;
-        }
+    $('#modalLabel').html("Dados do Fiador");
+    $('#btnSalvar').html("Salvar mudan&ccedil;as");
 
-        if (cpf) {
-            params.cpf = cpf;
-        }
+    //  IMPORTANTE: NÃO chamar .render() manualmente (eles renderizam depois que carregam template)
+    $('#tabDadosFiador').empty();
+    new FiadorControle({ el: $('#tabDadosFiador'), model: _this.modelFiador });
 
-        if (agencia) {
-            params.agencia = agencia;
-        }
+    $('#tabConjuge').empty();
+    new FiadorConjugeControle({ el: $('#tabConjuge'), model: _this.modelFiador });
 
-        return this.fetch({
-            type: 'GET',
-            data: $.param(params),
-            cache: false
-        });
+    $('#tabEndereco').empty();
+    new FiadorEnderecoControle({ el: $('#tabEndereco'), model: _this.modelFiador });
+
+    $('#tabContrato').empty();
+    new FiadorContatoControle({ el: $('#tabContrato'), model: _this.modelFiador });
+
+    // ajuste visual
+    $('#modalBody legend').hide();
+
+    $("#btnSalvar").unbind("click");
+    $('#btnSalvar').click(function () {
+      if (!_this.modelFiador.isValid()) {
+        _this.mostrarErros(_this.modelFiador.validationError);
+        $('#modalBody').animate({ scrollTop: 0 }, 500);
+        return;
+      }
+
+      $("#btnSalvar").attr("disabled", "disabled");
+      $('#ajaxStatus').modal('show');
+      _this.salvar();
+    });
+
+
+    // evita duplicar bind ao reabrir
+    $("#btnSalvarFiadorModal").off("click");
+    $("#btnCancelarFiadorModal").off("click");
+    $("#btnSairFiadorModal").off("click");
+
+    $("#btnSalvarFiadorModal").on("click", function (e) {
+      e.preventDefault();
+      removerMensagens();
+
+      if (!_this.modelFiador.isValid()) {
+        _this.mostrarErros(_this.modelFiador.validationError);
+        $('#modalBody').animate({ scrollTop: 0 }, 500);
+        return;
+      }
+
+      $("#btnSalvarFiadorModal").attr("disabled", "disabled");
+      $('#ajaxStatus').modal('show');
+      _this.salvar();
+    });
+
+    console.log("bind cancelar delegado");
+    $(document).off("click", "#btnCancelarFiadorModal").on("click", "#btnCancelarFiadorModal", function (e) {
+        console.log("clicou cancelar");
+        e.preventDefault();
+
+        _this.modelFiador.set(JSON.parse(_this._cloneFiadorJsonString || '{}'));
+        _this.voltarParaConsulta();
+    });
+
+
+
+
+    return this;
+  },
+
+  salvar: function () {
+    var _this = this;
+
+    var codigoFies = _this.modelFiador.get("codigoFies");
+    if (codigoFies) {
+        codigoFies = codigoFies.toString().replace(/\D/g, '');
+        _this.modelFiador.set("codigoFies", codigoFies);
     }
 
+    this.modelFiador.salvar().done().success(function (data) {
+      $("#btnSalvar").removeAttr("disabled");
+      $('#ajaxStatus').modal('hide');
+
+      if (data.codigo > 0) {
+        _this.mostrarErros([{ name: data.codigo, message: data.mensagem }]);
+        $('#modalBody').animate({ scrollTop: 0 }, 500);
+      } else {
+        _this.model.set(_this.modelFiador.toJSON());
+
+        mostrarSucessos([{ message: "Comando realizado com sucesso"
+         if (_this.callback) _this.callback(_this.modelFiador);
+        }]);
+      }
+    }).error(function () {
+      $("#btnSalvar").removeAttr("disabled");
+      $('#ajaxStatus').modal('hide');
+      _this.mostrarErros([{ name: "1", message: "Ocorreu um erro na realização do comando, tente novamente!" }]);
+      $('#modalBody').animate({ scrollTop: 0 }, 500);
+    });
+  },
+
+  mostrarErros: function (errors) {
+    var wMsg = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">x</button>';
+    _.each(errors, function (error) {
+      wMsg += error.message + "</BR>";
+    });
+    wMsg += '</div>';
+    $('#msgModal').html(wMsg);
+  }
 });
