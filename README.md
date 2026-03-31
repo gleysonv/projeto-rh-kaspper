@@ -1,160 +1,84 @@
-var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
+<ul class="breadcrumb">
+	<li><a href="index.html">In&iacute;cio</a> <span class="divider">&gt;</span></li>
+	<li>
+		Contrato FIES
+		<span class="divider">&gt;</span>
+	</li>
+	<li>
+		Manuten&ccedil;&atilde;o
+		<span class="divider">&gt;</span>
+	</li>
+	<li class="active">Alteração/Subistituicão de Fiador .</li>
+</ul>
 
-window.FiadorModalControle = Backbone.View.extend({
-  callback: null,
-  modelFiador: null,
-
-  initialize: function () {
-    var that = this;
-    removerMensagens();
-
-    // clona o fiador recebido
-    // (guarda no "this" para o Cancelar funcionar)
-    this._cloneFiadorJsonString = JSON.stringify(this.model.clone());
-    this.modelFiador = new Fiador(JSON.parse(this._cloneFiadorJsonString));
-
-    this.modelAnterior = this.options.modelAnterior || null;
-    this.modo = this.options.modo || 'incluir';
-
-    $.when(
-      $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorContatoControle.js')
-    ).done(function () {
-
-      $.get(BASE_FIADOR + '/visao/FiadorModal.html').done(function (data) {
-        that.template = _.template(data);
-        that.render();
-      });
-
-    }).fail(function () {
-      console.error('FiadorModalControle: falha ao carregar controles das abas');
-    });
-  },
-
-  voltarParaConsulta: function (){
-    var modelConsulta = this.modelAnterior || new ConsultaFiador();
-
-    $('#container').empty();
-
-    new ConsultaFiadorControle({
-        el: $('#container'),
-        model: modelConsulta
-    });
-  },
-
-  render: function () {
-    $(this.el).html(this.template(this.modelFiador.toJSON()));
-
-    var _this = this;
-    var cloneFiador = _this._cloneFiadorJsonString; // snapshot inicial
-
-    $('#modalLabel').html("Dados do Fiador");
-    $('#btnSalvar').html("Salvar mudan&ccedil;as");
-
-    //  IMPORTANTE: NÃO chamar .render() manualmente (eles renderizam depois que carregam template)
-    $('#tabDadosFiador').empty();
-    new FiadorControle({ el: $('#tabDadosFiador'), model: _this.modelFiador });
-
-    $('#tabConjuge').empty();
-    new FiadorConjugeControle({ el: $('#tabConjuge'), model: _this.modelFiador });
-
-    $('#tabEndereco').empty();
-    new FiadorEnderecoControle({ el: $('#tabEndereco'), model: _this.modelFiador });
-
-    $('#tabContrato').empty();
-    new FiadorContatoControle({ el: $('#tabContrato'), model: _this.modelFiador });
-
-    // ajuste visual
-    $('#modalBody legend').hide();
-
-    $("#btnSalvar").unbind("click");
-    $('#btnSalvar').click(function () {
-      if (!_this.modelFiador.isValid()) {
-        _this.mostrarErros(_this.modelFiador.validationError);
-        $('#modalBody').animate({ scrollTop: 0 }, 500);
-        return;
-      }
-
-      $("#btnSalvar").attr("disabled", "disabled");
-      $('#ajaxStatus').modal('show');
-      _this.salvar();
-    });
+<h1>Informa&ccedil;&otilde;es  do Estudante</h1>
 
 
-    // evita duplicar bind ao reabrir
-    $("#btnSalvarFiadorModal").off("click");
-    $("#btnCancelarFiadorModal").off("click");
-    $("#btnSairFiadorModal").off("click");
+<form class="form-horizontal" id="formFiltroConsulta">
 
-    $("#btnSalvarFiadorModal").on("click", function (e) {
-      e.preventDefault();
-      removerMensagens();
+	<div class="row-fluid noprint" id="divConsultar">
+		<div class="span6">
+			<div class="control-group">
+				<label class="control-label" for="cpf"> CPF: </label>
+				<div class="controls">
+					<input type="text" id="cpf" name="cpf" class="input-medium cpf" maxlength="14">
+				</div>
+			</div>
 
-      if (!_this.modelFiador.isValid()) {
-        _this.mostrarErros(_this.modelFiador.validationError);
-        $('#modalBody').animate({ scrollTop: 0 }, 500);
-        return;
-      }
+			<div class="control-group">
+				<label class="control-label" for="codigoFiesConsulta"> C&oacute;digo Fies: </label>
+				<div class="controls">
+					<input type="text" id="codigoFiesConsulta" name="codigoFiesConsulta" class="input-medium fies" maxlength="11">
 
-      $("#btnSalvarFiadorModal").attr("disabled", "disabled");
-      $('#ajaxStatus').modal('show');
-      _this.salvar();
-    });
-
-    console.log("bind cancelar delegado");
-    $(document).off("click", "#btnCancelarFiadorModal").on("click", "#btnCancelarFiadorModal", function (e) {
-        console.log("clicou cancelar");
-        e.preventDefault();
-
-        _this.modelFiador.set(JSON.parse(_this._cloneFiadorJsonString || '{}'));
-        _this.voltarParaConsulta();
-    });
-
+					<a href="#" class="btn btn-primary" title="Localizar" id="btnLocalizarCodFies">
+						<i class="icon-search icon-white"></i>
+						Localizar C&oacute;d. Fies
+					</a>
+				</div>
+				<div class="controls">
+					<label class="control-label" for="codigoFiesConsulta"><span class="obrigatorio">*</span> Agência: </label>
+				<div class="controls">
+					<input type="text" id="agenciaConsulta" name="agenciaConsulta" class="input-medium fies" maxlength="11">
+				</div>
+			</div>
 
 
+		</div>
+	</div>
+	<br>
+	<div class="form-actions noprint" >
+		<a href="#" class="btn btn-primary" title="Consultar" id="btnConsultar">
+			<i class="icon-search icon-white"></i>
+			Consultar
+		</a>
+		<a href="#" class="btn btn-limpar" title="Limpar" id="btnLimpar">Limpar</a>
+		<a href="#" class="btn btn-primary" title="Voltar" id="btnVoltar">Voltar</a>
+	</div>
 
-    return this;
-  },
+	<!-- Resultado da pesquisa de fiadores -->
+	<div class="span12" style="margin-top:10px;">
+		<table class="table table-bordered table-striped" id="tbResultadoFiadores">
+			<caption>Lista de fiadores vinculados ao contrato FIES consultado</caption>
+			<thead>
+			<tr>
+				<th>N&ordm; Contrato</th>
+				<th>CPF Fiador</th>
+				<th>Nome Fiador</th>
+				<th>Data Nasc.</th>
+				<th>A&ccedil;&otilde;es</th>
+			</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+	</div>
 
-  salvar: function () {
-    var _this = this;
+	<!-- Ações só fazem sentido após existir um contrato/estudante consultado -->
+	<div class="form-actions" id="divAcoesPosConsulta" style="display:none;">
+		<a href="#" class="btn btn-primary" title="Novo Fiador" id="btnNovoFiador">Novo Fiador</a>
+		<a href="#" class="btn" title="Sair" id="btnSair">Sair</a>
+	</div>
+</form>
 
-    var codigoFies = _this.modelFiador.get("codigoFies");
-    if (codigoFies) {
-        codigoFies = codigoFies.toString().replace(/\D/g, '');
-        _this.modelFiador.set("codigoFies", codigoFies);
-    }
 
-    this.modelFiador.salvar().done().success(function (data) {
-      $("#btnSalvar").removeAttr("disabled");
-      $('#ajaxStatus').modal('hide');
-
-      if (data.codigo > 0) {
-        _this.mostrarErros([{ name: data.codigo, message: data.mensagem }]);
-        $('#modalBody').animate({ scrollTop: 0 }, 500);
-      } else {
-        _this.model.set(_this.modelFiador.toJSON());
-
-        mostrarSucessos([{ message: "Comando realizado com sucesso"
-         if (_this.callback) _this.callback(_this.modelFiador);
-        }]);
-      }
-    }).error(function () {
-      $("#btnSalvar").removeAttr("disabled");
-      $('#ajaxStatus').modal('hide');
-      _this.mostrarErros([{ name: "1", message: "Ocorreu um erro na realização do comando, tente novamente!" }]);
-      $('#modalBody').animate({ scrollTop: 0 }, 500);
-    });
-  },
-
-  mostrarErros: function (errors) {
-    var wMsg = '<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">x</button>';
-    _.each(errors, function (error) {
-      wMsg += error.message + "</BR>";
-    });
-    wMsg += '</div>';
-    $('#msgModal').html(wMsg);
-  }
-});
+<!-- Modal Incluir -->
+<div id="divModalIncluir"></div>
