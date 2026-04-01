@@ -1,363 +1,189 @@
-21:37:08,264 ERROR [org.jboss.as.ejb3.invocation] (default task-51) WFLYEJB0034: A Invocação EJB falhou no FiadorBean do componente para o public br.gov.caixa.fes.dominio.Retorno br.gov.caixa.fes.negocio.FiadorBean.excluir(java.lang.String,br.gov.caixa.fes.dominio.Fiador) do método: javax.ejb.EJBException: java.lang.NullPointerException
-        at org.jboss.as.ejb3.tx.CMTTxInterceptor.handleExceptionInOurTx(CMTTxInterceptor.java:188)
-        at org.jboss.as.ejb3.tx.CMTTxInterceptor.invokeInOurTx(CMTTxInterceptor.java:277)
-        at org.jboss.as.ejb3.tx.CMTTxInterceptor.required(CMTTxInterceptor.java:332)
-        at org.jboss.as.ejb3.tx.CMTTxInterceptor.processInvocation(CMTTxInterceptor.java:240)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.invocation.InterceptorContext$Invocation.proceed(InterceptorContext.java:509)
-        at org.jboss.weld.ejb.AbstractEJBRequestScopeActivationInterceptor.aroundInvoke(AbstractEJBRequestScopeActivationInterceptor.java:64)
-        at org.jboss.as.weld.ejb.EjbRequestScopeActivationInterceptor.processInvocation(EjbRequestScopeActivationInterceptor.java:89)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.component.interceptors.CurrentInvocationContextInterceptor.processInvocation(CurrentInvocationContextInterceptor.java:41)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.component.invocationmetrics.WaitTimeInterceptor.processInvocation(WaitTimeInterceptor.java:47)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.security.SecurityContextInterceptor.processInvocation(SecurityContextInterceptor.java:100)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.deployment.processors.StartupAwaitInterceptor.processInvocation(StartupAwaitInterceptor.java:22)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.component.interceptors.ShutDownInterceptorFactory$1.processInvocation(ShutDownInterceptorFactory.java:64)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.component.interceptors.LoggingInterceptor.processInvocation(LoggingInterceptor.java:67)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ee.component.NamespaceContextInterceptor.processInvocation(NamespaceContextInterceptor.java:50)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.component.interceptors.AdditionalSetupInterceptor.processInvocation(AdditionalSetupInterceptor.java:54)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.invocation.ContextClassLoaderInterceptor.processInvocation(ContextClassLoaderInterceptor.java:60)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.invocation.InterceptorContext.run(InterceptorContext.java:438)
-        at org.wildfly.security.manager.WildFlySecurityManager.doChecked(WildFlySecurityManager.java:609)
-        at org.jboss.invocation.AccessCheckingInterceptor.processInvocation(AccessCheckingInterceptor.java:57)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.invocation.ChainedInterceptor.processInvocation(ChainedInterceptor.java:53)
-        at org.jboss.as.ee.component.ViewService$View.invoke(ViewService.java:198)
-        at org.jboss.as.ee.component.ViewDescription$1.processInvocation(ViewDescription.java:185)
-        at org.jboss.as.ee.component.ProxyInvocationHandler.invoke(ProxyInvocationHandler.java:81)
-        at br.gov.caixa.fes.negocio.FiadorBean$$$view513.excluir(Unknown Source)
-        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-        at java.lang.reflect.Method.invoke(Method.java:497)
-        at org.jboss.weld.util.reflection.Reflections.invokeAndUnwrap(Reflections.java:433)
-        at org.jboss.weld.bean.proxy.EnterpriseBeanProxyMethodHandler.invoke(EnterpriseBeanProxyMethodHandler.java:127)
-        at org.jboss.weld.bean.proxy.EnterpriseTargetBeanInstance.invoke(EnterpriseTargetBeanInstance.java:56)
-        at org.jboss.weld.bean.proxy.InjectionPointPropagatingEnterpriseTargetBeanInstance.invoke(InjectionPointPropagatingEnterpriseTargetBeanInstance.java:67)
-        at org.jboss.weld.bean.proxy.ProxyMethodHandler.invoke(ProxyMethodHandler.java:100)
-        at br.gov.caixa.fes.negocio.FiadorBean$Proxy$_$$_Weld$EnterpriseProxy$.excluir(Unknown Source)
-        at br.gov.caixa.fes.rest.FiadorRest.excluir(FiadorRest.java:98)
-        at br.gov.caixa.fes.rest.FiadorRest$Proxy$_$$_WeldSubclass.excluir$$super(Unknown Source)
-        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-        at java.lang.reflect.Method.invoke(Method.java:497)
-        at org.jboss.weld.interceptor.proxy.TerminalAroundInvokeInvocationContext.proceedInternal(TerminalAroundInvokeInvocationContext.java:49)
-        at org.jboss.weld.interceptor.proxy.AroundInvokeInvocationContext.proceed(AroundInvokeInvocationContext.java:77)
-        at br.gov.caixa.arqrefcore.validacao.ValidationInterceptor.intercept(ValidationInterceptor.java:40)
-        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-        at java.lang.reflect.Method.invoke(Method.java:497)
-        at org.jboss.weld.interceptor.reader.SimpleInterceptorInvocation$SimpleMethodInvocation.invoke(SimpleInterceptorInvocation.java:73)
-        at org.jboss.weld.interceptor.proxy.InterceptorMethodHandler.executeAroundInvoke(InterceptorMethodHandler.java:84)
-        at org.jboss.weld.interceptor.proxy.InterceptorMethodHandler.executeInterception(InterceptorMethodHandler.java:72)
-        at org.jboss.weld.interceptor.proxy.InterceptorMethodHandler.invoke(InterceptorMethodHandler.java:56)
-        at org.jboss.weld.bean.proxy.CombinedInterceptorAndDecoratorStackMethodHandler.invoke(CombinedInterceptorAndDecoratorStackMethodHandler.java:79)
-        at org.jboss.weld.bean.proxy.CombinedInterceptorAndDecoratorStackMethodHandler.invoke(CombinedInterceptorAndDecoratorStackMethodHandler.java:68)
-        at br.gov.caixa.fes.rest.FiadorRest$Proxy$_$$_WeldSubclass.excluir(Unknown Source)
-        at br.gov.caixa.fes.rest.FiadorRest$Proxy$_$$_WeldClientProxy.excluir(Unknown Source)
-        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-        at java.lang.reflect.Method.invoke(Method.java:497)
-        at org.jboss.resteasy.core.MethodInjectorImpl.invoke(MethodInjectorImpl.java:140)
-        at org.jboss.resteasy.core.ResourceMethodInvoker.invokeOnTarget(ResourceMethodInvoker.java:295)
-        at org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:249)
-        at org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:236)
-        at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:406)
-        at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:213)
-        at org.jboss.resteasy.plugins.server.servlet.ServletContainerDispatcher.service(ServletContainerDispatcher.java:228)
-        at org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.service(HttpServletDispatcher.java:56)
-        at org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.service(HttpServletDispatcher.java:51)
-        at javax.servlet.http.HttpServlet.service(HttpServlet.java:790)
-        at io.undertow.servlet.handlers.ServletHandler.handleRequest(ServletHandler.java:85)
-        at io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:129)
-        at br.gov.caixa.fes.filter.FilterSifes.doFilter(FilterSifes.java:26)
-        at io.undertow.servlet.core.ManagedFilter.doFilter(ManagedFilter.java:61)
-        at io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:131)
-        at io.undertow.servlet.handlers.FilterHandler.handleRequest(FilterHandler.java:84)
-        at io.undertow.servlet.handlers.security.ServletSecurityRoleHandler.handleRequest(ServletSecurityRoleHandler.java:62)
-        at io.undertow.servlet.handlers.ServletDispatchingHandler.handleRequest(ServletDispatchingHandler.java:36)
-        at org.wildfly.extension.undertow.security.SecurityContextAssociationHandler.handleRequest(SecurityContextAssociationHandler.java:78)
-        at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-        at org.keycloak.adapters.undertow.UndertowAuthenticatedActionsHandler.handleRequest(UndertowAuthenticatedActionsHandler.java:66)
-        at io.undertow.servlet.handlers.security.SSLInformationAssociationHandler.handleRequest(SSLInformationAssociationHandler.java:131)
-        at io.undertow.servlet.handlers.security.ServletAuthenticationCallHandler.handleRequest(ServletAuthenticationCallHandler.java:57)
-        at io.undertow.server.handlers.DisableCacheHandler.handleRequest(DisableCacheHandler.java:33)
-        at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-        at io.undertow.security.handlers.AuthenticationConstraintHandler.handleRequest(AuthenticationConstraintHandler.java:53)
-        at io.undertow.security.handlers.AbstractConfidentialityHandler.handleRequest(AbstractConfidentialityHandler.java:46)
-        at io.undertow.servlet.handlers.security.ServletConfidentialityConstraintHandler.handleRequest(ServletConfidentialityConstraintHandler.java:64)
-        at io.undertow.servlet.handlers.security.ServletSecurityConstraintHandler.handleRequest(ServletSecurityConstraintHandler.java:59)
-        at io.undertow.security.handlers.AuthenticationMechanismsHandler.handleRequest(AuthenticationMechanismsHandler.java:60)
-        at io.undertow.servlet.handlers.security.CachedAuthenticatedSessionHandler.handleRequest(CachedAuthenticatedSessionHandler.java:77)
-        at io.undertow.security.handlers.NotificationReceiverHandler.handleRequest(NotificationReceiverHandler.java:50)
-        at io.undertow.security.handlers.AbstractSecurityContextAssociationHandler.handleRequest(AbstractSecurityContextAssociationHandler.java:43)
-        at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-        at org.wildfly.extension.undertow.security.jacc.JACCContextIdHandler.handleRequest(JACCContextIdHandler.java:61)
-        at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-        at org.wildfly.extension.undertow.deployment.GlobalRequestControllerHandler.handleRequest(GlobalRequestControllerHandler.java:68)
-        at org.keycloak.adapters.undertow.ServletPreAuthActionsHandler.handleRequest(ServletPreAuthActionsHandler.java:69)
-        at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-        at io.undertow.servlet.handlers.ServletInitialHandler.handleFirstRequest(ServletInitialHandler.java:292)
-        at io.undertow.servlet.handlers.ServletInitialHandler.access$100(ServletInitialHandler.java:81)
-        at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:138)
-        at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:135)
-        at io.undertow.servlet.core.ServletRequestContextThreadSetupAction$1.call(ServletRequestContextThreadSetupAction.java:48)
-        at io.undertow.servlet.core.ContextClassLoaderSetupAction$1.call(ContextClassLoaderSetupAction.java:43)
-        at org.wildfly.extension.undertow.security.SecurityContextThreadSetupAction.lambda$create$0(SecurityContextThreadSetupAction.java:105)
-        at org.wildfly.extension.undertow.security.SecurityContextThreadSetupAction$$Lambda$1207/1932732237.call(Unknown Source)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-        at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-        at io.undertow.servlet.handlers.ServletInitialHandler.dispatchRequest(ServletInitialHandler.java:272)
-        at io.undertow.servlet.handlers.ServletInitialHandler.access$000(ServletInitialHandler.java:81)
-        at io.undertow.servlet.handlers.ServletInitialHandler$1.handleRequest(ServletInitialHandler.java:104)
-        at io.undertow.server.Connectors.executeRootHandler(Connectors.java:326)
-        at io.undertow.server.HttpServerExchange$1.run(HttpServerExchange.java:812)
-        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
-        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
-        at java.lang.Thread.run(Thread.java:745)
-Caused by: java.lang.NullPointerException
-        at br.gov.caixa.fes.negocio.FiadorBean.salvar(FiadorBean.java:371)
-        at br.gov.caixa.fes.negocio.FiadorBean.salvar(FiadorBean.java:198)
-        at br.gov.caixa.fes.negocio.FiadorBean.excluir(FiadorBean.java:463)
-        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-        at java.lang.reflect.Method.invoke(Method.java:497)
-        at org.jboss.as.ee.component.ManagedReferenceMethodInterceptor.processInvocation(ManagedReferenceMethodInterceptor.java:52)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.invocation.InterceptorContext$Invocation.proceed(InterceptorContext.java:509)
-        at org.jboss.as.weld.ejb.DelegatingInterceptorInvocationContext.proceed(DelegatingInterceptorInvocationContext.java:92)
-        at org.jboss.weld.interceptor.proxy.WeldInvocationContext.interceptorChainCompleted(WeldInvocationContext.java:98)
-        at org.jboss.weld.interceptor.proxy.WeldInvocationContext.proceed(WeldInvocationContext.java:117)
-        at br.gov.caixa.arqrefcore.log.LoggerIntercepter.intercept(LoggerIntercepter.java:50)
-        at sun.reflect.GeneratedMethodAccessor92.invoke(Unknown Source)
-        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-        at java.lang.reflect.Method.invoke(Method.java:497)
-        at org.jboss.weld.interceptor.reader.SimpleInterceptorInvocation$SimpleMethodInvocation.invoke(SimpleInterceptorInvocation.java:73)
-        at org.jboss.weld.interceptor.proxy.WeldInvocationContext.invokeNext(WeldInvocationContext.java:83)
-        at org.jboss.weld.interceptor.proxy.WeldInvocationContext.proceed(WeldInvocationContext.java:115)
-        at org.jboss.weld.bean.InterceptorImpl.intercept(InterceptorImpl.java:108)
-        at org.jboss.as.weld.ejb.DelegatingInterceptorInvocationContext.proceed(DelegatingInterceptorInvocationContext.java:82)
-        at org.jboss.as.weld.interceptors.EjbComponentInterceptorSupport.delegateInterception(EjbComponentInterceptorSupport.java:60)
-        at org.jboss.as.weld.interceptors.Jsr299BindingsInterceptor.delegateInterception(Jsr299BindingsInterceptor.java:76)
-        at org.jboss.as.weld.interceptors.Jsr299BindingsInterceptor.doMethodInterception(Jsr299BindingsInterceptor.java:88)
-        at org.jboss.as.weld.interceptors.Jsr299BindingsInterceptor.processInvocation(Jsr299BindingsInterceptor.java:101)
-        at org.jboss.as.ee.component.interceptors.UserInterceptorFactory$1.processInvocation(UserInterceptorFactory.java:63)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.component.invocationmetrics.ExecutionTimeInterceptor.processInvocation(ExecutionTimeInterceptor.java:49)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.jpa.interceptor.SBInvocationInterceptor.processInvocation(SBInvocationInterceptor.java:47)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ee.concurrent.ConcurrentContextInterceptor.processInvocation(ConcurrentContextInterceptor.java:45)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.invocation.InitialInterceptor.processInvocation(InitialInterceptor.java:40)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.invocation.ChainedInterceptor.processInvocation(ChainedInterceptor.java:53)
-        at org.jboss.as.ee.component.interceptors.ComponentDispatcherInterceptor.processInvocation(ComponentDispatcherInterceptor.java:52)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.component.pool.PooledInstanceInterceptor.processInvocation(PooledInstanceInterceptor.java:51)
-        at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-        at org.jboss.as.ejb3.tx.CMTTxInterceptor.invokeInOurTx(CMTTxInterceptor.java:275)
-        ... 134 more
+window.FiadorBoxControle = Backbone.View
+		.extend({
+			_self : null,
+			events : {
+				'click a#btn-AlterarFiador' : 'alterarFiador',
+				'click [class="accordion-toggle"][title="toggle"]' : 'visualizar',
+			},
 
-21:37:08,273 SEVERE [br.gov.caixa.arqrefcore.excecao.rs.DefaultExceptionMapper] (default task-51) java.lang.NullPointerException
-21:37:08,274 ERROR [stderr] (default task-51) javax.ejb.EJBException: java.lang.NullPointerException
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.tx.CMTTxInterceptor.handleExceptionInOurTx(CMTTxInterceptor.java:188)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.tx.CMTTxInterceptor.invokeInOurTx(CMTTxInterceptor.java:277)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.tx.CMTTxInterceptor.required(CMTTxInterceptor.java:332)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.tx.CMTTxInterceptor.processInvocation(CMTTxInterceptor.java:240)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext$Invocation.proceed(InterceptorContext.java:509)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.weld.ejb.AbstractEJBRequestScopeActivationInterceptor.aroundInvoke(AbstractEJBRequestScopeActivationInterceptor.java:64)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.as.weld.ejb.EjbRequestScopeActivationInterceptor.processInvocation(EjbRequestScopeActivationInterceptor.java:89)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.component.interceptors.CurrentInvocationContextInterceptor.processInvocation(CurrentInvocationContextInterceptor.java:41)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.component.invocationmetrics.WaitTimeInterceptor.processInvocation(WaitTimeInterceptor.java:47)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,274 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.security.SecurityContextInterceptor.processInvocation(SecurityContextInterceptor.java:100)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.deployment.processors.StartupAwaitInterceptor.processInvocation(StartupAwaitInterceptor.java:22)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.component.interceptors.ShutDownInterceptorFactory$1.processInvocation(ShutDownInterceptorFactory.java:64)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.component.interceptors.LoggingInterceptor.processInvocation(LoggingInterceptor.java:67)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.as.ee.component.NamespaceContextInterceptor.processInvocation(NamespaceContextInterceptor.java:50)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.component.interceptors.AdditionalSetupInterceptor.processInvocation(AdditionalSetupInterceptor.java:54)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.ContextClassLoaderInterceptor.processInvocation(ContextClassLoaderInterceptor.java:60)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.run(InterceptorContext.java:438)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.wildfly.security.manager.WildFlySecurityManager.doChecked(WildFlySecurityManager.java:609)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.AccessCheckingInterceptor.processInvocation(AccessCheckingInterceptor.java:57)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.invocation.ChainedInterceptor.processInvocation(ChainedInterceptor.java:53)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.as.ee.component.ViewService$View.invoke(ViewService.java:198)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.as.ee.component.ViewDescription$1.processInvocation(ViewDescription.java:185)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.as.ee.component.ProxyInvocationHandler.invoke(ProxyInvocationHandler.java:81)
-21:37:08,276 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.negocio.FiadorBean$$$view513.excluir(Unknown Source)
-21:37:08,276 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-21:37:08,276 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-21:37:08,276 ERROR [stderr] (default task-51)   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-21:37:08,276 ERROR [stderr] (default task-51)   at java.lang.reflect.Method.invoke(Method.java:497)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.weld.util.reflection.Reflections.invokeAndUnwrap(Reflections.java:433)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.weld.bean.proxy.EnterpriseBeanProxyMethodHandler.invoke(EnterpriseBeanProxyMethodHandler.java:127)
-21:37:08,276 ERROR [stderr] (default task-51)   at org.jboss.weld.bean.proxy.EnterpriseTargetBeanInstance.invoke(EnterpriseTargetBeanInstance.java:56)
-21:37:08,277 ERROR [stderr] (default task-51)   at org.jboss.weld.bean.proxy.InjectionPointPropagatingEnterpriseTargetBeanInstance.invoke(InjectionPointPropagatingEnterpriseTargetBeanInstance.java:67)
-21:37:08,277 ERROR [stderr] (default task-51)   at org.jboss.weld.bean.proxy.ProxyMethodHandler.invoke(ProxyMethodHandler.java:100)
-21:37:08,277 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.negocio.FiadorBean$Proxy$_$$_Weld$EnterpriseProxy$.excluir(Unknown Source)
-21:37:08,277 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.rest.FiadorRest.excluir(FiadorRest.java:98)
-21:37:08,277 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.rest.FiadorRest$Proxy$_$$_WeldSubclass.excluir$$super(Unknown Source)
-21:37:08,277 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-21:37:08,277 ERROR [stderr] (default task-51)   at java.lang.reflect.Method.invoke(Method.java:497)
-21:37:08,277 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.reader.SimpleInterceptorInvocation$SimpleMethodInvocation.invoke(SimpleInterceptorInvocation.java:73)
-21:37:08,277 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.InterceptorMethodHandler.executeAroundInvoke(InterceptorMethodHandler.java:84)
-21:37:08,277 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.InterceptorMethodHandler.executeInterception(InterceptorMethodHandler.java:72)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.InterceptorMethodHandler.invoke(InterceptorMethodHandler.java:56)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.weld.bean.proxy.CombinedInterceptorAndDecoratorStackMethodHandler.invoke(CombinedInterceptorAndDecoratorStackMethodHandler.java:79)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.weld.bean.proxy.CombinedInterceptorAndDecoratorStackMethodHandler.invoke(CombinedInterceptorAndDecoratorStackMethodHandler.java:68)
-21:37:08,277 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-21:37:08,277 ERROR [stderr] (default task-51)   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-21:37:08,277 ERROR [stderr] (default task-51)   at java.lang.reflect.Method.invoke(Method.java:497)
-21:37:08,277 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.TerminalAroundInvokeInvocationContext.proceedInternal(TerminalAroundInvokeInvocationContext.java:49)
-21:37:08,277 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.AroundInvokeInvocationContext.proceed(AroundInvokeInvocationContext.java:77)
-21:37:08,277 ERROR [stderr] (default task-51)   at br.gov.caixa.arqrefcore.validacao.ValidationInterceptor.intercept(ValidationInterceptor.java:40)
-21:37:08,277 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-21:37:08,277 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-21:37:08,277 ERROR [stderr] (default task-51)   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-21:37:08,278 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.rest.FiadorRest$Proxy$_$$_WeldSubclass.excluir(Unknown Source)
-21:37:08,278 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.rest.FiadorRest$Proxy$_$$_WeldClientProxy.excluir(Unknown Source)
-21:37:08,278 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-21:37:08,278 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-21:37:08,278 ERROR [stderr] (default task-51)   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-21:37:08,278 ERROR [stderr] (default task-51)   at java.lang.reflect.Method.invoke(Method.java:497)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.core.MethodInjectorImpl.invoke(MethodInjectorImpl.java:140)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.core.ResourceMethodInvoker.invokeOnTarget(ResourceMethodInvoker.java:295)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:249)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:236)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:406)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:213)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.plugins.server.servlet.ServletContainerDispatcher.service(ServletContainerDispatcher.java:228)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.service(HttpServletDispatcher.java:56)
-21:37:08,278 ERROR [stderr] (default task-51)   at org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.service(HttpServletDispatcher.java:51)
-21:37:08,278 ERROR [stderr] (default task-51)   at javax.servlet.http.HttpServlet.service(HttpServlet.java:790)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletHandler.handleRequest(ServletHandler.java:85)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:129)
-21:37:08,279 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.filter.FilterSifes.doFilter(FilterSifes.java:26)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.core.ManagedFilter.doFilter(ManagedFilter.java:61)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.FilterHandler$FilterChainImpl.doFilter(FilterHandler.java:131)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.FilterHandler.handleRequest(FilterHandler.java:84)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.security.ServletSecurityRoleHandler.handleRequest(ServletSecurityRoleHandler.java:62)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletDispatchingHandler.handleRequest(ServletDispatchingHandler.java:36)
-21:37:08,279 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.security.SecurityContextAssociationHandler.handleRequest(SecurityContextAssociationHandler.java:78)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-21:37:08,279 ERROR [stderr] (default task-51)   at org.keycloak.adapters.undertow.UndertowAuthenticatedActionsHandler.handleRequest(UndertowAuthenticatedActionsHandler.java:66)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.security.SSLInformationAssociationHandler.handleRequest(SSLInformationAssociationHandler.java:131)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.security.ServletAuthenticationCallHandler.handleRequest(ServletAuthenticationCallHandler.java:57)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.server.handlers.DisableCacheHandler.handleRequest(DisableCacheHandler.java:33)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-21:37:08,279 ERROR [stderr] (default task-51)   at io.undertow.security.handlers.AuthenticationConstraintHandler.handleRequest(AuthenticationConstraintHandler.java:53)
-21:37:08,284 ERROR [stderr] (default task-51)   at io.undertow.security.handlers.AbstractConfidentialityHandler.handleRequest(AbstractConfidentialityHandler.java:46)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.security.ServletConfidentialityConstraintHandler.handleRequest(ServletConfidentialityConstraintHandler.java:64)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.security.ServletSecurityConstraintHandler.handleRequest(ServletSecurityConstraintHandler.java:59)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.security.handlers.AuthenticationMechanismsHandler.handleRequest(AuthenticationMechanismsHandler.java:60)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.security.CachedAuthenticatedSessionHandler.handleRequest(CachedAuthenticatedSessionHandler.java:77)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.security.handlers.NotificationReceiverHandler.handleRequest(NotificationReceiverHandler.java:50)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.security.handlers.AbstractSecurityContextAssociationHandler.handleRequest(AbstractSecurityContextAssociationHandler.java:43)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-21:37:08,285 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.security.jacc.JACCContextIdHandler.handleRequest(JACCContextIdHandler.java:61)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-21:37:08,285 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.GlobalRequestControllerHandler.handleRequest(GlobalRequestControllerHandler.java:68)
-21:37:08,285 ERROR [stderr] (default task-51)   at org.keycloak.adapters.undertow.ServletPreAuthActionsHandler.handleRequest(ServletPreAuthActionsHandler.java:69)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.server.handlers.PredicateHandler.handleRequest(PredicateHandler.java:43)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletInitialHandler.handleFirstRequest(ServletInitialHandler.java:292)
-21:37:08,285 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletInitialHandler.access$100(ServletInitialHandler.java:81)
-21:37:08,286 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:138)
-21:37:08,286 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletInitialHandler$2.call(ServletInitialHandler.java:135)
-21:37:08,286 ERROR [stderr] (default task-51)   at io.undertow.servlet.core.ServletRequestContextThreadSetupAction$1.call(ServletRequestContextThreadSetupAction.java:48)
-21:37:08,286 ERROR [stderr] (default task-51)   at io.undertow.servlet.core.ContextClassLoaderSetupAction$1.call(ContextClassLoaderSetupAction.java:43)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.security.SecurityContextThreadSetupAction.lambda$create$0(SecurityContextThreadSetupAction.java:105)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.security.SecurityContextThreadSetupAction$$Lambda$1207/1932732237.call(Unknown Source)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-21:37:08,286 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-21:37:08,287 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-21:37:08,287 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction.lambda$create$0(UndertowDeploymentInfoService.java:1508)
-21:37:08,287 ERROR [stderr] (default task-51)   at org.wildfly.extension.undertow.deployment.UndertowDeploymentInfoService$UndertowThreadSetupAction$$Lambda$1208/1106959692.call(Unknown Source)
-21:37:08,287 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletInitialHandler.dispatchRequest(ServletInitialHandler.java:272)
-21:37:08,287 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletInitialHandler.access$000(ServletInitialHandler.java:81)
-21:37:08,287 ERROR [stderr] (default task-51)   at io.undertow.servlet.handlers.ServletInitialHandler$1.handleRequest(ServletInitialHandler.java:104)
-21:37:08,287 ERROR [stderr] (default task-51)   at io.undertow.server.Connectors.executeRootHandler(Connectors.java:326)
-21:37:08,287 ERROR [stderr] (default task-51)   at io.undertow.server.HttpServerExchange$1.run(HttpServerExchange.java:812)
-21:37:08,287 ERROR [stderr] (default task-51)   at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
-21:37:08,287 ERROR [stderr] (default task-51)   at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
-21:37:08,287 ERROR [stderr] (default task-51)   at java.lang.Thread.run(Thread.java:745)
-21:37:08,288 ERROR [stderr] (default task-51) Caused by: java.lang.NullPointerException
-21:37:08,288 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.negocio.FiadorBean.salvar(FiadorBean.java:371)
-21:37:08,288 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.negocio.FiadorBean.salvar(FiadorBean.java:198)
-21:37:08,288 ERROR [stderr] (default task-51)   at br.gov.caixa.fes.negocio.FiadorBean.excluir(FiadorBean.java:463)
-21:37:08,288 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-21:37:08,288 ERROR [stderr] (default task-51)   at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-21:37:08,288 ERROR [stderr] (default task-51)   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-21:37:08,288 ERROR [stderr] (default task-51)   at java.lang.reflect.Method.invoke(Method.java:497)
-21:37:08,288 ERROR [stderr] (default task-51)   at org.jboss.as.ee.component.ManagedReferenceMethodInterceptor.processInvocation(ManagedReferenceMethodInterceptor.java:52)
-21:37:08,288 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,288 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext$Invocation.proceed(InterceptorContext.java:509)
-21:37:08,288 ERROR [stderr] (default task-51)   at org.jboss.as.weld.ejb.DelegatingInterceptorInvocationContext.proceed(DelegatingInterceptorInvocationContext.java:92)
-21:37:08,288 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.WeldInvocationContext.interceptorChainCompleted(WeldInvocationContext.java:98)
-21:37:08,288 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.WeldInvocationContext.proceed(WeldInvocationContext.java:117)
-21:37:08,288 ERROR [stderr] (default task-51)   at br.gov.caixa.arqrefcore.log.LoggerIntercepter.intercept(LoggerIntercepter.java:50)
-21:37:08,288 ERROR [stderr] (default task-51)   at sun.reflect.GeneratedMethodAccessor92.invoke(Unknown Source)
-21:37:08,289 ERROR [stderr] (default task-51)   at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-21:37:08,289 ERROR [stderr] (default task-51)   at java.lang.reflect.Method.invoke(Method.java:497)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.reader.SimpleInterceptorInvocation$SimpleMethodInvocation.invoke(SimpleInterceptorInvocation.java:73)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.WeldInvocationContext.invokeNext(WeldInvocationContext.java:83)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.weld.interceptor.proxy.WeldInvocationContext.proceed(WeldInvocationContext.java:115)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.weld.bean.InterceptorImpl.intercept(InterceptorImpl.java:108)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.as.weld.ejb.DelegatingInterceptorInvocationContext.proceed(DelegatingInterceptorInvocationContext.java:82)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.as.weld.interceptors.EjbComponentInterceptorSupport.delegateInterception(EjbComponentInterceptorSupport.java:60)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.as.weld.interceptors.Jsr299BindingsInterceptor.delegateInterception(Jsr299BindingsInterceptor.java:76)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.as.weld.interceptors.Jsr299BindingsInterceptor.doMethodInterception(Jsr299BindingsInterceptor.java:88)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.as.weld.interceptors.Jsr299BindingsInterceptor.processInvocation(Jsr299BindingsInterceptor.java:101)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.as.ee.component.interceptors.UserInterceptorFactory$1.processInvocation(UserInterceptorFactory.java:63)
-21:37:08,289 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.component.invocationmetrics.ExecutionTimeInterceptor.processInvocation(ExecutionTimeInterceptor.java:49)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.as.jpa.interceptor.SBInvocationInterceptor.processInvocation(SBInvocationInterceptor.java:47)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.as.ee.concurrent.ConcurrentContextInterceptor.processInvocation(ConcurrentContextInterceptor.java:45)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.invocation.InitialInterceptor.processInvocation(InitialInterceptor.java:40)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.invocation.ChainedInterceptor.processInvocation(ChainedInterceptor.java:53)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.as.ee.component.interceptors.ComponentDispatcherInterceptor.processInvocation(ComponentDispatcherInterceptor.java:52)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.component.pool.PooledInstanceInterceptor.processInvocation(PooledInstanceInterceptor.java:51)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.invocation.InterceptorContext.proceed(InterceptorContext.java:422)
-21:37:08,290 ERROR [stderr] (default task-51)   at org.jboss.as.ejb3.tx.CMTTxInterceptor.invokeInOurTx(CMTTxInterceptor.java:275)
+			initialize : function() {
+				console.log("call -> FiadorBoxControle -> AlterarFiador");
+				var that = this;
+				$.get('../fes-web/servicos/cadastro/fiador/visao/FiadorBox.html').done(
+						function(data) {
+							that.template = _.template(data);
+
+							$.when($.get('../fes-web/servicos/cadastro/fiador/modelo/Fiador.js'),
+									$.get('../fes-web/servicos/cadastro/fiador/controle/FiadorListControle.js'),
+									$.get('../fes-web/servicos/cadastro/fiador/controle/FiadorEnderecoListControle.js'),
+									$.get('../fes-web/servicos/cadastro/fiador/controle/FiadorContatoListControle.js'),
+									$.get('../fes-web/servicos/cadastro/fiador/controle/FiadorModalControle.js')).done(function() {
+								that.render();
+							});
+						});
+			},
+
+			render : function() {
+				console.log("call -> FiadorBoxControle -> render");
+
+				$(this.el).html(this.template(this.model.toJSON()));
+
+				_self = this;
+
+				window.setTimeout(function() {
+					// console.log ("call -> FiadorBoxControle -> setTimeout");
+
+					$(".column").sortable({
+						connectWith : '.column',
+						revert : true,
+						iframeFix : false,
+						items : 'div.box',
+						opacity : 0.8,
+						helper : 'original',
+						forceHelperSize : true,
+						placeholder : 'box-placeholder round-all',
+						forcePlaceholderSize : true,
+						tolerance : 'pointer'
+					});
+
+					// console.log ("call -> FiadorBoxControle -> setTimeout
+					// fim");
+
+					$(".column").disableSelection();
+
+				}, 100);
+
+				// console.log('fim render!');
+				return this;
+			},
+
+			visualizar : function(e1) {
+				console.log("call -> FiadorBoxControle -> visualizar");
+
+				var wCodigo = (e1.target.nodeName === 'A') ? $(e1.target).attr('data-index') : $(e1.target).parent().attr('data-index');
+				$('#messageContainer').html("");
+
+				if (!($('#objetoListaBox' + wCodigo).hasClass('collapse'))) {
+					$('#objetoListaBox' + wCodigo).addClass('collapse').removeClass('expanded');
+					console.log("call -> FiadorBoxControle -> visualizar -> collapse");
+					return;
+				}
+				$('#objetoListaBox' + wCodigo).addClass('expanded').removeClass('collapse');
+
+				var _self = this;
+
+				console.log(_self.model);
+
+				_self.$('#objetoListaBox' + wCodigo).html(new FiadorListControle({
+					model : _self.model
+				}).el);
+
+				_self.$('#objetoListaBox' + wCodigo).append(new FiadorEnderecoListControle({
+					model : _self.model
+				}).el);
+
+				_self.$('#objetoListaBox' + wCodigo).append(new FiadorContatoListControle({
+					model : _self.model
+				}).el);
+
+				if (_self.options.alterar || _self.options.alterar == undefined) {
+
+					//RTC_24491053
+					if (!(($.inArray("FES_GESTOR", usuario.get("grupoUsuarioList")) == -1) && $.inArray("FES_MANUT", usuario.get("grupoUsuarioList")) == -1 && $.inArray("FES_CECOQGO", usuario.get("grupoUsuarioList")) == -1 && $.inArray("FES_MANUTJUR", usuario.get("grupoUsuarioList")) == -1 && $.inArray("FES_AGENCIA", usuario.get("grupoUsuarioList")) == -1)) {
+
+						_self
+								.$('#objetoListaBox' + wCodigo)
+								.append(
+										'<a href="#frmModal" id="btn-AlterarFiador" role="button" class="btn" data-toggle="modal">Alterar &raquo;</a> &nbsp;&nbsp; <a href="javascript:void(0)" id="btn-RemoverFiador" role="button" class="btn btn-warning">Remover</a>');
+
+						$("#btn-RemoverFiador").click(function(evt) {
+							console.log("call -> FiadorBoxControle -> visualizar -> RemoverFiador");
+							_self.removerFiador(evt);
+						});
+					}
+				}
+			},
+
+			alterarFiador : function() {
+				console.log("call -> FiadorBoxControle -> alterarFiador");
+				var that = this;
+				// return;
+				var wFiador = new FiadorModalControle({
+					model : this.model
+				});
+
+				$('#modalBody').html(wFiador.el);
+				$('#frmModal').css('left', '15%');	
+
+				wFiador.callback = function(e) {
+					console.log("call -> FiadorBoxControle -> callback ");
+					$("#frmModal").modal('hide');
+					$('#modalBody').html("");
+					// that.render();
+					that.callback(that.model);
+				}
+			},
+
+			removerFiador : function(e) {
+				console.log("call -> FiadorBoxControle -> removerFiador");
+				e.preventDefault();
+
+				var that = this;
+				mensagemConfirmacao("Você deseja realmente excluir o fiador?", "Cancelar", "OK", function() {
+
+					that.model.excluir().done().success(function(data) {
+						if (data.codigo > 0) {
+							var errors = [];
+							errors.push({
+								name : data.codigo,
+								message : data.mensagem
+							});
+							mostrarErrors(errors);
+						} else {
+							mensagemAlerta("Comando realizado com sucesso", "OK", function() {
+								that.model.set("removido", true);
+								that.callback(that.model);
+							});
+						}
+					}).error(function(data) {
+						console.log("erro 3");
+						console.log(data);
+						var errors = [];
+						errors.push({
+							name : "1",
+							message : "Ocorreu um erro na realização do comando, tente novamente!"
+						});
+						mostrarErrors(errors);
+					});
+
+				}, "Confirmação");
+			},
+
+			retorno : function() {
+				console.log("call -> FiadorBoxControle -> retorno");
+				$('#modalBody').modal('hide');
+				$('#modalBody').html("");
+				this.setControls(this);
+			},
+
+			// Toggle button widget
+			widgetToggle : function(e) {
+				// Make sure the bottom of the box has rounded corners
+				e.parent().parent().toggleClass("round-all");
+				e.parent().parent().toggleClass("round-top");
+
+				// replace plus for minus icon or the other way around
+				if (e.html() == "<i class=\"icon-plus\"></i>") {
+					e.html("<i class=\"icon-minus\"></i>");
+				} else {
+					e.html("<i class=\"icon-plus\"></i>");
+				}
+
+				// close or open box
+				e.parent().parent().next(".box-content").toggleClass("box-content-closed");
+
+				// Prevent the browser jump to the link anchor
+				return false;
+			}
+		});
+//# sourceURL=FiadorBoxControle.js			
