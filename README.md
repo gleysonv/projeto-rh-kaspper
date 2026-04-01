@@ -3,6 +3,7 @@ window.FiadorBoxControle = Backbone.View
 			_self : null,
 			events : {
 				'click a#btn-AlterarFiador' : 'alterarFiador',
+				'click a#btn-RemoverFiador' : 'removerFiador',
 				'click [class="accordion-toggle"][title="toggle"]' : 'visualizar',
 			},
 
@@ -31,8 +32,6 @@ window.FiadorBoxControle = Backbone.View
 				_self = this;
 
 				window.setTimeout(function() {
-					// console.log ("call -> FiadorBoxControle -> setTimeout");
-
 					$(".column").sortable({
 						connectWith : '.column',
 						revert : true,
@@ -46,14 +45,10 @@ window.FiadorBoxControle = Backbone.View
 						tolerance : 'pointer'
 					});
 
-					// console.log ("call -> FiadorBoxControle -> setTimeout
-					// fim");
-
 					$(".column").disableSelection();
 
 				}, 100);
 
-				// console.log('fim render!');
 				return this;
 			},
 
@@ -95,11 +90,6 @@ window.FiadorBoxControle = Backbone.View
 								.$('#objetoListaBox' + wCodigo)
 								.append(
 										'<a href="#frmModal" id="btn-AlterarFiador" role="button" class="btn" data-toggle="modal">Alterar &raquo;</a> &nbsp;&nbsp; <a href="javascript:void(0)" id="btn-RemoverFiador" role="button" class="btn btn-warning">Remover</a>');
-
-						$("#btn-RemoverFiador").click(function(evt) {
-							console.log("call -> FiadorBoxControle -> visualizar -> RemoverFiador");
-							_self.removerFiador(evt);
-						});
 					}
 				}
 			},
@@ -107,21 +97,26 @@ window.FiadorBoxControle = Backbone.View
 			alterarFiador : function() {
 				console.log("call -> FiadorBoxControle -> alterarFiador");
 				var that = this;
-				// return;
+
 				var wFiador = new FiadorModalControle({
 					model : this.model
 				});
 
 				$('#modalBody').html(wFiador.el);
-				$('#frmModal').css('left', '15%');	
+				$('#frmModal').css('left', '15%');
 
 				wFiador.callback = function(e) {
 					console.log("call -> FiadorBoxControle -> callback ");
 					$("#frmModal").modal('hide');
 					$('#modalBody').html("");
-					// that.render();
 					that.callback(that.model);
 				}
+			},
+
+			mostrarMensagemSucesso : function(mensagem) {
+				$('#messageContainer').html(
+					'<div class="alert alert-success">' + mensagem + '</div>'
+				);
 			},
 
 			removerFiador : function(e) {
@@ -140,9 +135,16 @@ window.FiadorBoxControle = Backbone.View
 							});
 							mostrarErrors(errors);
 						} else {
-							mensagemAlerta("Comando realizado com sucesso", "OK", function() {
-								that.model.set("removido", true);
-								that.callback(that.model);
+							that.model.set("removido", true);
+
+							$(that.el).fadeOut(300, function() {
+								$(this).remove();
+
+								if (that.callback && typeof that.callback === 'function') {
+									that.callback(that.model);
+								}
+
+								that.mostrarMensagemSucesso("Comando realizado com sucesso");
 							});
 						}
 					}).error(function(data) {
@@ -168,22 +170,18 @@ window.FiadorBoxControle = Backbone.View
 
 			// Toggle button widget
 			widgetToggle : function(e) {
-				// Make sure the bottom of the box has rounded corners
 				e.parent().parent().toggleClass("round-all");
 				e.parent().parent().toggleClass("round-top");
 
-				// replace plus for minus icon or the other way around
 				if (e.html() == "<i class=\"icon-plus\"></i>") {
 					e.html("<i class=\"icon-minus\"></i>");
 				} else {
 					e.html("<i class=\"icon-plus\"></i>");
 				}
 
-				// close or open box
 				e.parent().parent().next(".box-content").toggleClass("box-content-closed");
 
-				// Prevent the browser jump to the link anchor
 				return false;
 			}
 		});
-//# sourceURL=FiadorBoxControle.js			
+//# sourceURL=FiadorBoxControle.js
