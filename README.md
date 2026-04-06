@@ -1,405 +1,205 @@
-//# sourceURL=ConsultaFiadorControle.js
-
 var BASE_FIADOR = '../fes-web/servicos/contratofies/manutencaofiador';
 
-window.ConsultaFiadorControle = Backbone.View.extend({
-
-  urlTemplate: BASE_FIADOR + '/visao/ConsultaBaseFiador.html',
-
-  events: {
-    "click a#btnLimpar": "limpar",
-    "click a#btnConsultar": "consultar",
-    "click a#btnVoltar": "voltar",
-    "click a#btnLocalizarCodFies": "localizarCodFies",
-    "click a#btnNovoFiador": "novoFiador",
-    "click a#btnSair": "sair",
-    "blur #formFiltroConsulta input": "change",
-    "change #formFiltroConsulta select": "change",
-    "blur #cpf": "validarCpf"
-  },
-
-  initialize: function () {
-    $.get('../fes-web/servicos/contratofies/consultagenericaestudante/controle/ConsultaGenericaEstudanteModalControle.js');
-    $.get('../fes-web/servicos/contratofies/consultagenericaestudante/modelo/Estudante.js');
-
-    var that = this;
-    removerMensagens();
-
-    // Pré-carrega o básico (não bloqueia, mas ajuda)
-    $.getScript(BASE_FIADOR + '/modelo/Fiador.js');
-    $.getScript(BASE_FIADOR + '/controle/FiadorModalControle.js');
-
-    $.get(this.urlTemplate).done(function (data) {
-      that.template = _.template(data);
-      that.render();
-      loadMask();
-      removeAutoComplete('cpf', 'cpf');
-    });
-  },
-
-  render: function () {
-    $(this.el).html(this.template(this.model.toJSON()));
-    $('#divResultado').hide();
-    $('#tbResultadoFiadores tbody').empty();
-    // Ações (Novo Fiador / Sair) só após consulta
-    $('#divAcoesPosConsulta').hide();
-    return this;
-  },
-
-  change: function (e) {
-    var obj = {};
-    obj[e.target.name] = String(e.target.value || '').trim();
-    this.model.set(obj);
-  },
-
-  validarCpf: function (e) {
-    removerMensagens();
-    var cpf = purificaAtributo(e.target.value);
-    if (cpf !== '') {
-      var msg = validarCPF(cpf);
-      if (msg !== '') {
-        mostrarErrors([{ message: msg }]);
-        return false;
-      }
-    }
-    return true;
-  },
-
-  limpar: function () {
-    removerMensagens();
-    limparFormulario('#formFiltroConsulta');
-    if (this.model && this.model.initialize) {
-      this.model.initialize();
-    }
-    $('#divResultado').hide('slow');
-    $('#tbResultadoFiadores tbody').empty();
-    $('#divAcoesPosConsulta').hide();
-  },
-
-  validar: function () {
-    if (!this.model.isValid()) {
-      mostrarErrors(this.model.validationError);
-      return false;
-    }
-    return true;
-  },
-
-  consultar: function () {
-    var that = this;
-
-    $('#divResultado').hide('slow');
-    $('#divAcoesPosConsulta').hide();
-    removerMensagens();
-
-    var cpf = String(purificaAtributo(this.model.get('cpf') || '') || '').trim();
-    var codigoFies = String(purificaAtributo(this.model.get('codigoFiesConsulta') || '') || '').trim();
-    var agencia = String(purificaAtributo(this.model.get('agenciaConsulta') || '') || '').trim();
-
-    this.model.set({
-      cpf: cpf,
-      codigoFiesConsulta: codigoFies,
-      agenciaConsulta: agencia
-    });
-
-    if (!this.validar()) {
-      return;
-    }
-
-    $('#ajaxStatus').modal('show');
-
-    this.model.buscar()
-      .done(function (data) {
-        $('#ajaxStatus').modal('hide');
-
-        console.log('[consultarFiadores] retorno =', data);
-
-        if (data && data.mensagem) {
-          mostrarErrors([{ message: data.mensagem }]);
-          return;
-        }
-
-        var lista = [];
-        if ($.isArray(data)) {
-          lista = data;
-        } else if (data) {
-          lista =
-            data.listaFiadores ||
-            data.fiadores ||
-            data.listaRetorno ||
-            (data.retorno && data.retorno.listaRetorno) ||
-            (data.objeto && data.objeto.listaRetorno) ||
-            [];
-        }
-
-        that.renderTabelaFiadores(lista);
-        $('#divResultado').show('slow');
-        $('#divAcoesPosConsulta').show('slow');
-      })
-      .fail(function (xhr) {
-        $('#ajaxStatus').modal('hide');
-        console.error('[listarFiadores] FAIL', xhr && xhr.status, xhr && xhr.responseText);
-
-        mostrarErrors([{
-          message: 'Falha ao consultar fiadores. Verifique Network > Response.'
-        }]);
-      });
-  },
-
-  // ---------- TABELA ----------
-
-  renderTabelaFiadores: function (fiadores) {
-    var $tbody = $('#tbResultadoFiadores tbody');
-    if ($tbody.length === 0) {
-      return;
-    }
-
-    $tbody.empty();
-
-    if (!fiadores || fiadores.length === 0) {
-      $tbody.append('<tr><td colspan="5">Nenhum fiador encontrado.</td></tr>');
-      return;
-    }
-
-    var that = this;
-
-    function pick(obj, paths) {
-      for (var i = 0; i < paths.length; i++) {
-        var parts = paths[i].split('.');
-        var cur = obj;
-        for (var j = 0; j < parts.length; j++) {
-          if (cur == null) {
-            break;
-          }
-          cur = cur[parts[j]];
-        }
-        if (cur !== undefined && cur !== null && cur !== '' && typeof cur !== 'object') {
-          return cur;
-        }
-      }
-      return '';
-    }
-
-    _.each(fiadores, function (f) {
-
-      // MAPEAMENTO ROBUSTO (para bater com o que o backend devolver)
-      var numeroContrato = pick(f, [
-        'numeroContrato',
-        'nuContratoFormatado',
-        'nuContrato',
-        'contrato.numeroContrato',
-        'contrato.nuContratoFormatado',
-        'contrato.nuContrato'
-      ]);
-      var cpfFiador = (f.cpfFiador || f.coCpfFiador || f.cpf || f.cpfCandidato || '');
-      var nomeFiador = (f.nomeFiador || f.noFiador || f.nome || f.nomeCandidato || '');
-      var dtNasc = (f.dataNascimento || f.dtNascimento || f.dataNasc || f.dtNasc || '');
-
-      var tr =
-        '<tr>' +
-          '<td>' + (numeroContrato || '') + '</td>' +
-          '<td>' + (cpfFiador ? mascararCpf(cpfFiador) : '') + '</td>' +
-          '<td>' + (nomeFiador || '') + '</td>' +
-          '<td>' + (dtNasc || '') + '</td>' +
-          '<td>' +
-            '<a href="#" class="btn btn-mini btn-primary btnAlterarFiadorRow">Alterar</a> ' +
-            '<a href="#" class="btn btn-mini btn-danger btnExcluirFiadorRow">Excluir</a>' +
-          '</td>' +
-        '</tr>';
-
-      var $tr = $(tr);
-
-      $tr.find('.btnAlterarFiadorRow').click(function (e) {
-        e.preventDefault();
-        that.alterarFiador(f);
-      });
-
-      $tr.find('.btnExcluirFiadorRow').click(function (e) {
-        e.preventDefault();
-        that.excluirFiador(f, $tr);
-      });
-
-      $tbody.append($tr);
-    });
-  },
-
-  excluirFiador: function (fiadorRow, $tr) {
-    removerMensagens();
-
-    if (!confirm('Confirma a exclusão do fiador selecionado?')) {
-      return;
-    }
-
-    var model = new Fiador();
-    model.clear();
-
-    var cpf = fiadorRow.cpfFiador || fiadorRow.coCpfFiador || fiadorRow.cpf || "";
-    var codigoFies = this.model.get("codigoFiesConsulta") || fiadorRow.codigoFies || 0;
-    var dependenteCPF = fiadorRow.dependenteCPF || fiadorRow.dependenteCpf || 0;
-    var codigo = fiadorRow.codigo || fiadorRow.codigoFiador || 0;
-
-    cpf = purificaAtributo(cpf);
-    codigoFies = purificaAtributo(codigoFies);
-
-    if (codigoFies) {
-      codigoFies = parseInt(codigoFies, 10);
-    }
-
-    model.set("cpf", cpf);
-    model.set("codigoFies", codigoFies);
-    model.set("dependenteCPF", dependenteCPF);
-    model.set("codigo", codigo);
-
-    $('#ajaxStatus').modal('show');
-
-    model.excluir()
-      .done(function (retorno) {
-        $('#ajaxStatus').modal('hide');
-
-        if (retorno && retorno.mensagem) {
-          mostrarErrors([{ message: retorno.mensagem }]);
-          return;
-        }
-
-        $tr.remove();
-
-        var $tbody = $('#tbResultadoFiadores tbody');
-        if ($tbody.find('tr').length === 0) {
-          $tbody.append('<tr><td colspan="5">Nenhum fiador encontrado.</td></tr>');
-        }
-
-        mostrarSucessos([{
-          message: 'Fiador excluído com sucesso.'
-        }]);
-      })
-      .fail(function (xhr) {
-        $('#ajaxStatus').modal('hide');
-        console.error('[excluirFiador] FAIL', xhr);
-        mostrarErrors([{ message: 'Falha ao excluir o fiador.' }]);
-      });
-  },
-
-  alterarFiador: function (fiadorRow) {
-    var that = this;
-    var model = new Fiador();
-
-    var cpf = (fiadorRow.cpfFiador || fiadorRow.coCpfFiador || fiadorRow.cpf || '');
-    cpf = (cpf || '').toString().replace(/\D/g, '');
-
-    var codigoFies = this.model.get('codigoFiesConsulta') || this.model.get('codigoFies') || '';
-    codigoFies = (codigoFies || '').toString().replace(/\D/g, '');
-
-    if (!cpf || !codigoFies) {
-      mostrarErrors([{ message: 'Não foi possível alterar: CPF ou Código FIES não informado.' }], '#msgModal');
-      return;
-    }
-
-    model.set('cpf', cpf);
-    model.set('codigoFies', codigoFies);
-
-    try {
-      $('#ajaxStatus').modal('show');
-    } catch (e) {}
-
-    $.ajax({
-      url: '../fes-web/emprest/fiador/consulta',
-      type: 'GET',
-      dataType: 'json',
-      data: {
-        codigoFies: codigoFies,
-        cpf: cpf
-      }
-    }).done(function (data) {
-      try {
-        $('#ajaxStatus').modal('hide');
-      } catch (e) {}
-
-      if (!data) {
-        mostrarErrors([{ message: 'Consulta não retornou dados do fiador.' }], '#msgModal');
-        return;
-      }
-
-      data.codigoFies = codigoFies;
-      data.cpf = cpf;
-
-      model.set(data);
-
-      that.abrirTelaCadastroFiador(model, 'alterar');
-
-    }).fail(function (xhr) {
-      try {
-        $('#ajaxStatus').modal('hide');
-      } catch (e) {}
-
-      var msg = 'Erro ao consultar fiador completo para alteração.';
-      try {
-        if (xhr && xhr.responseText) {
-          msg += ' ' + xhr.responseText;
-        }
-      } catch (e) {}
-
-      mostrarErrors([{ message: msg }], '#msgModal');
-    });
-  },
-
-  novoFiador: function (e) {
-    if (e) {
-      e.preventDefault();
-    }
-
-    var model = new Fiador();
-
-    var cod = this.model.get("codigoFiesConsulta");
-    if (cod) {
-      model.set("codigoFies", cod);
-    }
-
-    this.abrirTelaCadastroFiador(model, "incluir");
-  },
-
-  abrirTelaCadastroFiador: function (modelFiador, modo) {
-    removerMensagens();
-
-    var modelConsultaAnterior = this.model;
-
-    $.when(
-      $.getScript(BASE_FIADOR + '/modelo/Fiador.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorModalControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorConjugeControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorEnderecoControle.js'),
-      $.getScript(BASE_FIADOR + '/controle/FiadorContatoControle.js')
-    )
-    .done(function () {
-      $('#container').html(
-        new FiadorModalControle({
-          el: $('#container'),
-          model: modelFiador,
-          modo: modo,
-          modelAnterior: modelConsultaAnterior
-        }).el
-      );
-    })
-    .fail(function (xhr, status, err) {
-      console.log("[abrirTelaCadastroFiador] FAIL", status, err);
-      alert('Erro ao carregar a tela de cadastro do fiador.');
-    });
-  },
-
-  localizarCodFies: function () {
-    $('#divResultado').hide();
-    this.detalhe = new ConsultaGenericaEstudanteModalControle({
-      el: $('#divModalIncluir'),
-      model: new Estudante(),
-      modelAnterior: this.model
-    });
-  },
-
-  sair: function () {
-    abrirPagina('../fes-web/fes-index.html');
-  },
-
-  voltar: function () {
-    abrirPagina('../fes-web/fes-index.html');
-  }
-
+window.FiadorBoxControle = Backbone.View.extend({
+	_self: null,
+
+	events: {
+		'click a#btn-AlterarFiador': 'alterarFiador',
+		'click [class="accordion-toggle"][title="toggle"]': 'visualizar'
+	},
+
+	initialize: function () {
+		console.log("call -> FiadorBoxControle -> AlterarFiador");
+		var that = this;
+
+		$.get(BASE_FIADOR + '/visao/FiadorBox.html').done(function (data) {
+			that.template = _.template(data);
+
+			$.when(
+				$.get(BASE_FIADOR + '/modelo/Fiador.js'),
+				$.get(BASE_FIADOR + '/controle/FiadorListControle.js'),
+				$.get(BASE_FIADOR + '/controle/FiadorEnderecoListControle.js'),
+				$.get(BASE_FIADOR + '/controle/FiadorContatoListControle.js'),
+				$.get(BASE_FIADOR + '/controle/FiadorModalControle.js')
+			).done(function () {
+				that.render();
+			});
+		});
+	},
+
+	render: function () {
+		console.log("call -> FiadorBoxControle -> render");
+
+		$(this.el).html(this.template(this.model.toJSON()));
+
+		_self = this;
+
+		window.setTimeout(function () {
+			$(".column").sortable({
+				connectWith: '.column',
+				revert: true,
+				iframeFix: false,
+				items: 'div.box',
+				opacity: 0.8,
+				helper: 'original',
+				forceHelperSize: true,
+				placeholder: 'box-placeholder round-all',
+				forcePlaceholderSize: true,
+				tolerance: 'pointer'
+			});
+
+			$(".column").disableSelection();
+
+		}, 100);
+
+		return this;
+	},
+
+	visualizar: function (e1) {
+		console.log("call -> FiadorBoxControle -> visualizar");
+
+		var wCodigo = (e1.target.nodeName === 'A')
+			? $(e1.target).attr('data-index')
+			: $(e1.target).parent().attr('data-index');
+
+		$('#messageContainer').html("");
+
+		if (!($('#objetoListaBox' + wCodigo).hasClass('collapse'))) {
+			$('#objetoListaBox' + wCodigo).addClass('collapse').removeClass('expanded');
+			console.log("call -> FiadorBoxControle -> visualizar -> collapse");
+			return;
+		}
+
+		$('#objetoListaBox' + wCodigo).addClass('expanded').removeClass('collapse');
+
+		var _self = this;
+
+		console.log(_self.model);
+
+		_self.$('#objetoListaBox' + wCodigo).html(new FiadorListControle({
+			model: _self.model
+		}).el);
+
+		_self.$('#objetoListaBox' + wCodigo).append(new FiadorEnderecoListControle({
+			model: _self.model
+		}).el);
+
+		_self.$('#objetoListaBox' + wCodigo).append(new FiadorContatoListControle({
+			model: _self.model
+		}).el);
+
+		if (_self.options.alterar || _self.options.alterar === undefined) {
+			if (!(($.inArray("FES_GESTOR", usuario.get("grupoUsuarioList")) == -1) &&
+				$.inArray("FES_MANUT", usuario.get("grupoUsuarioList")) == -1 &&
+				$.inArray("FES_MANUTJUR", usuario.get("grupoUsuarioList")) == -1 &&
+				$.inArray("FES_AGENCIA", usuario.get("grupoUsuarioList")) == -1)) {
+
+				_self.$('#objetoListaBox' + wCodigo).append(
+					'<a href="#frmModal" id="btn-AlterarFiador" role="button" class="btn" data-toggle="modal">Alterar &raquo;</a> &nbsp;&nbsp; ' +
+					'<a href="javascript:void(0)" id="btn-RemoverFiador" role="button" class="btn btn-warning">Remover</a>'
+				);
+
+				$("#btn-RemoverFiador").click(function (evt) {
+					console.log("call -> FiadorBoxControle -> visualizar -> RemoverFiador");
+					_self.removerFiador(evt);
+				});
+			}
+		}
+	},
+
+	alterarFiador: function () {
+		console.log("call -> FiadorBoxControle -> alterarFiador");
+		var that = this;
+
+		var wFiador = new FiadorModalControle({
+			model: this.model
+		});
+
+		$('#modalBody').html(wFiador.el);
+		$('#frmModal').css('left', '15%');
+
+		wFiador.callback = function () {
+			console.log("call -> FiadorBoxControle -> callback ");
+			$("#frmModal").modal('hide');
+			$('#modalBody').html("");
+			that.callback(that.model);
+		};
+	},
+
+	removerFiador: function (e) {
+		console.log("call -> FiadorBoxControle -> removerFiador");
+		e.preventDefault();
+
+		var that = this;
+
+		mensagemConfirmacao(
+			"Você deseja realmente deseja excluir o fiador?",
+			"Cancelar",
+			"OK",
+			function () {
+				that.model.excluir()
+					.done(function (data) {
+						if (data && data.codigo > 0) {
+							var errors = [];
+							errors.push({
+								name: data.codigo,
+								message: data.mensagem
+							});
+							mostrarErrors(errors);
+						} else {
+							mostrarSucessos([{
+								message: "Comando de exclusão realizado com sucesso!"
+							}]);
+
+							that.model.set("removido", true);
+
+							if (that.$el && that.$el.length) {
+								that.$el.remove();
+							}
+
+							if (typeof that.callback === 'function') {
+								that.callback(that.model);
+							}
+						}
+					})
+					.fail(function (data) {
+						console.log("erro 3");
+						console.log(data);
+
+						var errors = [];
+						errors.push({
+							name: "1",
+							message: "Ocorreu um erro na realização do comando, tente novamente!"
+						});
+						mostrarErrors(errors);
+					});
+			},
+			"Confirmação"
+		);
+	},
+
+	retorno: function () {
+		console.log("call -> FiadorBoxControle -> retorno");
+		$('#modalBody').modal('hide');
+		$('#modalBody').html("");
+		this.setControls(this);
+	},
+
+	// Toggle button widget
+	widgetToggle: function (e) {
+		e.parent().parent().toggleClass("round-all");
+		e.parent().parent().toggleClass("round-top");
+
+		if (e.html() == "<i class=\"icon-plus\"></i>") {
+			e.html("<i class=\"icon-minus\"></i>");
+		} else {
+			e.html("<i class=\"icon-plus\"></i>");
+		}
+
+		e.parent().parent().next(".box-content").toggleClass("box-content-closed");
+
+		return false;
+	}
 });
+
+//# sourceURL=FiadorBoxControle.js
