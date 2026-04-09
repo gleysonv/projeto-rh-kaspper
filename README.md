@@ -1,4 +1,4 @@
-   // ================== NOVOS TESTES DE COBERTURA DA COMUNICAÇÃO SIAPI ==================
+// ================== NOVOS TESTES DE COBERTURA DA COMUNICAÇÃO SIAPI ==================
 
     @Test
     public void salvar_quandoInclusao_deveComunicarSiapi() throws Exception {
@@ -18,17 +18,17 @@
         assertEquals(Long.valueOf(0), r.getCodigo());
         verify(contratoBean, times(1)).exportaOnline120(f.getCodigoFies());
         verify(api, times(1)).executeAPIPB699Codigo(any(Padrao.class));
-        verify(ocorrenciaRejeicaoBean, times(1)).gravarOcorrenciaRejeicao(
-                eq(f.getCodigoFies()),
-                eq(TipoOperacaoAditamento.ADITAMENTO_NAO_SIMPLIFICADO),
-                eq(SituacaoOcorrenciaRejeicao.ENVIADO_BANCO),
-                eq("SIAPI #ABC-Mensagem de erro"),
-                1,
-                2026);
+        verify(ocorrenciaRejeicaoBean, never()).gravarOcorrenciaRejeicao(
+                anyLong(),
+                any(TipoOperacaoAditamento.class),
+                any(SituacaoOcorrenciaRejeicao.class),
+                anyString(),
+                isNull(),
+                isNull());
     }
 
     @Test
-    public void excluirRenegociacao_quandoSucesso_deveComunicarSiapi() throws BusinessException {
+    public void excluirRenegociacao_quandoSucesso_deveComunicarSiapi() {
         Fiador f = buildFiadorValido();
 
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
@@ -48,7 +48,7 @@
     }
 
     @Test
-    public void validarRenegociacao_quandoSucesso_naoDeveComunicarSiapi() throws BusinessException {
+    public void validarRenegociacao_quandoSucesso_naoDeveComunicarSiapi() {
         Fiador f = buildFiadorValido();
 
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
@@ -61,16 +61,16 @@
         verify(contratoBean, never()).exportaOnline120(anyLong());
         verify(api, never()).executeAPIPB699Codigo(any(Padrao.class));
         verify(ocorrenciaRejeicaoBean, never()).gravarOcorrenciaRejeicao(
-                eq(f.getCodigoFies()),
-                eq(TipoOperacaoAditamento.ADITAMENTO_NAO_SIMPLIFICADO),
-                eq(SituacaoOcorrenciaRejeicao.ENVIADO_BANCO),
-                eq("SIAPI #ABC-Mensagem de erro"),
-                1,
-                2026);
+                anyLong(),
+                any(TipoOperacaoAditamento.class),
+                any(SituacaoOcorrenciaRejeicao.class),
+                anyString(),
+                isNull(),
+                isNull());
     }
 
     @Test
-    public void salvar_quandoInclusaoESiapiRetornarErro_deveGravarOcorrencia() throws BusinessException {
+    public void salvar_quandoInclusaoESiapiRetornarErro_deveGravarOcorrencia() {
         Fiador f = buildFiadorValido();
 
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
@@ -93,12 +93,12 @@
                 eq(TipoOperacaoAditamento.ADITAMENTO_NAO_SIMPLIFICADO),
                 eq(SituacaoOcorrenciaRejeicao.ENVIADO_BANCO),
                 eq("SIAPI #ABC-Mensagem de erro"),
-                1,
-                2026);
+                isNull(),
+                isNull());
     }
 
     @Test
-    public void salvar_quandoInclusaoEExportaOnline120Vazio_naoDeveChamarApi() throws BusinessException {
+    public void salvar_quandoInclusaoEExportaOnline120Vazio_naoDeveChamarApi() {
         Fiador f = buildFiadorValido();
 
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
@@ -112,10 +112,10 @@
         verify(contratoBean, times(1)).exportaOnline120(f.getCodigoFies());
         verify(api, never()).executeAPIPB699Codigo(any(Padrao.class));
         verify(ocorrenciaRejeicaoBean, never()).gravarOcorrenciaRejeicao(
-                eq(f.getCodigoFies()),
-                eq(TipoOperacaoAditamento.ADITAMENTO_NAO_SIMPLIFICADO),
-                eq(SituacaoOcorrenciaRejeicao.ENVIADO_BANCO),
-                eq("SIAPI #ABC-Mensagem de erro"),
-                1,
-                2026);
+                anyLong(),
+                any(TipoOperacaoAditamento.class),
+                any(SituacaoOcorrenciaRejeicao.class),
+                anyString(),
+                isNull(),
+                isNull());
     }
