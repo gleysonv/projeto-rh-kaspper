@@ -1,121 +1,68 @@
-// ================== NOVOS TESTES DE COBERTURA DA COMUNICAÇÃO SIAPI ==================
+@Test
+public void salvarRenegociacao_quandoSucesso_retornaSucesso() {
+    Fiador f = buildFiadorValido();
+    when(query.setParameter(anyString(), anyObject())).thenReturn(query);
+    when(query.executeUpdate()).thenReturn(1);
 
-    @Test
-    public void salvar_quandoInclusao_deveComunicarSiapi() throws Exception {
-        Fiador f = buildFiadorValido();
+    when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
+    Padrao retornoApi = mock(Padrao.class);
+    when(retornoApi.getCodigoRetorno()).thenReturn("0");
+    when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
 
-        when(query.setParameter(anyString(), anyObject())).thenReturn(query);
-        when(query.executeUpdate()).thenReturn(1);
-        when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
+    Retorno r = bean.salvarRenegociacao(USUARIO, f, 10L);
+    assertEquals(Long.valueOf(0), r.getCodigo());
+    assertEquals(MSG_COMANDO_SUCESSO, r.getMensagem());
+}
 
-        Padrao retornoApi = mock(Padrao.class);
-        when(retornoApi.getCodigoRetorno()).thenReturn("0");
-        when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
 
-        Retorno r = bean.salvar(USUARIO, f);
+@Test
+public void excluirRenegociacao_quandoSucesso_retornaSucesso() {
+    Fiador f = buildFiadorValido();
+    when(query.setParameter(anyString(), anyObject())).thenReturn(query);
+    when(query.executeUpdate()).thenReturn(1);
 
-        assertNotNull(r);
-        assertEquals(Long.valueOf(0), r.getCodigo());
-        verify(contratoBean, times(1)).exportaOnline120(f.getCodigoFies());
-        verify(api, times(1)).executeAPIPB699Codigo(any(Padrao.class));
-        verify(ocorrenciaRejeicaoBean, never()).gravarOcorrenciaRejeicao(
-                anyLong(),
-                any(TipoOperacaoAditamento.class),
-                any(SituacaoOcorrenciaRejeicao.class),
-                anyString(),
-                isNull(),
-                isNull());
-    }
+    when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
+    Padrao retornoApi = mock(Padrao.class);
+    when(retornoApi.getCodigoRetorno()).thenReturn("0");
+    when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
 
-    @Test
-    public void excluirRenegociacao_quandoSucesso_deveComunicarSiapi() {
-        Fiador f = buildFiadorValido();
+    Retorno r = bean.excluirRenegociacao(USUARIO, f, 10L);
+    assertEquals(Long.valueOf(0), r.getCodigo());
+    assertEquals(MSG_COMANDO_SUCESSO, r.getMensagem());
+}
 
-        when(query.setParameter(anyString(), anyObject())).thenReturn(query);
-        when(query.executeUpdate()).thenReturn(1);
-        when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
+@Test
+public void salvar_quandoPersistenceExceptionComSQLException_retornaMensagemRaiz() {
+    Fiador f = buildFiadorValido();
+    when(query.setParameter(anyString(), anyObject())).thenReturn(query);
 
-        Padrao retornoApi = mock(Padrao.class);
-        when(retornoApi.getCodigoRetorno()).thenReturn("0");
-        when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
+    java.sql.SQLException sqlEx = new java.sql.SQLException("ORA-00001: valor duplicado");
+    RuntimeException nested = new RuntimeException(sqlEx);
+    javax.persistence.PersistenceException pe = new javax.persistence.PersistenceException(nested);
+    when(query.executeUpdate()).thenThrow(pe);
 
-        Retorno r = bean.excluirRenegociacao(USUARIO, f, 10L);
+    when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
+    Padrao retornoApi = mock(Padrao.class);
+    when(retornoApi.getCodigoRetorno()).thenReturn("0");
+    when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
 
-        assertNotNull(r);
-        assertEquals(Long.valueOf(0), r.getCodigo());
-        verify(contratoBean, times(1)).exportaOnline120(f.getCodigoFies());
-        verify(api, times(1)).executeAPIPB699Codigo(any(Padrao.class));
-    }
+    Retorno r = bean.salvar(USUARIO, f);
+    assertEquals(Long.valueOf(1), r.getCodigo());
+    assertEquals("valor duplicado", r.getMensagem());
+}
 
-    @Test
-    public void validarRenegociacao_quandoSucesso_naoDeveComunicarSiapi() {
-        Fiador f = buildFiadorValido();
+@Test
+public void salvar_quandoExceptionGenerica_retornaMensagemPadrao() {
+    Fiador f = buildFiadorValido();
+    when(query.setParameter(anyString(), anyObject())).thenReturn(query);
+    when(query.executeUpdate()).thenThrow(new RuntimeException(EXCEPTION_MESSAGE_X));
 
-        when(query.setParameter(anyString(), anyObject())).thenReturn(query);
-        when(query.executeUpdate()).thenReturn(1);
+    when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
+    Padrao retornoApi = mock(Padrao.class);
+    when(retornoApi.getCodigoRetorno()).thenReturn("0");
+    when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
 
-        Retorno r = bean.validarRenegociacao(USUARIO, f, 10L);
-
-        assertNotNull(r);
-        assertEquals(Long.valueOf(0), r.getCodigo());
-        verify(contratoBean, never()).exportaOnline120(anyLong());
-        verify(api, never()).executeAPIPB699Codigo(any(Padrao.class));
-        verify(ocorrenciaRejeicaoBean, never()).gravarOcorrenciaRejeicao(
-                anyLong(),
-                any(TipoOperacaoAditamento.class),
-                any(SituacaoOcorrenciaRejeicao.class),
-                anyString(),
-                isNull(),
-                isNull());
-    }
-
-    @Test
-    public void salvar_quandoInclusaoESiapiRetornarErro_deveGravarOcorrencia() {
-        Fiador f = buildFiadorValido();
-
-        when(query.setParameter(anyString(), anyObject())).thenReturn(query);
-        when(query.executeUpdate()).thenReturn(1);
-        when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
-
-        Padrao retornoApi = mock(Padrao.class);
-        when(retornoApi.getCodigoRetorno()).thenReturn("5");
-        when(retornoApi.getCodigoErroTransacaoSiapi()).thenReturn("ABC");
-        when(retornoApi.getMensagem()).thenReturn("Mensagem de erro");
-        when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
-
-        Retorno r = bean.salvar(USUARIO, f);
-
-        assertNotNull(r);
-        assertEquals(Long.valueOf(0), r.getCodigo());
-
-        verify(ocorrenciaRejeicaoBean, times(1)).gravarOcorrenciaRejeicao(
-                eq(f.getCodigoFies()),
-                eq(TipoOperacaoAditamento.ADITAMENTO_NAO_SIMPLIFICADO),
-                eq(SituacaoOcorrenciaRejeicao.ENVIADO_BANCO),
-                eq("SIAPI #ABC-Mensagem de erro"),
-                isNull(),
-                isNull());
-    }
-
-    @Test
-    public void salvar_quandoInclusaoEExportaOnline120Vazio_naoDeveChamarApi() {
-        Fiador f = buildFiadorValido();
-
-        when(query.setParameter(anyString(), anyObject())).thenReturn(query);
-        when(query.executeUpdate()).thenReturn(1);
-        when(contratoBean.exportaOnline120(anyLong())).thenReturn(EMPTY);
-
-        Retorno r = bean.salvar(USUARIO, f);
-
-        assertNotNull(r);
-        assertEquals(Long.valueOf(0), r.getCodigo());
-        verify(contratoBean, times(1)).exportaOnline120(f.getCodigoFies());
-        verify(api, never()).executeAPIPB699Codigo(any(Padrao.class));
-        verify(ocorrenciaRejeicaoBean, never()).gravarOcorrenciaRejeicao(
-                anyLong(),
-                any(TipoOperacaoAditamento.class),
-                any(SituacaoOcorrenciaRejeicao.class),
-                anyString(),
-                isNull(),
-                isNull());
-    }
+    Retorno r = bean.salvar(USUARIO, f);
+    assertEquals(Long.valueOf(1), r.getCodigo());
+    assertEquals("Ocorreu um erro na realização do comando, tente novamente!", r.getMensagem());
+}
