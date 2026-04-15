@@ -1,115 +1,202 @@
 package br.gov.caixa.fes.rest;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
 import java.util.List;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import br.gov.caixa.arqrefcore.validacao.Validation;
+import br.gov.caixa.arqrefcore.excecao.BusinessException;
+import br.gov.caixa.fes.dominio.Contrato;
 import br.gov.caixa.fes.dominio.Fiador;
 import br.gov.caixa.fes.dominio.Retorno;
 import br.gov.caixa.fes.dominio.renegociacaocontrato.vo.SolicitacaoRenegociacaoContratoVO;
+import br.gov.caixa.fes.negocio.ContratoService;
 import br.gov.caixa.fes.negocio.FiadorService;
 
-import br.gov.caixa.fes.negocio.ContratoService;
-import br.gov.caixa.fes.dominio.Contrato;
-import br.gov.caixa.arqrefcore.excecao.BusinessException;
+@RunWith(MockitoJUnitRunner.class)
+public class FiadorRestTest {
 
-@RequestScoped
-@Path("/fiador")
-public class FiadorRest extends AbstractSecurityRest {
+	private static final String USUARIO = "c891803";
+	private static final Long CODIGO_FIES = 123456L;
+	private static final String CPF = "12345678900";
+	private static final Integer AGENCIA = 1234;
 
-	@Inject
+	@InjectMocks
+	private FiadorRest rest = Mockito.spy(new FiadorRest());
+
+	@Mock
 	private FiadorService serv;
 
-	@Inject
+	@Mock
 	private ContratoService contratoServ;
 
-	@GET
-	@Path("/consultaFiadores")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public List<Fiador> consultaFiadores(@QueryParam("codigoFies") Long codigoFies) {
-
-		String usuario = getUsuarioLogado();
-
-		return serv.consultarFiadores(usuario, codigoFies);
+	@Before
+	public void setup() {
+		doReturn(USUARIO).when(rest).getUsuarioLogado();
 	}
 
-	@GET
-	@Path("/consulta")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public Fiador consulta(@QueryParam("codigoFies") Long codigoFies,
-						   @QueryParam("cpf") String cpf) {
+	@Test
+	public void deveConsultarFiadores() {
+		List<Fiador> retornoEsperado = Arrays.asList(new Fiador(), new Fiador());
 
-		String usuario = getUsuarioLogado();
+		when(serv.consultarFiadores(USUARIO, CODIGO_FIES)).thenReturn(retornoEsperado);
 
-		return serv.consultar(usuario, codigoFies, cpf);
+		List<Fiador> retorno = rest.consultaFiadores(CODIGO_FIES);
+
+		assertSame(retornoEsperado, retorno);
+		verify(serv).consultarFiadores(USUARIO, CODIGO_FIES);
 	}
 
-	@GET
-	@Path("/consultaFiadoresPorCpfCodFiesAgencia")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public List<Fiador> consultaFiadoresPorCpfCodFiesAgencia(
-			@QueryParam("codigoFies") Long codigoFies,
-			@QueryParam("cpf") String cpf,
-			@QueryParam("agencia") Integer agencia) throws BusinessException {
+	@Test
+	public void deveConsultarFiadorPorCodigoFiesECpf() {
+		Fiador retornoEsperado = new Fiador();
 
-		if ((cpf == null || cpf.trim().isEmpty()) && codigoFies == null) {
-			throw new BusinessException("Informe o CPF ou o Código FIES.");
+		when(serv.consultar(USUARIO, CODIGO_FIES, CPF)).thenReturn(retornoEsperado);
+
+		Fiador retorno = rest.consulta(CODIGO_FIES, CPF);
+
+		assertSame(retornoEsperado, retorno);
+		verify(serv).consultar(USUARIO, CODIGO_FIES, CPF);
+	}
+
+	@Test
+	public void deveLancarExcecaoQuandoNaoInformarCpfENemCodigoFiesNaConsultaPorCpfCodFiesAgencia() {
+		try {
+			rest.consultaFiadoresPorCpfCodFiesAgencia(null, null, AGENCIA);
+			fail("Deveria ter lançado BusinessException");
+		} catch (BusinessException e) {
+			assertEquals("Informe o CPF ou o Código FIES.", e.getMessage());
 		}
+	}
 
-		if (agencia == null) {
-			throw new BusinessException("Informe a agência.");
+	@Test
+	public void deveLancarExcecaoQuandoInformarCpfEmBrancoENemCodigoFiesNaConsultaPorCpfCodFiesAgencia() {
+		try {
+			rest.consultaFiadoresPorCpfCodFiesAgencia(null, "   ", AGENCIA);
+			fail("Deveria ter lançado BusinessException");
+		} catch (BusinessException e) {
+			assertEquals("Informe o CPF ou o Código FIES.", e.getMessage());
 		}
+	}
 
-		if (codigoFies == null) {
-			codigoFies = 0L;
+	@Test
+	public void deveLancarExcecaoQuandoNaoInformarAgenciaNaConsultaPorCpfCodFiesAgencia() {
+		try {
+			rest.consultaFiadoresPorCpfCodFiesAgencia(CODIGO_FIES, CPF, null);
+			fail("Deveria ter lançado BusinessException");
+		} catch (BusinessException e) {
+			assertEquals("Informe a agência.", e.getMessage());
 		}
-
-		String usuario = getUsuarioLogado();
-		Contrato contrato = contratoServ.consulta(usuario, cpf, codigoFies, agencia);
-		return serv.consultarFiadores(usuario, contrato.getEstudante().getCodigoFies());
 	}
 
-	@POST
-	@Path("/salva")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Validation
-	public Retorno salva(Fiador fiador) {
-		String usuario = getUsuarioLogado();
+	@Test
+	public void deveConsultarFiadoresPorCpfCodFiesAgenciaComCodigoFiesInformado() throws BusinessException {
+		Contrato contrato = Mockito.mock(Contrato.class, Mockito.RETURNS_DEEP_STUBS);
+		List<Fiador> retornoEsperado = Arrays.asList(new Fiador(), new Fiador());
 
-		return serv.salvar(usuario, fiador);
+		when(contrato.getEstudante().getCodigoFies()).thenReturn(CODIGO_FIES);
+		when(contratoServ.consulta(USUARIO, CPF, CODIGO_FIES, AGENCIA)).thenReturn(contrato);
+		when(serv.consultarFiadores(USUARIO, CODIGO_FIES)).thenReturn(retornoEsperado);
+
+		List<Fiador> retorno = rest.consultaFiadoresPorCpfCodFiesAgencia(CODIGO_FIES, CPF, AGENCIA);
+
+		assertSame(retornoEsperado, retorno);
+		verify(contratoServ).consulta(USUARIO, CPF, CODIGO_FIES, AGENCIA);
+		verify(serv).consultarFiadores(USUARIO, CODIGO_FIES);
 	}
 
-	@POST
-	@Path("/excluir")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Validation
-	public Retorno excluir(Fiador fiador) {
-		String usuario = getUsuarioLogado();
-		fiador = serv.consultar(usuario, fiador.getCodigoFies(), fiador.getCpf());
+	@Test
+	public void deveConsultarFiadoresPorCpfCodFiesAgenciaQuandoCodigoFiesNaoInformado() throws BusinessException {
+		Contrato contrato = Mockito.mock(Contrato.class, Mockito.RETURNS_DEEP_STUBS);
+		List<Fiador> retornoEsperado = Arrays.asList(new Fiador());
 
-		return serv.excluir(usuario, fiador);
+		when(contrato.getEstudante().getCodigoFies()).thenReturn(CODIGO_FIES);
+		when(contratoServ.consulta(USUARIO, CPF, 0L, AGENCIA)).thenReturn(contrato);
+		when(serv.consultarFiadores(USUARIO, CODIGO_FIES)).thenReturn(retornoEsperado);
+
+		List<Fiador> retorno = rest.consultaFiadoresPorCpfCodFiesAgencia(null, CPF, AGENCIA);
+
+		assertSame(retornoEsperado, retorno);
+		verify(contratoServ).consulta(USUARIO, CPF, 0L, AGENCIA);
+		verify(serv).consultarFiadores(USUARIO, CODIGO_FIES);
 	}
 
-	@POST
-	@Path("/validarRenegociacao")
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Validation
-	public Retorno validar(SolicitacaoRenegociacaoContratoVO renegociacao) {
-		String usuario = getUsuarioLogado();
-
+	@Test
+	public void deveSalvarFiador() {
 		Fiador fiador = new Fiador();
-		fiador.setCpf(renegociacao.getDadosEstudante().getCpf());
-		fiador.setCodigoFies(Long.valueOf(renegociacao.getDadosEstudante().getCodFies()));
+		Retorno retornoEsperado = new Retorno();
 
-		return serv.validarRenegociacao(usuario, fiador, renegociacao.getCodigo());
+		when(serv.salvar(USUARIO, fiador)).thenReturn(retornoEsperado);
+
+		Retorno retorno = rest.salva(fiador);
+
+		assertSame(retornoEsperado, retorno);
+		verify(serv).salvar(USUARIO, fiador);
+	}
+
+	@Test
+	public void deveExcluirFiador() {
+		Fiador fiadorEntrada = new Fiador();
+		fiadorEntrada.setCodigoFies(CODIGO_FIES);
+		fiadorEntrada.setCpf(CPF);
+
+		Fiador fiadorConsultado = new Fiador();
+		fiadorConsultado.setCodigoFies(CODIGO_FIES);
+		fiadorConsultado.setCpf(CPF);
+
+		Retorno retornoEsperado = new Retorno();
+
+		when(serv.consultar(USUARIO, CODIGO_FIES, CPF)).thenReturn(fiadorConsultado);
+		when(serv.excluir(USUARIO, fiadorConsultado)).thenReturn(retornoEsperado);
+
+		Retorno retorno = rest.excluir(fiadorEntrada);
+
+		assertSame(retornoEsperado, retorno);
+		verify(serv).consultar(USUARIO, CODIGO_FIES, CPF);
+		verify(serv).excluir(USUARIO, fiadorConsultado);
+	}
+
+	@Test
+	public void deveValidarRenegociacao() {
+		SolicitacaoRenegociacaoContratoVO renegociacao =
+				Mockito.mock(SolicitacaoRenegociacaoContratoVO.class, Mockito.RETURNS_DEEP_STUBS);
+
+		Retorno retornoEsperado = new Retorno();
+
+		when(renegociacao.getDadosEstudante().getCpf()).thenReturn(CPF);
+		when(renegociacao.getDadosEstudante().getCodFies()).thenReturn(String.valueOf(CODIGO_FIES));
+		when(renegociacao.getCodigo()).thenReturn(10L);
+		when(serv.validarRenegociacao(
+				Mockito.eq(USUARIO),
+				Mockito.argThat(fiador ->
+						fiador != null
+						&& CPF.equals(fiador.getCpf())
+						&& CODIGO_FIES.equals(fiador.getCodigoFies())),
+				Mockito.eq(10L)))
+			.thenReturn(retornoEsperado);
+
+		Retorno retorno = rest.validar(renegociacao);
+
+		assertSame(retornoEsperado, retorno);
+		verify(serv).validarRenegociacao(
+				Mockito.eq(USUARIO),
+				Mockito.argThat(fiador ->
+						fiador != null
+						&& CPF.equals(fiador.getCpf())
+						&& CODIGO_FIES.equals(fiador.getCodigoFies())),
+				Mockito.eq(10L));
 	}
 }
