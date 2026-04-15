@@ -1,68 +1,115 @@
-@Test
-public void salvarRenegociacao_quandoSucesso_retornaSucesso() {
-    Fiador f = buildFiadorValido();
-    when(query.setParameter(anyString(), anyObject())).thenReturn(query);
-    when(query.executeUpdate()).thenReturn(1);
+package br.gov.caixa.fes.rest;
 
-    when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
-    Padrao retornoApi = mock(Padrao.class);
-    when(retornoApi.getCodigoRetorno()).thenReturn("0");
-    when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
+import java.util.List;
 
-    Retorno r = bean.salvarRenegociacao(USUARIO, f, 10L);
-    assertEquals(Long.valueOf(0), r.getCodigo());
-    assertEquals(MSG_COMANDO_SUCESSO, r.getMensagem());
-}
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
+import br.gov.caixa.arqrefcore.validacao.Validation;
+import br.gov.caixa.fes.dominio.Fiador;
+import br.gov.caixa.fes.dominio.Retorno;
+import br.gov.caixa.fes.dominio.renegociacaocontrato.vo.SolicitacaoRenegociacaoContratoVO;
+import br.gov.caixa.fes.negocio.FiadorService;
 
-@Test
-public void excluirRenegociacao_quandoSucesso_retornaSucesso() {
-    Fiador f = buildFiadorValido();
-    when(query.setParameter(anyString(), anyObject())).thenReturn(query);
-    when(query.executeUpdate()).thenReturn(1);
+import br.gov.caixa.fes.negocio.ContratoService;
+import br.gov.caixa.fes.dominio.Contrato;
+import br.gov.caixa.arqrefcore.excecao.BusinessException;
 
-    when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
-    Padrao retornoApi = mock(Padrao.class);
-    when(retornoApi.getCodigoRetorno()).thenReturn("0");
-    when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
+@RequestScoped
+@Path("/fiador")
+public class FiadorRest extends AbstractSecurityRest {
 
-    Retorno r = bean.excluirRenegociacao(USUARIO, f, 10L);
-    assertEquals(Long.valueOf(0), r.getCodigo());
-    assertEquals(MSG_COMANDO_SUCESSO, r.getMensagem());
-}
+	@Inject
+	private FiadorService serv;
 
-@Test
-public void salvar_quandoPersistenceExceptionComSQLException_retornaMensagemRaiz() {
-    Fiador f = buildFiadorValido();
-    when(query.setParameter(anyString(), anyObject())).thenReturn(query);
+	@Inject
+	private ContratoService contratoServ;
 
-    java.sql.SQLException sqlEx = new java.sql.SQLException("ORA-00001: valor duplicado");
-    RuntimeException nested = new RuntimeException(sqlEx);
-    javax.persistence.PersistenceException pe = new javax.persistence.PersistenceException(nested);
-    when(query.executeUpdate()).thenThrow(pe);
+	@GET
+	@Path("/consultaFiadores")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public List<Fiador> consultaFiadores(@QueryParam("codigoFies") Long codigoFies) {
 
-    when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
-    Padrao retornoApi = mock(Padrao.class);
-    when(retornoApi.getCodigoRetorno()).thenReturn("0");
-    when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
+		String usuario = getUsuarioLogado();
 
-    Retorno r = bean.salvar(USUARIO, f);
-    assertEquals(Long.valueOf(1), r.getCodigo());
-    assertEquals("valor duplicado", r.getMensagem());
-}
+		return serv.consultarFiadores(usuario, codigoFies);
+	}
 
-@Test
-public void salvar_quandoExceptionGenerica_retornaMensagemPadrao() {
-    Fiador f = buildFiadorValido();
-    when(query.setParameter(anyString(), anyObject())).thenReturn(query);
-    when(query.executeUpdate()).thenThrow(new RuntimeException(EXCEPTION_MESSAGE_X));
+	@GET
+	@Path("/consulta")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public Fiador consulta(@QueryParam("codigoFies") Long codigoFies,
+						   @QueryParam("cpf") String cpf) {
 
-    when(contratoBean.exportaOnline120(anyLong())).thenReturn("W120");
-    Padrao retornoApi = mock(Padrao.class);
-    when(retornoApi.getCodigoRetorno()).thenReturn("0");
-    when(api.executeAPIPB699Codigo(any(Padrao.class))).thenReturn(retornoApi);
+		String usuario = getUsuarioLogado();
 
-    Retorno r = bean.salvar(USUARIO, f);
-    assertEquals(Long.valueOf(1), r.getCodigo());
-    assertEquals("Ocorreu um erro na realização do comando, tente novamente!", r.getMensagem());
+		return serv.consultar(usuario, codigoFies, cpf);
+	}
+
+	@GET
+	@Path("/consultaFiadoresPorCpfCodFiesAgencia")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public List<Fiador> consultaFiadoresPorCpfCodFiesAgencia(
+			@QueryParam("codigoFies") Long codigoFies,
+			@QueryParam("cpf") String cpf,
+			@QueryParam("agencia") Integer agencia) throws BusinessException {
+
+		if ((cpf == null || cpf.trim().isEmpty()) && codigoFies == null) {
+			throw new BusinessException("Informe o CPF ou o Código FIES.");
+		}
+
+		if (agencia == null) {
+			throw new BusinessException("Informe a agência.");
+		}
+
+		if (codigoFies == null) {
+			codigoFies = 0L;
+		}
+
+		String usuario = getUsuarioLogado();
+		Contrato contrato = contratoServ.consulta(usuario, cpf, codigoFies, agencia);
+		return serv.consultarFiadores(usuario, contrato.getEstudante().getCodigoFies());
+	}
+
+	@POST
+	@Path("/salva")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Validation
+	public Retorno salva(Fiador fiador) {
+		String usuario = getUsuarioLogado();
+
+		return serv.salvar(usuario, fiador);
+	}
+
+	@POST
+	@Path("/excluir")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Validation
+	public Retorno excluir(Fiador fiador) {
+		String usuario = getUsuarioLogado();
+		fiador = serv.consultar(usuario, fiador.getCodigoFies(), fiador.getCpf());
+
+		return serv.excluir(usuario, fiador);
+	}
+
+	@POST
+	@Path("/validarRenegociacao")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Validation
+	public Retorno validar(SolicitacaoRenegociacaoContratoVO renegociacao) {
+		String usuario = getUsuarioLogado();
+
+		Fiador fiador = new Fiador();
+		fiador.setCpf(renegociacao.getDadosEstudante().getCpf());
+		fiador.setCodigoFies(Long.valueOf(renegociacao.getDadosEstudante().getCodFies()));
+
+		return serv.validarRenegociacao(usuario, fiador, renegociacao.getCodigo());
+	}
 }
