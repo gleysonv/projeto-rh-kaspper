@@ -3,20 +3,22 @@ package br.gov.caixa.fes.rest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 
 import br.gov.caixa.arqrefcore.excecao.BusinessException;
 import br.gov.caixa.fes.dominio.Contrato;
@@ -26,7 +28,6 @@ import br.gov.caixa.fes.dominio.renegociacaocontrato.vo.SolicitacaoRenegociacaoC
 import br.gov.caixa.fes.negocio.ContratoService;
 import br.gov.caixa.fes.negocio.FiadorService;
 
-@RunWith(MockitoJUnitRunner.class)
 public class FiadorRestTest {
 
 	private static final String USUARIO = "c891803";
@@ -34,8 +35,7 @@ public class FiadorRestTest {
 	private static final String CPF = "12345678900";
 	private static final Integer AGENCIA = 1234;
 
-	@InjectMocks
-	private FiadorRest rest = Mockito.spy(new FiadorRest());
+	private FiadorRest rest;
 
 	@Mock
 	private FiadorService serv;
@@ -44,8 +44,21 @@ public class FiadorRestTest {
 	private ContratoService contratoServ;
 
 	@Before
-	public void setup() {
+	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
+
+		rest = Mockito.spy(new FiadorRest());
+
+		injetarCampo(rest, "serv", serv);
+		injetarCampo(rest, "contratoServ", contratoServ);
+
 		doReturn(USUARIO).when(rest).getUsuarioLogado();
+	}
+
+	private void injetarCampo(Object target, String nomeCampo, Object valor) throws Exception {
+		Field field = target.getClass().getDeclaredField(nomeCampo);
+		field.setAccessible(true);
+		field.set(target, valor);
 	}
 
 	@Test
@@ -73,37 +86,37 @@ public class FiadorRestTest {
 	}
 
 	@Test
-	public void deveLancarExcecaoQuandoNaoInformarCpfENemCodigoFiesNaConsultaPorCpfCodFiesAgencia() {
+	public void deveLancarExcecaoQuandoNaoInformarCpfENemCodigoFies() {
 		try {
 			rest.consultaFiadoresPorCpfCodFiesAgencia(null, null, AGENCIA);
-			fail("Deveria ter lançado BusinessException");
+			fail();
 		} catch (BusinessException e) {
 			assertEquals("Informe o CPF ou o Código FIES.", e.getMessage());
 		}
 	}
 
 	@Test
-	public void deveLancarExcecaoQuandoInformarCpfEmBrancoENemCodigoFiesNaConsultaPorCpfCodFiesAgencia() {
+	public void deveLancarExcecaoQuandoInformarCpfEmBrancoENemCodigoFies() {
 		try {
 			rest.consultaFiadoresPorCpfCodFiesAgencia(null, "   ", AGENCIA);
-			fail("Deveria ter lançado BusinessException");
+			fail();
 		} catch (BusinessException e) {
 			assertEquals("Informe o CPF ou o Código FIES.", e.getMessage());
 		}
 	}
 
 	@Test
-	public void deveLancarExcecaoQuandoNaoInformarAgenciaNaConsultaPorCpfCodFiesAgencia() {
+	public void deveLancarExcecaoQuandoNaoInformarAgencia() {
 		try {
 			rest.consultaFiadoresPorCpfCodFiesAgencia(CODIGO_FIES, CPF, null);
-			fail("Deveria ter lançado BusinessException");
+			fail();
 		} catch (BusinessException e) {
 			assertEquals("Informe a agência.", e.getMessage());
 		}
 	}
 
 	@Test
-	public void deveConsultarFiadoresPorCpfCodFiesAgenciaComCodigoFiesInformado() throws BusinessException {
+	public void deveConsultarFiadoresPorCpfCodFiesAgenciaComCodigoFiesInformado() throws Exception {
 		Contrato contrato = Mockito.mock(Contrato.class, Mockito.RETURNS_DEEP_STUBS);
 		List<Fiador> retornoEsperado = Arrays.asList(new Fiador(), new Fiador());
 
@@ -119,7 +132,7 @@ public class FiadorRestTest {
 	}
 
 	@Test
-	public void deveConsultarFiadoresPorCpfCodFiesAgenciaQuandoCodigoFiesNaoInformado() throws BusinessException {
+	public void deveConsultarFiadoresPorCpfCodFiesAgenciaQuandoCodigoFiesForNulo() throws Exception {
 		Contrato contrato = Mockito.mock(Contrato.class, Mockito.RETURNS_DEEP_STUBS);
 		List<Fiador> retornoEsperado = Arrays.asList(new Fiador());
 
@@ -179,24 +192,35 @@ public class FiadorRestTest {
 		when(renegociacao.getDadosEstudante().getCpf()).thenReturn(CPF);
 		when(renegociacao.getDadosEstudante().getCodFies()).thenReturn(String.valueOf(CODIGO_FIES));
 		when(renegociacao.getCodigo()).thenReturn(10L);
+
 		when(serv.validarRenegociacao(
-				Mockito.eq(USUARIO),
-				Mockito.argThat(fiador ->
-						fiador != null
-						&& CPF.equals(fiador.getCpf())
-						&& CODIGO_FIES.equals(fiador.getCodigoFies())),
-				Mockito.eq(10L)))
+				eq(USUARIO),
+				argThat(new org.mockito.ArgumentMatcher<Fiador>() {
+					@Override
+					public boolean matches(Object argument) {
+						Fiador fiador = (Fiador) argument;
+						return fiador != null
+								&& CPF.equals(fiador.getCpf())
+								&& CODIGO_FIES.equals(fiador.getCodigoFies());
+					}
+				}),
+				eq(10L)))
 			.thenReturn(retornoEsperado);
 
 		Retorno retorno = rest.validar(renegociacao);
 
 		assertSame(retornoEsperado, retorno);
 		verify(serv).validarRenegociacao(
-				Mockito.eq(USUARIO),
-				Mockito.argThat(fiador ->
-						fiador != null
-						&& CPF.equals(fiador.getCpf())
-						&& CODIGO_FIES.equals(fiador.getCodigoFies())),
-				Mockito.eq(10L));
+				eq(USUARIO),
+				argThat(new org.mockito.ArgumentMatcher<Fiador>() {
+					@Override
+					public boolean matches(Object argument) {
+						Fiador fiador = (Fiador) argument;
+						return fiador != null
+								&& CPF.equals(fiador.getCpf())
+								&& CODIGO_FIES.equals(fiador.getCodigoFies());
+					}
+				}),
+				eq(10L));
 	}
 }
