@@ -1,309 +1,226 @@
-java.lang.NoSuchFieldException: serv
+package br.gov.caixa.fes.rest;
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
 
-java.lang.NoSuchFieldException: serv
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+import br.gov.caixa.arqrefcore.excecao.BusinessException;
+import br.gov.caixa.fes.dominio.Contrato;
+import br.gov.caixa.fes.dominio.Fiador;
+import br.gov.caixa.fes.dominio.Retorno;
+import br.gov.caixa.fes.dominio.renegociacaocontrato.vo.SolicitacaoRenegociacaoContratoVO;
+import br.gov.caixa.fes.negocio.ContratoService;
+import br.gov.caixa.fes.negocio.FiadorService;
 
+public class FiadorRestTest {
 
-java.lang.NoSuchFieldException: serv
+	private static final String USUARIO = "c891803";
+	private static final Long CODIGO_FIES = 123456L;
+	private static final String CPF = "12345678900";
+	private static final Integer AGENCIA = 1234;
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+	private FiadorRest rest;
 
+	@Mock
+	private FiadorService serv;
 
-java.lang.NoSuchFieldException: serv
+	@Mock
+	private ContratoService contratoServ;
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+	@Before
+	public void setUp() throws Exception {
+		MockitoAnnotations.initMocks(this);
 
+		rest = Mockito.spy(new FiadorRest());
 
-java.lang.NoSuchFieldException: serv
+		injetarCampo(rest, "serv", serv);
+		injetarCampo(rest, "contratoServ", contratoServ);
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+		doReturn(USUARIO).when(rest).getUsuarioLogado();
+	}
 
+	private void injetarCampo(Object target, String nomeCampo, Object valor) throws Exception {
+		Field field = target.getClass().getDeclaredField(nomeCampo);
+		field.setAccessible(true);
+		field.set(target, valor);
+	}
 
-java.lang.NoSuchFieldException: serv
+	@Test
+	public void deveConsultarFiadores() {
+		List<Fiador> retornoEsperado = Arrays.asList(new Fiador(), new Fiador());
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+		when(serv.consultarFiadores(USUARIO, CODIGO_FIES)).thenReturn(retornoEsperado);
 
+		List<Fiador> retorno = rest.consultaFiadores(CODIGO_FIES);
 
-java.lang.NoSuchFieldException: serv
+		assertSame(retornoEsperado, retorno);
+		verify(serv).consultarFiadores(USUARIO, CODIGO_FIES);
+	}
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+	@Test
+	public void deveConsultarFiadorPorCodigoFiesECpf() {
+		Fiador retornoEsperado = new Fiador();
 
+		when(serv.consultar(USUARIO, CODIGO_FIES, CPF)).thenReturn(retornoEsperado);
 
-java.lang.NoSuchFieldException: serv
+		Fiador retorno = rest.consulta(CODIGO_FIES, CPF);
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+		assertSame(retornoEsperado, retorno);
+		verify(serv).consultar(USUARIO, CODIGO_FIES, CPF);
+	}
 
+	@Test
+	public void deveLancarExcecaoQuandoNaoInformarCpfENemCodigoFies() {
+		try {
+			rest.consultaFiadoresPorCpfCodFiesAgencia(null, null, AGENCIA);
+			fail();
+		} catch (BusinessException e) {
+			assertEquals("Informe o CPF ou o Código FIES.", e.getMessage());
+		}
+	}
 
-java.lang.NoSuchFieldException: serv
+	@Test
+	public void deveLancarExcecaoQuandoInformarCpfEmBrancoENemCodigoFies() {
+		try {
+			rest.consultaFiadoresPorCpfCodFiesAgencia(null, "   ", AGENCIA);
+			fail();
+		} catch (BusinessException e) {
+			assertEquals("Informe o CPF ou o Código FIES.", e.getMessage());
+		}
+	}
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+	@Test
+	public void deveLancarExcecaoQuandoNaoInformarAgencia() {
+		try {
+			rest.consultaFiadoresPorCpfCodFiesAgencia(CODIGO_FIES, CPF, null);
+			fail();
+		} catch (BusinessException e) {
+			assertEquals("Informe a agência.", e.getMessage());
+		}
+	}
 
+	@Test
+	public void deveConsultarFiadoresPorCpfCodFiesAgenciaComCodigoFiesInformado() throws Exception {
+		Contrato contrato = Mockito.mock(Contrato.class, Mockito.RETURNS_DEEP_STUBS);
+		List<Fiador> retornoEsperado = Arrays.asList(new Fiador(), new Fiador());
 
-java.lang.NoSuchFieldException: serv
+		when(contrato.getEstudante().getCodigoFies()).thenReturn(CODIGO_FIES);
+		when(contratoServ.consulta(USUARIO, CPF, CODIGO_FIES, AGENCIA)).thenReturn(contrato);
+		when(serv.consultarFiadores(USUARIO, CODIGO_FIES)).thenReturn(retornoEsperado);
 
-	at java.lang.Class.getDeclaredField(Class.java:2070)
-	at br.gov.caixa.fes.rest.FiadorRestTest.injetarCampo(FiadorRestTest.java:58)
-	at br.gov.caixa.fes.rest.FiadorRestTest.setUp(FiadorRestTest.java:52)
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.lang.reflect.Method.invoke(Method.java:497)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:45)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:15)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:42)
-	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:27)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:263)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:68)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:47)
-	at org.junit.runners.ParentRunner$3.run(ParentRunner.java:231)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:60)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:229)
-	at org.junit.runners.ParentRunner.access$000(ParentRunner.java:50)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:222)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:300)
-	at org.junit.runner.JUnitCore.run(JUnitCore.java:157)
-	at com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:69)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater$1.execute(IdeaTestRunner.java:38)
-	at com.intellij.rt.execution.junit.TestsRepeater.repeat(TestsRepeater.java:11)
-	at com.intellij.rt.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:35)
-	at com.intellij.rt.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:232)
-	at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:55)
+		List<Fiador> retorno = rest.consultaFiadoresPorCpfCodFiesAgencia(CODIGO_FIES, CPF, AGENCIA);
 
+		assertSame(retornoEsperado, retorno);
+		verify(contratoServ).consulta(USUARIO, CPF, CODIGO_FIES, AGENCIA);
+		verify(serv).consultarFiadores(USUARIO, CODIGO_FIES);
+	}
+
+	@Test
+	public void deveConsultarFiadoresPorCpfCodFiesAgenciaQuandoCodigoFiesForNulo() throws Exception {
+		Contrato contrato = Mockito.mock(Contrato.class, Mockito.RETURNS_DEEP_STUBS);
+		List<Fiador> retornoEsperado = Arrays.asList(new Fiador());
+
+		when(contrato.getEstudante().getCodigoFies()).thenReturn(CODIGO_FIES);
+		when(contratoServ.consulta(USUARIO, CPF, 0L, AGENCIA)).thenReturn(contrato);
+		when(serv.consultarFiadores(USUARIO, CODIGO_FIES)).thenReturn(retornoEsperado);
+
+		List<Fiador> retorno = rest.consultaFiadoresPorCpfCodFiesAgencia(null, CPF, AGENCIA);
+
+		assertSame(retornoEsperado, retorno);
+		verify(contratoServ).consulta(USUARIO, CPF, 0L, AGENCIA);
+		verify(serv).consultarFiadores(USUARIO, CODIGO_FIES);
+	}
+
+	@Test
+	public void deveSalvarFiador() {
+		Fiador fiador = new Fiador();
+		Retorno retornoEsperado = new Retorno();
+
+		when(serv.salvar(USUARIO, fiador)).thenReturn(retornoEsperado);
+
+		Retorno retorno = rest.salva(fiador);
+
+		assertSame(retornoEsperado, retorno);
+		verify(serv).salvar(USUARIO, fiador);
+	}
+
+	@Test
+	public void deveExcluirFiador() {
+		Fiador fiadorEntrada = new Fiador();
+		fiadorEntrada.setCodigoFies(CODIGO_FIES);
+		fiadorEntrada.setCpf(CPF);
+
+		Fiador fiadorConsultado = new Fiador();
+		fiadorConsultado.setCodigoFies(CODIGO_FIES);
+		fiadorConsultado.setCpf(CPF);
+
+		Retorno retornoEsperado = new Retorno();
+
+		when(serv.consultar(USUARIO, CODIGO_FIES, CPF)).thenReturn(fiadorConsultado);
+		when(serv.excluir(USUARIO, fiadorConsultado)).thenReturn(retornoEsperado);
+
+		Retorno retorno = rest.excluir(fiadorEntrada);
+
+		assertSame(retornoEsperado, retorno);
+		verify(serv).consultar(USUARIO, CODIGO_FIES, CPF);
+		verify(serv).excluir(USUARIO, fiadorConsultado);
+	}
+
+	@Test
+	public void deveValidarRenegociacao() {
+		SolicitacaoRenegociacaoContratoVO renegociacao =
+				Mockito.mock(SolicitacaoRenegociacaoContratoVO.class, Mockito.RETURNS_DEEP_STUBS);
+
+		Retorno retornoEsperado = new Retorno();
+
+		when(renegociacao.getDadosEstudante().getCpf()).thenReturn(CPF);
+		when(renegociacao.getDadosEstudante().getCodFies()).thenReturn(String.valueOf(CODIGO_FIES));
+		when(renegociacao.getCodigo()).thenReturn(10L);
+
+		when(serv.validarRenegociacao(
+				eq(USUARIO),
+				argThat(new org.mockito.ArgumentMatcher<Fiador>() {
+					@Override
+					public boolean matches(Object argument) {
+						Fiador fiador = (Fiador) argument;
+						return fiador != null
+								&& CPF.equals(fiador.getCpf())
+								&& CODIGO_FIES.equals(fiador.getCodigoFies());
+					}
+				}),
+				eq(10L)))
+			.thenReturn(retornoEsperado);
+
+		Retorno retorno = rest.validar(renegociacao);
+
+		assertSame(retornoEsperado, retorno);
+		verify(serv).validarRenegociacao(
+				eq(USUARIO),
+				argThat(new org.mockito.ArgumentMatcher<Fiador>() {
+					@Override
+					public boolean matches(Object argument) {
+						Fiador fiador = (Fiador) argument;
+						return fiador != null
+								&& CPF.equals(fiador.getCpf())
+								&& CODIGO_FIES.equals(fiador.getCodigoFies());
+					}
+				}),
+				eq(10L));
+	}
+}
