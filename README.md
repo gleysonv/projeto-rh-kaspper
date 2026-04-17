@@ -367,7 +367,6 @@ public class FiadorBeanTest extends BaseSIFESTest {
         f.setCpf(CPF);
         List<Fiador> lista = new ArrayList<>();
         lista.add(f);
-        // bean já é um @Spy; evitar criar novo spy sobre classe já enriquecida por CGLIB
         doReturn(lista).when(bean).consultarFiadores(anyString(), anyLong());
         Fiador retorno = bean.consultar(USUARIO, 1L, CPF);
         assertNotNull(retorno);
@@ -376,8 +375,6 @@ public class FiadorBeanTest extends BaseSIFESTest {
 
     @Test
     public void consultar_quandoNaoEncontrado_retornaMensagem() {
-        // bean já é um @Spy; utilizar diretamente para evitar MockitoException
-        // Ao stubbar método de spy, utilizar doReturn(...).when(spy) para evitar execução real
         doReturn(Collections.<Fiador>emptyList()).when(bean).consultarFiadores(anyString(), anyLong());
         Fiador retorno = bean.consultar(USUARIO, 1L, CPF);
         assertNotNull(retorno);
@@ -450,6 +447,28 @@ public class FiadorBeanTest extends BaseSIFESTest {
         return f;
     }
 
+    private Fiador buildFiadorComConjugeObrigatorio() {
+        Fiador f = buildFiadorValido();
+        f.getEstadoCivil().setCodigo(2); // ativa validações do cônjuge
+        return f;
+    }
+
+    private DadosCpfRetorno mockDadosCpfRetorno(int situacaoCpf) {
+        DadosCpfRetorno dadosCpfRetorno = mock(DadosCpfRetorno.class);
+        when(dadosCpfRetorno.getSituacaoCPF()).thenReturn(situacaoCpf);
+        return dadosCpfRetorno;
+    }
+
+    private void mockConsultarFiadoresSemBloqueio(Fiador fiador) {
+        doReturn(Collections.singletonList(new Fiador()))
+                .when(bean).consultarFiadores(USUARIO, fiador.getCodigoFies());
+    }
+
+    private void mockFluxoInicialSalvarSemBloqueio(Fiador fiador) throws FESException {
+        mockConsultarFiadoresSemBloqueio(fiador);
+        doReturn(mockDadosCpfRetorno(1)).when(bean).consultarCpfNoSICPF(fiador.getCpf());
+    }
+
     @Test
     public void salvarRenegociacao_quandoSucesso_retornaSucesso() throws BusinessException {
         Fiador f = buildFiadorValido();
@@ -495,6 +514,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoPersistenceExceptionComSQLException_retornaMensagemRaiz() throws BusinessException, FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
 
         java.sql.SQLException sqlEx = new java.sql.SQLException("ORA-00001: valor duplicado");
@@ -515,6 +535,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoExceptionGenerica_retornaMensagemPadrao() throws BusinessException, FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
         when(query.executeUpdate()).thenThrow(new RuntimeException(EXCEPTION_MESSAGE_X));
 
@@ -531,6 +552,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoNomeVazio_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.setNome(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -540,6 +562,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoCpfVazio_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.setNome("NOME");
         f.setCpf(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
@@ -550,6 +573,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoDataNascVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.setDataNascimento(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -559,6 +583,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoIdentidadeVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getIdentidade().setIdentidade(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -568,6 +593,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoOrgaoExpedidorInvalido_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getIdentidade().getOrgaoExpedidor().setCodigo(0);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -577,6 +603,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoUfIdentidadeVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getIdentidade().getUf().setSigla(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -586,6 +613,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoDataExpedicaoVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getIdentidade().setDataExpedicaoIdentidade(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -595,6 +623,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoEnderecoVazio_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getEndereco().setEndereco(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -604,6 +633,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoCidadeInvalida_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getEndereco().getCidade().setCodigoCidade(-1);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -613,6 +643,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoUfEnderecoVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getEndereco().getCidade().getUf().setSigla(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -622,21 +653,17 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoProfissaoVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.setCodigoProfissao(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
         assertEquals("Profissão não foi informado!", r.getMensagem());
     }
 
-    private Fiador buildFiadorComConjugeObrigatorio() {
-        Fiador f = buildFiadorValido();
-        f.getEstadoCivil().setCodigo(2); // ativa validações do cônjuge
-        return f;
-    }
-
     @Test
     public void salvar_quandoEstadoCivil2_eConjugeNomeVazio_retornaMensagem() throws FESException {
         Fiador f = buildFiadorComConjugeObrigatorio();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getConjuge().setNome(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -646,6 +673,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoEstadoCivil2_eConjugeCpfVazio_retornaMensagem() throws FESException {
         Fiador f = buildFiadorComConjugeObrigatorio();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getConjuge().setCpf(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -655,6 +683,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoEstadoCivil2_eConjugeDataNascVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorComConjugeObrigatorio();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getConjuge().setDataNascimento(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -664,6 +693,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoEstadoCivil2_eConjugeIdentidadeVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorComConjugeObrigatorio();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getConjuge().getIdentidade().setIdentidade(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -673,6 +703,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoEstadoCivil2_eConjugeOrgaoInvalido_retornaMensagem() throws FESException {
         Fiador f = buildFiadorComConjugeObrigatorio();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getConjuge().getIdentidade().getOrgaoExpedidor().setCodigo(-1);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -682,6 +713,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoEstadoCivil2_eConjugeUfVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorComConjugeObrigatorio();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getConjuge().getIdentidade().getUf().setSigla(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -691,6 +723,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoEstadoCivil2_eConjugeDataExpVazia_retornaMensagem() throws FESException {
         Fiador f = buildFiadorComConjugeObrigatorio();
+        mockFluxoInicialSalvarSemBloqueio(f);
         f.getConjuge().getIdentidade().setDataExpedicaoIdentidade(EMPTY);
         Retorno r = bean.salvar(USUARIO, f);
         assertEquals(Long.valueOf(1), r.getCodigo());
@@ -702,6 +735,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     @Test
     public void salvar_quandoInclusao_deveComunicarSiapi() throws Exception {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
 
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
         when(query.executeUpdate()).thenReturn(1);
@@ -722,8 +756,8 @@ public class FiadorBeanTest extends BaseSIFESTest {
                 any(TipoOperacaoAditamento.class),
                 any(SituacaoOcorrenciaRejeicao.class),
                 anyString(),
-                eq((Integer)null),
-                eq((Integer)null));
+                eq((Integer) null),
+                eq((Integer) null));
     }
 
     @Test
@@ -764,13 +798,14 @@ public class FiadorBeanTest extends BaseSIFESTest {
                 any(TipoOperacaoAditamento.class),
                 any(SituacaoOcorrenciaRejeicao.class),
                 anyString(),
-                eq((Integer)null),
-                eq((Integer)null));
+                eq((Integer) null),
+                eq((Integer) null));
     }
 
     @Test
     public void salvar_quandoInclusaoESiapiRetornarErro_deveGravarOcorrencia() throws BusinessException, FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
 
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
         when(query.executeUpdate()).thenReturn(1);
@@ -792,13 +827,14 @@ public class FiadorBeanTest extends BaseSIFESTest {
                 eq(TipoOperacaoAditamento.ADITAMENTO_NAO_SIMPLIFICADO),
                 eq(SituacaoOcorrenciaRejeicao.ENVIADO_BANCO),
                 eq("SIAPI #ABC-Mensagem de erro"),
-                eq((Integer)null),
-                eq((Integer)null));
+                eq((Integer) null),
+                eq((Integer) null));
     }
 
     @Test
     public void salvar_quandoInclusaoEExportaOnline120Vazio_naoDeveChamarApi() throws BusinessException, FESException {
         Fiador f = buildFiadorValido();
+        mockFluxoInicialSalvarSemBloqueio(f);
 
         when(query.setParameter(anyString(), anyObject())).thenReturn(query);
         when(query.executeUpdate()).thenReturn(1);
@@ -815,12 +851,63 @@ public class FiadorBeanTest extends BaseSIFESTest {
                 any(TipoOperacaoAditamento.class),
                 any(SituacaoOcorrenciaRejeicao.class),
                 anyString(),
-                eq((Integer)null),
-                eq((Integer)null));
+                eq((Integer) null),
+                eq((Integer) null));
     }
 
     @Test
-    public void deverAlterarRendaDoFiador() throws  BusinessException {
+    public void salvar_quandoJaExistiremDoisFiadores_retornaErroLimiteFiadores() throws FESException {
+        Fiador fiador = buildFiadorValido();
+
+        List<Fiador> fiadoresCadastrados = Arrays.asList(new Fiador(), new Fiador());
+
+        doReturn(fiadoresCadastrados).when(bean).consultarFiadores(USUARIO, fiador.getCodigoFies());
+
+        Retorno retorno = bean.salvar(USUARIO, fiador);
+
+        assertNotNull(retorno);
+        assertEquals(Long.valueOf(-1L), retorno.getCodigo());
+        assertEquals("Não é permitido cadastrar mais de 2 fiadores.", retorno.getMensagem());
+
+        verify(bean, never()).consultarCpfNoSICPF(anyString());
+    }
+
+    @Test
+    public void salvar_quandoCpfComRestricao_retornaErroCpfRestrito() throws FESException {
+        Fiador fiador = buildFiadorValido();
+
+        mockConsultarFiadoresSemBloqueio(fiador);
+        doReturn(mockDadosCpfRetorno(0)).when(bean).consultarCpfNoSICPF(fiador.getCpf());
+
+        Retorno retorno = bean.salvar(USUARIO, fiador);
+
+        assertNotNull(retorno);
+        assertEquals(Long.valueOf(-1L), retorno.getCodigo());
+        assertEquals("CPF informado com restrição. Favor regularizar o CPF para continuar a contratação!", retorno.getMensagem());
+    }
+
+    @Test
+    public void salvar_quandoCpfRegular_deveDelegarParaSalvarInclusao() throws FESException {
+        Fiador fiador = buildFiadorValido();
+
+        Retorno retornoEsperado = new Retorno();
+        retornoEsperado.setCodigo(0L);
+        retornoEsperado.setMensagem(MSG_COMANDO_SUCESSO);
+
+        mockFluxoInicialSalvarSemBloqueio(fiador);
+        doReturn(retornoEsperado).when(bean).salvar("I", USUARIO, fiador);
+
+        Retorno retorno = bean.salvar(USUARIO, fiador);
+
+        assertNotNull(retorno);
+        assertEquals(Long.valueOf(0L), retorno.getCodigo());
+        assertEquals(MSG_COMANDO_SUCESSO, retorno.getMensagem());
+
+        verify(bean, times(1)).salvar("I", USUARIO, fiador);
+    }
+
+    @Test
+    public void deverAlterarRendaDoFiador() throws BusinessException {
         final Long CODIOG_RETORNO = 0L;
         final String MSG = "Renda do Fiador Alterada com sucesso.";
 
@@ -838,7 +925,7 @@ public class FiadorBeanTest extends BaseSIFESTest {
     }
 
     @Test
-    public void deverGerarErroNoValorDaRendaInvalida() throws  BusinessException {
+    public void deverGerarErroNoValorDaRendaInvalida() throws BusinessException {
         final Long CODIOG_RETORNO = -1L;
         final String MSG = "Valor informado é inválido.";
 
@@ -866,7 +953,6 @@ public class FiadorBeanTest extends BaseSIFESTest {
         fiadorRenda.setValorRendaBrutaMensal(BigDecimal.TEN);
         fiadorRenda.setEmailFiador(EMAIL);
 
-
         doThrow(new BusinessException("Fiador não Localizado.")).when(bean).validaFiadorExistente(fiadorRenda.getCpfFiador(), fiadorRenda.getCodFies());
 
         Retorno retorno = bean.alterarRendaFiador(fiadorRenda);
@@ -884,26 +970,26 @@ public class FiadorBeanTest extends BaseSIFESTest {
         fiadorRenda.setValorRendaBrutaMensal(BigDecimal.TEN);
         fiadorRenda.setEmailFiador(EMAIL);
 
-
         doThrow(new Exception("ERRO")).when(bean).validaFiadorExistente(fiadorRenda.getCpfFiador(), fiadorRenda.getCodFies());
 
         bean.alterarRendaFiador(fiadorRenda);
     }
+
     @Test
-    public void isRegimeBensValido(){
+    public void isRegimeBensValido() {
         boolean b = bean.isRegimeBensValido(null);
         Assert.assertFalse(b);
     }
 
     @Test
-    public void isRegimeBensValidofalse(){
+    public void isRegimeBensValidofalse() {
         boolean b = bean.isRegimeBensValido(7);
         Assert.assertFalse(b);
     }
 
     @Test
     public void salvarFiadorComplementar() throws BusinessException {
-        FiadorContratacaoComplementar fiador  = mockFiadorContratacaoComplementar();
+        FiadorContratacaoComplementar fiador = mockFiadorContratacaoComplementar();
         Mockito.when(em.createNativeQuery(Mockito.anyString())).thenReturn(query);
         Mockito.when(query.setParameter(Mockito.anyString(), Mockito.any())).thenReturn(query);
         Mockito.when(query.setParameter(Mockito.anyInt(), Mockito.any())).thenReturn(query);
@@ -911,71 +997,10 @@ public class FiadorBeanTest extends BaseSIFESTest {
         bean.salvarFiadorComplementar(fiador, 2L);
 
         Mockito.verify(em).createNativeQuery(Mockito.anyString());
-
-
     }
 
-    @Test
-    public void salvar_quandoJaExistiremDoisFiadores_retornaErroLimiteFiadores() throws FESException {
-        Fiador fiador = buildFiadorValido();
-
-        List<Fiador> fiadoresCadastrados = Arrays.asList(new Fiador(), new Fiador());
-
-        doReturn(fiadoresCadastrados).when(bean).consultarFiadores(USUARIO, fiador.getCodigoFies());
-
-        Retorno retorno = bean.salvar(USUARIO, fiador);
-
-        assertNotNull(retorno);
-        assertEquals(Long.valueOf(-1L), retorno.getCodigo());
-        assertEquals("Não é permitido cadastrar mais de 2 fiadores.", retorno.getMensagem());
-
-        verify(bean, never()).consultarCpfNoSICPF(anyString());
-    }
-
-    @Test
-    public void salvar_quandoCpfComRestricao_retornaErroCpfRestrito() throws FESException {
-        Fiador fiador = buildFiadorValido();
-
-        DadosCpfRetorno dadosCpfRetorno = mock(DadosCpfRetorno.class);
-        when(dadosCpfRetorno.getSituacaoCPF()).thenReturn(0);
-
-        doReturn(Collections.singletonList(new Fiador())).when(bean).consultarFiadores(USUARIO, fiador.getCodigoFies());
-        doReturn(dadosCpfRetorno).when(bean).consultarCpfNoSICPF(fiador.getCpf());
-
-        Retorno retorno = bean.salvar(USUARIO, fiador);
-
-        assertNotNull(retorno);
-        assertEquals(Long.valueOf(-1L), retorno.getCodigo());
-        assertEquals("CPF informado com restrição. Favor regularizar o CPF para continuar a contratação!", retorno.getMensagem());
-    }
-
-    @Test
-    public void salvar_quandoCpfRegular_deveDelegarParaSalvarInclusao() throws FESException {
-        Fiador fiador = buildFiadorValido();
-
-        DadosCpfRetorno dadosCpfRetorno = mock(DadosCpfRetorno.class);
-        when(dadosCpfRetorno.getSituacaoCPF()).thenReturn(1);
-
-        Retorno retornoEsperado = new Retorno();
-        retornoEsperado.setCodigo(0L);
-        retornoEsperado.setMensagem(MSG_COMANDO_SUCESSO);
-
-        doReturn(Collections.singletonList(new Fiador())).when(bean).consultarFiadores(USUARIO, fiador.getCodigoFies());
-        doReturn(dadosCpfRetorno).when(bean).consultarCpfNoSICPF(fiador.getCpf());
-        doReturn(retornoEsperado).when(bean).salvar("I", USUARIO, fiador);
-
-        Retorno retorno = bean.salvar(USUARIO, fiador);
-
-        assertNotNull(retorno);
-        assertEquals(Long.valueOf(0L), retorno.getCodigo());
-        assertEquals(MSG_COMANDO_SUCESSO, retorno.getMensagem());
-
-        verify(bean, times(1)).salvar("I", USUARIO, fiador);
-    }
-
-    public FiadorContratacaoComplementar mockFiadorContratacaoComplementar(){
+    public FiadorContratacaoComplementar mockFiadorContratacaoComplementar() {
         FiadorContratacaoComplementar fiador = new FiadorContratacaoComplementar();
-
 
         fiador.setIdentidade(STRING_QUALQUER);
         fiador.setCodigoOrgaoExpedidor(INTEGER_QUALQUER);
